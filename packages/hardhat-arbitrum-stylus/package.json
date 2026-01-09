@@ -27,7 +27,7 @@
     "build": "tsc --build .",
     "clean": "rimraf dist",
     "prepublishOnly": "pnpm build",
-    "test": "node --import tsx/esm --test \"test/*.ts\" \"test/!(fixture-project|fixture-projects|helpers)/**/*.ts\""
+    "test": "node --import tsx/esm --test --test-reporter=spec \"test/*.ts\" \"test/!(fixture-project|fixture-projects|helpers)/**/*.ts\""
   },
   "files": [
     "dist/src/",
