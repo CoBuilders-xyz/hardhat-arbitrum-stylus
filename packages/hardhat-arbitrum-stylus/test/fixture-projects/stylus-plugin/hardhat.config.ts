@@ -1,7 +1,7 @@
 import type { HardhatUserConfig } from 'hardhat/types/config';
 
-// allow relative import from package source
-import hardhatArbitrumStylusPlugin from '@cobuilders/hardhat-arbitrum-stylus';
+// eslint-disable-next-line import/no-relative-packages
+import hardhatArbitrumStylusPlugin from '../../../src/index.js';
 
 const config: HardhatUserConfig = {
   plugins: [hardhatArbitrumStylusPlugin],

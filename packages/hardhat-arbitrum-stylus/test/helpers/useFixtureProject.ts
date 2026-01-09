@@ -1,43 +1,43 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import os from 'node:os';
 import { after, before } from 'node:test';
 
-async function copyDir(src: string, dest: string): Promise<void> {
-  await fs.mkdir(dest, { recursive: true });
-  const entries = await fs.readdir(src, { withFileTypes: true });
-
-  for (const entry of entries) {
-    const from = path.join(src, entry.name);
-    const to = path.join(dest, entry.name);
-
-    if (entry.isDirectory()) {
-      await copyDir(from, to);
-    } else if (entry.isSymbolicLink()) {
-      const link = await fs.readlink(from);
-      await fs.symlink(link, to);
-    } else {
-      await fs.copyFile(from, to);
-    }
-  }
-}
-
-export function useFixtureProject(name: string): void {
-  const originalCwd = process.cwd();
-  let tmpDir: string;
+/**
+ * This helper adds node:test hooks to run the tests inside one of the projects
+ * from test/fixture-projects. It simply changes the working directory to the
+ * fixture project folder.
+ *
+ * This approach allows relative imports in fixture hardhat.config files to
+ * resolve back to the plugin source code.
+ *
+ * @param projectName The base name of the folder with the project to use.
+ */
+export function useFixtureProject(projectName: string): void {
+  let projectPath: string;
+  let prevWorkingDir: string;
 
   before(async () => {
-    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), `hh-fixture-${name}-`));
+    prevWorkingDir = process.cwd();
+    projectPath = path.join(
+      prevWorkingDir,
+      'test',
+      'fixture-projects',
+      projectName
+    );
 
-    const fixtureSrc = path.join(originalCwd, 'test', 'fixture-projects', name);
+    // Verify the fixture project exists
+    try {
+      await fs.access(projectPath);
+    } catch {
+      throw new Error(
+        `Fixture project '${projectName}' doesn't exist at ${projectPath}`
+      );
+    }
 
-    await copyDir(fixtureSrc, tmpDir);
-    process.chdir(tmpDir);
+    process.chdir(projectPath);
   });
 
-  after(async () => {
-    process.chdir(originalCwd);
-    // optional: cleanup tmpDir. You can leave it for debugging.
-    await fs.rm(tmpDir, { recursive: true, force: true });
+  after(() => {
+    process.chdir(prevWorkingDir);
   });
 }
