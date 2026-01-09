@@ -15,7 +15,10 @@ describe('@cobuilders/hardhat-arbitrum-stylus', () => {
     );
 
     const hre = await createHardhatRuntimeEnvironment(hardhatConfig.default);
-    assert.ok(hre.network);
-    console.log('hol?');
+
+    assert.notEqual(hre.tasks.getTask(['arb:node']), undefined);
+    assert.notEqual(hre.tasks.getTask(['arb:compile']), undefined);
+    assert.notEqual(hre.tasks.getTask(['arb:deploy']), undefined);
+    assert.notEqual(hre.tasks.getTask(['arb:test']), undefined);
   });
 });
