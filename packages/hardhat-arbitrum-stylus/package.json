@@ -1,0 +1,56 @@
+{
+  "name": "@cobuilders/hardhat-arbitrum-stylus",
+  "version": "0.0.0",
+  "description": "Hardhat plugin suite for Arbitrum Stylus development workflows",
+  "homepage": "https://github.com/cobuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arbitrum-stylus",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cobuilders-xyz/hardhat-arbitrum-stylus",
+    "directory": "packages/hardhat-arbitrum-stylus"
+  },
+  "author": "CoBuilders",
+  "license": "MIT",
+  "type": "module",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": "./dist/src/index.js"
+  },
+  "keywords": [
+    "arbitrum",
+    "stylus",
+    "smart-contracts",
+    "hardhat",
+    "hardhat-plugin",
+    "toolbox"
+  ],
+  "scripts": {
+    "build": "tsc --build .",
+    "clean": "rimraf dist",
+    "prepublishOnly": "pnpm build",
+    "test": "node --import tsx/esm --test --test-reporter=spec \"test/*.ts\" \"test/!(fixture-project|fixture-projects|helpers)/**/*.ts\""
+  },
+  "files": [
+    "dist/src/",
+    "src/",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "devDependencies": {
+    "@cobuilders/hardhat-arb-node": "workspace:^0.0.0",
+    "@cobuilders/hardhat-arb-compile": "workspace:^0.0.0",
+    "@cobuilders/hardhat-arb-deploy": "workspace:^0.0.0",
+    "@cobuilders/hardhat-arb-test": "workspace:^0.0.0",
+    "@types/node": "^22.0.0",
+    "rimraf": "^5.0.5",
+    "hardhat": "^3.0.0",
+    "tsx": "^4.19.3"
+  },
+  "peerDependencies": {
+    "@cobuilders/hardhat-arb-node": "^0.0.0",
+    "@cobuilders/hardhat-arb-compile": "^0.0.0",
+    "@cobuilders/hardhat-arb-deploy": "^0.0.0",
+    "@cobuilders/hardhat-arb-test": "^0.0.0",
+    "hardhat": "^3.0.0"
+  }
+}
