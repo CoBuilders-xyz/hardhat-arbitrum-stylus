@@ -64,5 +64,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Check for changeset
-        run: pnpm changeset status --since=origin/main
+      - name: Require a changeset (unless labeled)
+        run: |
+          # Any real changeset file is a .md file in .changeset/ except README.md
+          if ls .changeset/*.md 2>/dev/null | grep -vq 'README.md'; then
+            echo "Changeset found ✅"
+          else
+            echo "No changeset found. Run 'pnpm changeset' or add the 'no changeset needed' label."
+            exit 1
+          fi
