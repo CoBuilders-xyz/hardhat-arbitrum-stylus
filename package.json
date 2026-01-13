@@ -11,9 +11,6 @@
     "typescript": "^5.9.3"
   },
   "description": "Root package for the  Hardhat Arbitrum Stylus Plugin Suite",
-  "pnpm": {
-    "autoInstallPeers": false
-  },
   "scripts": {
     "build": "pnpm run --recursive --if-present build",
     "clean": "pnpm run --recursive --if-present clean",
