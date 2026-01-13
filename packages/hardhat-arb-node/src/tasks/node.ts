@@ -3,7 +3,7 @@ import type { HardhatRuntimeEnvironment } from 'hardhat/types/hre';
 
 const taskNode: NewTaskActionFunction<{}> = async (
   {},
-  hre: HardhatRuntimeEnvironment
+  hre: HardhatRuntimeEnvironment,
 ) => {
   console.log('node', 'hre.version:', hre.versions.hardhat);
 };
