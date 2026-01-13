@@ -27,7 +27,11 @@
     "build": "tsc --build .",
     "clean": "rimraf dist",
     "prepublishOnly": "pnpm build",
-    "test": "node --import tsx/esm --test --test-reporter=spec \"test/*.ts\" \"test/!(fixture-project|fixture-projects|helpers)/**/*.ts\""
+    "test": "node --import tsx/esm --test --test-reporter=spec \"test/*.ts\" \"test/!(fixture-project|fixture-projects|helpers)/**/*.ts\"",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write ."
   },
   "files": [
     "dist/src/",
@@ -42,8 +46,10 @@
     "@cobuilders/hardhat-arb-deploy": "workspace:^0.0.0",
     "@cobuilders/hardhat-arb-test": "workspace:^0.0.0",
     "@types/node": "^22.0.0",
-    "rimraf": "^5.0.5",
+    "eslint": "^9.18.0",
     "hardhat": "^3.0.0",
+    "prettier": "^3.4.0",
+    "rimraf": "^5.0.5",
     "tsx": "^4.19.3"
   },
   "peerDependencies": {

@@ -22,7 +22,7 @@ export function useFixtureProject(projectName: string): void {
       prevWorkingDir,
       'test',
       'fixture-projects',
-      projectName
+      projectName,
     );
 
     // Verify the fixture project exists
@@ -30,7 +30,7 @@ export function useFixtureProject(projectName: string): void {
       await fs.access(projectPath);
     } catch {
       throw new Error(
-        `Fixture project '${projectName}' doesn't exist at ${projectPath}`
+        `Fixture project '${projectName}' doesn't exist at ${projectPath}`,
       );
     }
 

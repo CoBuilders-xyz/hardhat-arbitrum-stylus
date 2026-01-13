@@ -10,7 +10,11 @@
   "scripts": {
     "build": "tsc --build .",
     "clean": "rimraf dist",
-    "prepublishOnly": "pnpm build"
+    "prepublishOnly": "pnpm build",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write ."
   },
   "files": [
     "dist/src/",
@@ -24,6 +28,8 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
-    "hardhat": "^3.0.0"
+    "eslint": "^9.18.0",
+    "hardhat": "^3.0.0",
+    "prettier": "^3.4.0"
   }
 }
