@@ -5,7 +5,7 @@ const taskCompile: NewTaskActionFunction<{}> = async (
   {},
   hre: HardhatRuntimeEnvironment
 ) => {
-  console.log('compile');
+  console.log('compile', 'hre.version:', hre.versions.hardhat);
 };
 
 export default taskCompile;

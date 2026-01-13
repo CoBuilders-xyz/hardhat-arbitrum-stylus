@@ -5,7 +5,7 @@ const taskDeploy: NewTaskActionFunction<{}> = async (
   {},
   hre: HardhatRuntimeEnvironment
 ) => {
-  console.log('deploy');
+  console.log('deploy', 'hre.version:', hre.versions.hardhat);
 };
 
 export default taskDeploy;

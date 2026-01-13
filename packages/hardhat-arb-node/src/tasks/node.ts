@@ -5,7 +5,7 @@ const taskNode: NewTaskActionFunction<{}> = async (
   {},
   hre: HardhatRuntimeEnvironment
 ) => {
-  console.log('node');
+  console.log('node', 'hre.version:', hre.versions.hardhat);
 };
 
 export default taskNode;
