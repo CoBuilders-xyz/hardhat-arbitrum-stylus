@@ -1,5 +1,11 @@
 # @cobuilders/hardhat-arb-deploy
 
+## 0.0.1-alpha.6
+
+### Patch Changes
+
+- 580c909: Fix package.json org case
+
 ## 0.0.1-alpha.5
 
 ### Patch Changes

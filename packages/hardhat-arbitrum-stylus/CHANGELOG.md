@@ -1,5 +1,16 @@
 # @cobuilders/hardhat-arbitrum-stylus
 
+## 0.0.1-alpha.6
+
+### Patch Changes
+
+- 580c909: Fix package.json org case
+- Updated dependencies [580c909]
+  - @cobuilders/hardhat-arb-compile@0.0.1-alpha.6
+  - @cobuilders/hardhat-arb-deploy@0.0.1-alpha.6
+  - @cobuilders/hardhat-arb-node@0.0.1-alpha.6
+  - @cobuilders/hardhat-arb-test@0.0.1-alpha.6
+
 ## 0.0.1-alpha.5
 
 ### Patch Changes
