@@ -1,5 +1,16 @@
 # @cobuilders/hardhat-arbitrum-stylus
 
+## 0.0.1-alpha.7
+
+### Patch Changes
+
+- 2d39409: Make public package
+- Updated dependencies [2d39409]
+  - @cobuilders/hardhat-arb-compile@0.0.1-alpha.7
+  - @cobuilders/hardhat-arb-deploy@0.0.1-alpha.7
+  - @cobuilders/hardhat-arb-node@0.0.1-alpha.7
+  - @cobuilders/hardhat-arb-test@0.0.1-alpha.7
+
 ## 0.0.1-alpha.6
 
 ### Patch Changes

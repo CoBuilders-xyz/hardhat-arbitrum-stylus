@@ -1,5 +1,11 @@
 # @cobuilders/hardhat-arb-compile
 
+## 0.0.1-alpha.7
+
+### Patch Changes
+
+- 2d39409: Make public package
+
 ## 0.0.1-alpha.6
 
 ### Patch Changes
