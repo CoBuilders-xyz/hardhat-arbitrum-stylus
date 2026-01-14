@@ -9,5 +9,7 @@
     "@cobuilders/hardhat-arb-test": "0.0.0",
     "@cobuilders/hardhat-arbitrum-stylus": "0.0.0"
   },
-  "changesets": []
+  "changesets": [
+    "fair-lines-boil"
+  ]
 }
