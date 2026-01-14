@@ -2,6 +2,11 @@
   "name": "@cobuilders/hardhat-arb-compile",
   "version": "0.0.1-alpha.5",
   "description": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus",
+    "directory": "packages/hardhat-arb-compile"
+  },
   "type": "module",
   "types": "./dist/src/index.d.ts",
   "exports": {
