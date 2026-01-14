@@ -99,16 +99,16 @@ importers:
   packages/hardhat-arbitrum-stylus:
     devDependencies:
       '@cobuilders/hardhat-arb-compile':
-        specifier: workspace:^0.0.1-alpha.5
+        specifier: workspace:^0.0.1-alpha.6
         version: link:../hardhat-arb-compile
       '@cobuilders/hardhat-arb-deploy':
-        specifier: workspace:^0.0.1-alpha.5
+        specifier: workspace:^0.0.1-alpha.6
         version: link:../hardhat-arb-deploy
       '@cobuilders/hardhat-arb-node':
-        specifier: workspace:^0.0.1-alpha.5
+        specifier: workspace:^0.0.1-alpha.6
         version: link:../hardhat-arb-node
       '@cobuilders/hardhat-arb-test':
-        specifier: workspace:^0.0.1-alpha.5
+        specifier: workspace:^0.0.1-alpha.6
         version: link:../hardhat-arb-test
       '@types/node':
         specifier: ^22.0.0
