@@ -95,3 +95,35 @@ jobs:
             npm publish --access public --provenance --tag "$TAG"
             cd ../..
           done
+
+  # Job 3: Create and push git tags after publishing
+  tag:
+    name: Push Git Tags
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create tags for published packages
+        run: pnpm changeset tag
+
+      - name: Push tags
+        run: git push --follow-tags
