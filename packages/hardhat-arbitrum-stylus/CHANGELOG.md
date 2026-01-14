@@ -1,5 +1,16 @@
 # @cobuilders/hardhat-arbitrum-stylus
 
+## 0.0.1-alpha.5
+
+### Patch Changes
+
+- c88edca: OIDC Fix
+- Updated dependencies [c88edca]
+  - @cobuilders/hardhat-arb-compile@0.0.1-alpha.5
+  - @cobuilders/hardhat-arb-deploy@0.0.1-alpha.5
+  - @cobuilders/hardhat-arb-node@0.0.1-alpha.5
+  - @cobuilders/hardhat-arb-test@0.0.1-alpha.5
+
 ## 0.0.1-alpha.4
 
 ### Patch Changes

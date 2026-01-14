@@ -1,5 +1,11 @@
 # @cobuilders/hardhat-arb-test
 
+## 0.0.1-alpha.5
+
+### Patch Changes
+
+- c88edca: OIDC Fix
+
 ## 0.0.1-alpha.4
 
 ### Patch Changes
