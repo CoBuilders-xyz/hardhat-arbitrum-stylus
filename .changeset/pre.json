@@ -10,6 +10,7 @@
     "@cobuilders/hardhat-arbitrum-stylus": "0.0.0"
   },
   "changesets": [
+    "bold-rabbits-rescue",
     "cute-trees-film",
     "every-banks-jump",
     "fair-lines-boil",

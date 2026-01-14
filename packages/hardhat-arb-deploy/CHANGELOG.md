@@ -1,5 +1,11 @@
 # @cobuilders/hardhat-arb-deploy
 
+## 0.0.1-alpha.8
+
+### Patch Changes
+
+- 20cd0e8: Fix release.yml: publish with npm
+
 ## 0.0.1-alpha.7
 
 ### Patch Changes
