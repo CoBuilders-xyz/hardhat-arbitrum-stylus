@@ -1,5 +1,11 @@
 # @cobuilders/hardhat-arb-compile
 
+## 0.0.1-alpha.4
+
+### Patch Changes
+
+- 7843b4f: Fix OIDC release
+
 ## 0.0.1-alpha.3
 
 ### Patch Changes

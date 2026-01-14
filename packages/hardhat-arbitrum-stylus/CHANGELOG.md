@@ -1,5 +1,16 @@
 # @cobuilders/hardhat-arbitrum-stylus
 
+## 0.0.1-alpha.4
+
+### Patch Changes
+
+- 7843b4f: Fix OIDC release
+- Updated dependencies [7843b4f]
+  - @cobuilders/hardhat-arb-compile@0.0.1-alpha.4
+  - @cobuilders/hardhat-arb-deploy@0.0.1-alpha.4
+  - @cobuilders/hardhat-arb-node@0.0.1-alpha.4
+  - @cobuilders/hardhat-arb-test@0.0.1-alpha.4
+
 ## 0.0.1-alpha.3
 
 ### Patch Changes
