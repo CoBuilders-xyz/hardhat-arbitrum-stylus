@@ -1,0 +1,13 @@
+{
+  "mode": "pre",
+  "tag": "alpha",
+  "initialVersions": {
+    "@cobuilders/config": "0.0.0",
+    "@cobuilders/hardhat-arb-compile": "0.0.0",
+    "@cobuilders/hardhat-arb-deploy": "0.0.0",
+    "@cobuilders/hardhat-arb-node": "0.0.0",
+    "@cobuilders/hardhat-arb-test": "0.0.0",
+    "@cobuilders/hardhat-arbitrum-stylus": "0.0.0"
+  },
+  "changesets": []
+}
