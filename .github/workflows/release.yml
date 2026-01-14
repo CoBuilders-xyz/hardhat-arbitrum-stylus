@@ -96,9 +96,9 @@ jobs:
             cd ../..
           done
 
-  # Job 3: Create and push git tags after publishing
+  # Job 3: Create git tags and GitHub releases after publishing
   tag:
-    name: Push Git Tags
+    name: Create Tags and Releases
     needs: publish
     runs-on: ubuntu-latest
     permissions:
@@ -127,3 +127,29 @@ jobs:
 
       - name: Push tags
         run: git push --follow-tags
+
+      - name: Create GitHub releases
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Get all tags that were just created (tags pointing to HEAD)
+          for tag in $(git tag --points-at HEAD); do
+            echo "Creating release for $tag"
+            
+            # Extract package name from tag (e.g., @cobuilders/hardhat-arb-compile@0.0.1-alpha.10)
+            PACKAGE_NAME=$(echo "$tag" | sed 's/@[^@]*$//')
+            VERSION=$(echo "$tag" | sed 's/.*@//')
+            
+            # Determine if it's a prerelease
+            PRERELEASE_FLAG=""
+            if [[ "$VERSION" == *"-alpha"* ]] || [[ "$VERSION" == *"-beta"* ]] || [[ "$VERSION" == *"-rc"* ]]; then
+              PRERELEASE_FLAG="--prerelease"
+            fi
+            
+            # Create the GitHub release
+            gh release create "$tag" \
+              --title "$tag" \
+              --notes "Release $PACKAGE_NAME version $VERSION" \
+              $PRERELEASE_FLAG \
+              --verify-tag || echo "Release for $tag may already exist, skipping..."
+          done
