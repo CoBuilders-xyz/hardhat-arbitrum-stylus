@@ -1,5 +1,11 @@
 # @cobuilders/hardhat-arb-node
 
+## 0.0.1-alpha.2
+
+### Patch Changes
+
+- 1f828e6: Replaced npm token for trusted publisher
+
 ## 0.0.1-alpha.1
 
 ### Patch Changes

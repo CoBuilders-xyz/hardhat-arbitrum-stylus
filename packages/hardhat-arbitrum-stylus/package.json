@@ -1,6 +1,6 @@
 {
   "name": "@cobuilders/hardhat-arbitrum-stylus",
-  "version": "0.0.1-alpha.1",
+  "version": "0.0.1-alpha.2",
   "description": "Hardhat plugin suite for Arbitrum Stylus development workflows",
   "homepage": "https://github.com/cobuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arbitrum-stylus",
   "repository": {
@@ -41,10 +41,10 @@
     "CHANGELOG.md"
   ],
   "devDependencies": {
-    "@cobuilders/hardhat-arb-node": "workspace:^0.0.1-alpha.1",
-    "@cobuilders/hardhat-arb-compile": "workspace:^0.0.1-alpha.1",
-    "@cobuilders/hardhat-arb-deploy": "workspace:^0.0.1-alpha.1",
-    "@cobuilders/hardhat-arb-test": "workspace:^0.0.1-alpha.1",
+    "@cobuilders/hardhat-arb-node": "workspace:^0.0.1-alpha.2",
+    "@cobuilders/hardhat-arb-compile": "workspace:^0.0.1-alpha.2",
+    "@cobuilders/hardhat-arb-deploy": "workspace:^0.0.1-alpha.2",
+    "@cobuilders/hardhat-arb-test": "workspace:^0.0.1-alpha.2",
     "@types/node": "^22.0.0",
     "eslint": "^9.18.0",
     "hardhat": "^3.0.0",
@@ -53,10 +53,10 @@
     "tsx": "^4.19.3"
   },
   "peerDependencies": {
-    "@cobuilders/hardhat-arb-node": "^0.0.1-alpha.1",
-    "@cobuilders/hardhat-arb-compile": "^0.0.1-alpha.1",
-    "@cobuilders/hardhat-arb-deploy": "^0.0.1-alpha.1",
-    "@cobuilders/hardhat-arb-test": "^0.0.1-alpha.1",
+    "@cobuilders/hardhat-arb-node": "^0.0.1-alpha.2",
+    "@cobuilders/hardhat-arb-compile": "^0.0.1-alpha.2",
+    "@cobuilders/hardhat-arb-deploy": "^0.0.1-alpha.2",
+    "@cobuilders/hardhat-arb-test": "^0.0.1-alpha.2",
     "hardhat": "^3.0.0"
   }
 }
