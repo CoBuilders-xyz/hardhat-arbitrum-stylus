@@ -1,5 +1,16 @@
 # @cobuilders/hardhat-arbitrum-stylus
 
+## 0.0.1-alpha.2
+
+### Patch Changes
+
+- 1f828e6: Replaced npm token for trusted publisher
+- Updated dependencies [1f828e6]
+  - @cobuilders/hardhat-arb-compile@0.0.1-alpha.2
+  - @cobuilders/hardhat-arb-deploy@0.0.1-alpha.2
+  - @cobuilders/hardhat-arb-node@0.0.1-alpha.2
+  - @cobuilders/hardhat-arb-test@0.0.1-alpha.2
+
 ## 0.0.1-alpha.1
 
 ### Patch Changes
