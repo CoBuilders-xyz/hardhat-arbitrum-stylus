@@ -1,5 +1,11 @@
 # @cobuilders/hardhat-arb-test
 
+## 0.0.1-alpha.3
+
+### Patch Changes
+
+- 47932a3: Added provenance flag to force OIDC
+
 ## 0.0.1-alpha.2
 
 ### Patch Changes
