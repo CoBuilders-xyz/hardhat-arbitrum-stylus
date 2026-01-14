@@ -1,5 +1,16 @@
 # @cobuilders/hardhat-arbitrum-stylus
 
+## 0.0.1-alpha.11
+
+### Patch Changes
+
+- dd40dbf: Add release and pre-release to gh
+- Updated dependencies [dd40dbf]
+  - @cobuilders/hardhat-arb-compile@0.0.1-alpha.11
+  - @cobuilders/hardhat-arb-deploy@0.0.1-alpha.11
+  - @cobuilders/hardhat-arb-node@0.0.1-alpha.11
+  - @cobuilders/hardhat-arb-test@0.0.1-alpha.11
+
 ## 0.0.1-alpha.10
 
 ### Patch Changes

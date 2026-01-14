@@ -1,5 +1,11 @@
 # @cobuilders/hardhat-arb-deploy
 
+## 0.0.1-alpha.11
+
+### Patch Changes
+
+- dd40dbf: Add release and pre-release to gh
+
 ## 0.0.1-alpha.10
 
 ### Patch Changes
