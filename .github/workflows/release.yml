@@ -8,43 +8,77 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
-  release:
-    name: Release
+  # Job 1: Create version PR if there are changesets
+  pr:
+    name: Create Release PR
     runs-on: ubuntu-latest
-
+    outputs:
+      hasChangesets: ${{ steps.changesets.outputs.hasChangesets }}
     permissions:
-      id-token: write
-      contents: write
       pull-requests: write
-
+      contents: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Create Release PR
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          title: "chore: release packages"
+          commit: "chore: version packages"
+          version: pnpm version-for-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Job 2: Build and publish if no changesets (versions already bumped)
+  publish:
+    name: Publish to npm
+    needs: pr
+    if: needs.pr.outputs.hasChangesets == 'false'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write  # Required for OIDC trusted publishing
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: pnpm
           registry-url: https://registry.npmjs.org
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile
 
-      - name: Build
-        run: pnpm build
+      - run: pnpm build
 
-      - name: Create Release PR or Publish
-        id: changesets
-        uses: changesets/action@v1
-        with:
-          version: pnpm version-for-release
-          publish: pnpm changeset publish
-          title: "chore: release packages"
-          commit: "chore: version packages"
+      - name: Update npm for Trusted Publishing support
+        run: npm install -g npm@latest
+
+      - name: Publish packages
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
+        run: |
+          # Get list of packages that need publishing
+          pnpm publish --filter "./packages/**" -r --no-git-checks --access public --dry-run --report-summary
+          
+          # Publish each package using npm directly (pnpm doesn't support OIDC)
+          jq -r '.publishedPackages[] | "\(.name)|\(.version)"' pnpm-publish-summary.json | while IFS='|' read -r name version; do
+            echo "Publishing $name@$version"
+            cd "packages/$(echo $name | sed 's/@cobuilders\///')"
+            npm publish --access public --provenance
+            cd ../..
+          done
