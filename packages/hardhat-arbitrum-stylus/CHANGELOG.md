@@ -1,5 +1,16 @@
 # @cobuilders/hardhat-arbitrum-stylus
 
+## 0.0.1-alpha.9
+
+### Patch Changes
+
+- b3fbeaa: Add tag to npm publish
+- Updated dependencies [b3fbeaa]
+  - @cobuilders/hardhat-arb-compile@0.0.1-alpha.9
+  - @cobuilders/hardhat-arb-deploy@0.0.1-alpha.9
+  - @cobuilders/hardhat-arb-node@0.0.1-alpha.9
+  - @cobuilders/hardhat-arb-test@0.0.1-alpha.9
+
 ## 0.0.1-alpha.8
 
 ### Patch Changes

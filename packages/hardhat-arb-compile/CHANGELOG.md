@@ -1,5 +1,11 @@
 # @cobuilders/hardhat-arb-compile
 
+## 0.0.1-alpha.9
+
+### Patch Changes
+
+- b3fbeaa: Add tag to npm publish
+
 ## 0.0.1-alpha.8
 
 ### Patch Changes
