@@ -1,5 +1,16 @@
 # @cobuilders/hardhat-arbitrum-stylus
 
+## 0.0.1-alpha.3
+
+### Patch Changes
+
+- 47932a3: Added provenance flag to force OIDC
+- Updated dependencies [47932a3]
+  - @cobuilders/hardhat-arb-compile@0.0.1-alpha.3
+  - @cobuilders/hardhat-arb-deploy@0.0.1-alpha.3
+  - @cobuilders/hardhat-arb-node@0.0.1-alpha.3
+  - @cobuilders/hardhat-arb-test@0.0.1-alpha.3
+
 ## 0.0.1-alpha.2
 
 ### Patch Changes
