@@ -2,10 +2,10 @@
   "name": "@cobuilders/hardhat-arbitrum-stylus",
   "version": "0.0.1-alpha.5",
   "description": "Hardhat plugin suite for Arbitrum Stylus development workflows",
-  "homepage": "https://github.com/cobuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arbitrum-stylus",
+  "homepage": "https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arbitrum-stylus",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cobuilders-xyz/hardhat-arbitrum-stylus",
+    "url": "https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus",
     "directory": "packages/hardhat-arbitrum-stylus"
   },
   "author": "CoBuilders",
