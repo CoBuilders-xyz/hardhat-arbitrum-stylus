@@ -79,6 +79,19 @@ jobs:
           jq -r '.publishedPackages[] | "\(.name)|\(.version)"' pnpm-publish-summary.json | while IFS='|' read -r name version; do
             echo "Publishing $name@$version"
             cd "packages/$(echo $name | sed 's/@cobuilders\///')"
-            npm publish --access public --provenance
+            
+            # Determine the appropriate tag for prerelease versions
+            if [[ "$version" == *"-alpha"* ]]; then
+              TAG="alpha"
+            elif [[ "$version" == *"-beta"* ]]; then
+              TAG="beta"
+            elif [[ "$version" == *"-rc"* ]]; then
+              TAG="rc"
+            else
+              TAG="latest"
+            fi
+            
+            echo "Using tag: $TAG"
+            npm publish --access public --provenance --tag "$TAG"
             cd ../..
           done
