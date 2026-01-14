@@ -1,5 +1,16 @@
 # @cobuilders/hardhat-arbitrum-stylus
 
+## 0.0.1-alpha.10
+
+### Patch Changes
+
+- 61f2d49: Added auto-tag workflow
+- Updated dependencies [61f2d49]
+  - @cobuilders/hardhat-arb-compile@0.0.1-alpha.10
+  - @cobuilders/hardhat-arb-deploy@0.0.1-alpha.10
+  - @cobuilders/hardhat-arb-node@0.0.1-alpha.10
+  - @cobuilders/hardhat-arb-test@0.0.1-alpha.10
+
 ## 0.0.1-alpha.9
 
 ### Patch Changes

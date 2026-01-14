@@ -1,5 +1,11 @@
 # @cobuilders/hardhat-arb-node
 
+## 0.0.1-alpha.10
+
+### Patch Changes
+
+- 61f2d49: Added auto-tag workflow
+
 ## 0.0.1-alpha.9
 
 ### Patch Changes
