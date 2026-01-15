@@ -1,5 +1,11 @@
 # @cobuilders/hardhat-arb-node
 
+## 0.0.1-alpha.12
+
+### Patch Changes
+
+- a8c712c: Added readme badges and keywords
+
 ## 0.0.1-alpha.11
 
 ### Patch Changes

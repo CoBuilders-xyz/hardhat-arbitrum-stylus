@@ -1,5 +1,16 @@
 # @cobuilders/hardhat-arbitrum-stylus
 
+## 0.0.1-alpha.12
+
+### Patch Changes
+
+- a8c712c: Added readme badges and keywords
+- Updated dependencies [a8c712c]
+  - @cobuilders/hardhat-arb-compile@0.0.1-alpha.12
+  - @cobuilders/hardhat-arb-deploy@0.0.1-alpha.12
+  - @cobuilders/hardhat-arb-node@0.0.1-alpha.12
+  - @cobuilders/hardhat-arb-test@0.0.1-alpha.12
+
 ## 0.0.1-alpha.11
 
 ### Patch Changes
