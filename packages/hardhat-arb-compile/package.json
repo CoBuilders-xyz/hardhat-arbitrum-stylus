@@ -1,7 +1,20 @@
 {
   "name": "@cobuilders/hardhat-arb-compile",
   "version": "0.0.1-alpha.11",
-  "description": "",
+  "description": "Hardhat plugin for compiling Arbitrum Stylus (Rust/WASM) contracts",
+  "homepage": "https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arb-compile",
+  "keywords": [
+    "arbitrum",
+    "stylus",
+    "hardhat",
+    "hardhat-plugin",
+    "rust",
+    "wasm",
+    "compiler",
+    "cargo-stylus"
+  ],
+  "author": "CoBuilders",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus",

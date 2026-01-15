@@ -1,7 +1,18 @@
 {
   "name": "@cobuilders/hardhat-arb-test",
   "version": "0.0.1-alpha.11",
-  "description": "",
+  "description": "Hardhat plugin for testing against Arbitrum node with cross-VM support",
+  "homepage": "https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arb-test",
+  "keywords": [
+    "arbitrum",
+    "stylus",
+    "hardhat",
+    "hardhat-plugin",
+    "testing",
+    "cross-vm"
+  ],
+  "author": "CoBuilders",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus",

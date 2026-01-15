@@ -1,7 +1,19 @@
 {
   "name": "@cobuilders/hardhat-arb-deploy",
   "version": "0.0.1-alpha.11",
-  "description": "",
+  "description": "Hardhat plugin for deploying Arbitrum Stylus (WASM) contracts",
+  "homepage": "https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arb-deploy",
+  "keywords": [
+    "arbitrum",
+    "stylus",
+    "hardhat",
+    "hardhat-plugin",
+    "deploy",
+    "wasm",
+    "smart-contracts"
+  ],
+  "author": "CoBuilders",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus",
