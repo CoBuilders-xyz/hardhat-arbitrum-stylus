@@ -1,0 +1,56 @@
+{
+  "name": "@cobuilders/hardhat-arb-utils",
+  "version": "0.0.1-alpha.12",
+  "description": "Shared utilities for hardhat-arbitrum-stylus plugins (internal)",
+  "homepage": "https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arb-utils",
+  "keywords": [
+    "arbitrum",
+    "stylus",
+    "hardhat",
+    "utilities",
+    "docker"
+  ],
+  "author": "CoBuilders",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus",
+    "directory": "packages/hardhat-arb-utils"
+  },
+  "type": "module",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    },
+    "./container": {
+      "types": "./dist/src/container/index.d.ts",
+      "default": "./dist/src/container/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc --build .",
+    "clean": "rimraf dist",
+    "test": "node --import tsx/esm --test --test-reporter=spec \"test/*.ts\"",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write ."
+  },
+  "files": [
+    "dist/src/",
+    "src/"
+  ],
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "eslint": "^9.18.0",
+    "prettier": "^3.4.0",
+    "rimraf": "^6.0.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
