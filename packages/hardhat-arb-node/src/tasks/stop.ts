@@ -28,8 +28,18 @@ const taskStop: NewTaskActionFunction<TaskStopArguments> = async (
     return;
   }
 
-  await client.stop(containerId);
-  await client.remove(containerId, true);
+  try {
+    await client.stop(containerId);
+  } catch {
+    // Container may already be stopped
+  }
+
+  // Try to remove, but ignore errors (container may be auto-removed)
+  try {
+    await client.remove(containerId, true);
+  } catch {
+    // Container may already be removed (autoRemove flag)
+  }
 
   if (!quiet) {
     console.log('Node stopped.');

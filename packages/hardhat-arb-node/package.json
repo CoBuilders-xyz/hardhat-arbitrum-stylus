@@ -31,7 +31,7 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
-    "test": "node --import tsx/esm --test \"test/*.ts\"",
+    "test": "node --import tsx/esm --test --test-reporter=spec \"test/*.ts\"",
     "pretest": "pnpm build"
   },
   "files": [
@@ -43,7 +43,11 @@
   ],
   "peerDependencies": {
     "@cobuilders/hardhat-arb-utils": "workspace:*",
-    "hardhat": "^3.0.0"
+    "hardhat": "^3.0.0",
+    "viem": "^2.30.0"
+  },
+  "dependencies": {
+    "viem": "^2.30.0"
   },
   "devDependencies": {
     "@cobuilders/hardhat-arb-utils": "workspace:*",

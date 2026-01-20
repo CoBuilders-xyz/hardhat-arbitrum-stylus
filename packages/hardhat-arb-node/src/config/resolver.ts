@@ -13,5 +13,7 @@ export function resolveArbNodeConfig(
     tag: userConfig?.tag ?? DEFAULT_ARB_NODE_CONFIG.tag,
     httpPort: userConfig?.httpPort ?? DEFAULT_ARB_NODE_CONFIG.httpPort,
     wsPort: userConfig?.wsPort ?? DEFAULT_ARB_NODE_CONFIG.wsPort,
+    chainId: userConfig?.chainId ?? DEFAULT_ARB_NODE_CONFIG.chainId,
+    devAccount: DEFAULT_ARB_NODE_CONFIG.devAccount,
   };
 }

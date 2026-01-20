@@ -19,6 +19,16 @@ const hardhatArbNodePlugin: HardhatPlugin = {
         name: 'quiet',
         description: 'Suppress output',
       })
+      .addFlag({
+        name: 'detach',
+        shortName: 'd',
+        description: 'Run in background without attaching to logs',
+      })
+      .addFlag({
+        name: 'stylusReady',
+        description:
+          'Deploy CREATE2 factory, Cache Manager, and StylusDeployer',
+      })
       .setAction(() => import('./tasks/start.js'))
       .build(),
 

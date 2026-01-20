@@ -241,9 +241,20 @@ export class DockerClient {
 
   /**
    * Stream container logs.
+   * @param containerId - The container ID to stream logs from
+   * @param options - Options for log streaming
+   * @param options.tail - Number of lines to show from the end (0 = only new logs)
    */
-  streamLogs(containerId: string): ChildProcess {
-    return spawn(this.dockerCommand, ["logs", "-f", containerId], {
+  streamLogs(containerId: string, options?: { tail?: number }): ChildProcess {
+    const args = ["logs", "-f"];
+
+    if (options?.tail !== undefined) {
+      args.push("--tail", options.tail.toString());
+    }
+
+    args.push(containerId);
+
+    return spawn(this.dockerCommand, args, {
       stdio: ["ignore", "pipe", "pipe"],
     });
   }

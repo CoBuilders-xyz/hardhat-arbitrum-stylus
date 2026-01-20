@@ -1,3 +1,15 @@
+import type { Hex } from 'viem';
+
+/**
+ * Dev account configuration
+ */
+export interface DevAccount {
+  /** Account address */
+  address: Hex;
+  /** Private key (with 0x prefix) */
+  privateKey: Hex;
+}
+
 /**
  * User-provided configuration for the Arbitrum node.
  * All fields are optional and will use defaults if not provided.
@@ -11,6 +23,8 @@ export interface ArbNodeUserConfig {
   httpPort?: number;
   /** WebSocket port on host (default: 8548) */
   wsPort?: number;
+  /** Chain ID (default: 412346) */
+  chainId?: number;
 }
 
 /**
@@ -26,4 +40,8 @@ export interface ArbNodeConfig {
   httpPort: number;
   /** WebSocket port on host */
   wsPort: number;
+  /** Chain ID */
+  chainId: number;
+  /** Pre-funded development account */
+  devAccount: DevAccount;
 }

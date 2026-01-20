@@ -39,6 +39,11 @@ describe('@cobuilders/hardhat-arb-node', () => {
       assert.equal(hre.config.arbNode.tag, 'v3.7.1-926f1ab');
       assert.equal(hre.config.arbNode.httpPort, 8547);
       assert.equal(hre.config.arbNode.wsPort, 8548);
+      assert.equal(hre.config.arbNode.chainId, 412346);
+      assert.equal(
+        hre.config.arbNode.devAccount.address,
+        '0x3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E',
+      );
     });
   });
 
