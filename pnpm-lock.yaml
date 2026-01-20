@@ -68,6 +68,9 @@ importers:
 
   packages/hardhat-arb-node:
     devDependencies:
+      '@cobuilders/hardhat-arb-utils':
+        specifier: workspace:*
+        version: link:../hardhat-arb-utils
       '@types/node':
         specifier: ^22.0.0
         version: 22.19.3
@@ -80,6 +83,9 @@ importers:
       prettier:
         specifier: ^3.4.0
         version: 3.7.4
+      tsx:
+        specifier: ^4.19.3
+        version: 4.21.0
 
   packages/hardhat-arb-test:
     devDependencies:
