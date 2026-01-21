@@ -6,7 +6,6 @@ const taskTest: NewTaskActionFunction<{}> = async (
   hre: HardhatRuntimeEnvironment,
 ) => {
   console.log('test', 'hre.version:', hre.versions.hardhat);
-  console.log('hello world');
 };
 
 export default taskTest;
