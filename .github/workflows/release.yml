@@ -35,8 +35,8 @@ jobs:
         id: changesets
         uses: changesets/action@v1
         with:
-          title: "chore: release packages"
-          commit: "chore: version packages"
+          title: 'chore: release packages'
+          commit: 'chore: version packages'
           version: pnpm version-for-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write  # Required for OIDC trusted publishing
+      id-token: write # Required for OIDC trusted publishing
     steps:
       - uses: actions/checkout@v4
 
@@ -74,7 +74,7 @@ jobs:
         run: |
           # Get list of packages that need publishing
           pnpm publish --filter "./packages/**" -r --no-git-checks --access public --dry-run --report-summary
-          
+
           # Publish each package using npm directly (pnpm doesn't support OIDC)
           jq -r '.publishedPackages[] | "\(.name)|\(.version)"' pnpm-publish-summary.json | while IFS='|' read -r name version; do
             echo "Publishing $name@$version"
