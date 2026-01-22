@@ -1,5 +1,16 @@
 # @cobuilders/hardhat-arb-node
 
+## 0.0.1-alpha.13
+
+### Patch Changes
+
+- f314e72: Added hardhat-arb-node to plugin suite
+  - start|stop|status|logs
+  - prefunded accounts Enhanced all packages error handling (HardhatPluginError)
+- Updated dependencies [f314e72]
+- Updated dependencies [e567a7e]
+  - @cobuilders/hardhat-arb-utils@0.0.1-alpha.13
+
 ## 0.0.1-alpha.12
 
 ### Patch Changes
