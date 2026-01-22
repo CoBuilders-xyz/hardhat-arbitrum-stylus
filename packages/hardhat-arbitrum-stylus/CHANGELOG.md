@@ -1,5 +1,16 @@
 # @cobuilders/hardhat-arbitrum-stylus
 
+## 0.0.1-alpha.14
+
+### Patch Changes
+
+- 4043e74: Fix workspace publishing for npm
+- Updated dependencies [4043e74]
+  - @cobuilders/hardhat-arb-compile@0.0.1-alpha.13
+  - @cobuilders/hardhat-arb-deploy@0.0.1-alpha.13
+  - @cobuilders/hardhat-arb-node@0.0.1-alpha.15
+  - @cobuilders/hardhat-arb-test@0.0.1-alpha.13
+
 ## 0.0.1-alpha.13
 
 ### Patch Changes

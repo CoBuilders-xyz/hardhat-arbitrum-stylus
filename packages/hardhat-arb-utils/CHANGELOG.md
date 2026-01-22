@@ -1,5 +1,11 @@
 # @cobuilders/hardhat-arb-utils
 
+## 0.0.1-alpha.14
+
+### Patch Changes
+
+- 4043e74: Fix workspace publishing for npm
+
 ## 0.0.1-alpha.13
 
 ### Patch Changes
