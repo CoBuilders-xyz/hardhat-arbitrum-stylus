@@ -7,15 +7,18 @@
     "@cobuilders/hardhat-arb-deploy": "0.0.0",
     "@cobuilders/hardhat-arb-node": "0.0.0",
     "@cobuilders/hardhat-arb-test": "0.0.0",
-    "@cobuilders/hardhat-arbitrum-stylus": "0.0.0"
+    "@cobuilders/hardhat-arbitrum-stylus": "0.0.0",
+    "@cobuilders/hardhat-arb-utils": "0.0.1-alpha.12"
   },
   "changesets": [
     "bold-rabbits-rescue",
     "cute-trees-film",
     "every-banks-jump",
     "fair-lines-boil",
+    "fresh-geese-exist",
     "full-lizards-smell",
     "fuzzy-mails-occur",
+    "kind-papers-wave",
     "modern-doodles-listen",
     "rare-cows-leave",
     "shaky-cows-rest",
