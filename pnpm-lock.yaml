@@ -73,7 +73,7 @@ importers:
         version: 2.44.4(typescript@5.9.3)(zod@3.25.76)
     devDependencies:
       '@cobuilders/hardhat-arb-utils':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../hardhat-arb-utils
       '@types/node':
         specifier: ^22.0.0
