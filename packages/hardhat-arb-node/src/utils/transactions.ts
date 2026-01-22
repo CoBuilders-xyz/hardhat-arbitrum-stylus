@@ -11,6 +11,8 @@ import {
 } from 'viem';
 import { privateKeyToAccount, type PrivateKeyAccount } from 'viem/accounts';
 
+import { createPluginError } from '@cobuilders/hardhat-arb-utils';
+
 /**
  * Arbitrum precompile addresses (checksummed)
  */
@@ -155,7 +157,7 @@ export async function deployContract(
   };
 
   if (!result.result?.contractAddress) {
-    throw new Error('Failed to get contract address from receipt');
+    throw createPluginError('Failed to get contract address from receipt');
   }
 
   return { txHash, contractAddress: result.result.contractAddress };
@@ -199,7 +201,7 @@ export async function sendRawTransaction(
 
   const result = (await response.json()) as { result?: Hex; error?: unknown };
   if (!result.result) {
-    throw new Error(
+    throw createPluginError(
       `Failed to send raw transaction: ${JSON.stringify(result.error)}`,
     );
   }

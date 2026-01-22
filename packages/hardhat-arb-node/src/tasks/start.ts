@@ -6,6 +6,7 @@ import {
   ContainerManager,
   DockerClient,
   type ContainerConfig,
+  createPluginError,
 } from '@cobuilders/hardhat-arb-utils';
 
 import { CONTAINER_NAME, HARDHAT_ACCOUNTS } from '../config/defaults.js';
@@ -148,7 +149,7 @@ async function deployCreate2Factory(
   // Verify deployment
   const deployedCode = await getCode(rpcUrl, CREATE2_FACTORY.ADDRESS);
   if (deployedCode === '0x') {
-    throw new Error('Failed to deploy CREATE2 factory');
+    throw createPluginError('Failed to deploy CREATE2 factory');
   }
 }
 
@@ -202,7 +203,7 @@ async function deployStylusDeployer(
   // Verify deployment
   const code = await getCode(rpcUrl, contractAddress);
   if (code === '0x') {
-    throw new Error('Failed to deploy StylusDeployer');
+    throw createPluginError('Failed to deploy StylusDeployer');
   }
 
   if (!quiet) {

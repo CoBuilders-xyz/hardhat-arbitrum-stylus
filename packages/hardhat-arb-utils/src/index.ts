@@ -5,3 +5,4 @@
  */
 
 export * from "./container/index.js";
+export * from "./errors/index.js";
