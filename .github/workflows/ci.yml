@@ -67,9 +67,11 @@ jobs:
 
       - name: Require a changeset (unless labeled)
         run: |
-          if ls .changeset/*.md 2>/dev/null | grep -vq 'README.md'; then
-            echo "Changeset found ✅"
+          NEW_CHANGESETS=$(git diff --name-only --diff-filter=A origin/${{ github.base_ref }}...HEAD -- '.changeset/*.md' | grep -v 'README.md' || true)
+          if [ -n "$NEW_CHANGESETS" ]; then
+            echo "New changeset found ✅"
+            echo "$NEW_CHANGESETS"
           else
-            echo "No changeset found. Run 'pnpm changeset' or add the 'no changeset needed' label."
+            echo "No new changeset found in this PR. Run 'pnpm changeset' or add the 'no changeset needed' label."
             exit 1
           fi
