@@ -37,21 +37,7 @@ describe("Docker Container Utilities", () => {
   });
 
   describe("DockerClient", () => {
-    it("should check Docker availability", async () => {
-      const available = await client.isAvailable();
-      assert.equal(typeof available, "boolean");
-      // If Docker is not available, skip remaining tests
-      if (!available) {
-        console.log("Docker is not available - skipping container tests");
-      }
-    });
-
     it("should check if image exists", async () => {
-      const available = await client.isAvailable();
-      if (!available) {
-        return;
-      }
-
       // hello-world is a very small image, check if it exists
       const exists = await client.imageExists("hello-world", "latest");
       assert.equal(typeof exists, "boolean");
@@ -60,11 +46,6 @@ describe("Docker Container Utilities", () => {
 
   describe("ContainerManager - Run with command", () => {
     it("should run hello-world container with default command", async () => {
-      const available = await client.isAvailable();
-      if (!available) {
-        return;
-      }
-
       const containerName = "hardhat-arb-utils-test-hello";
       await cleanupContainer(client, containerName);
 
@@ -90,11 +71,6 @@ describe("Docker Container Utilities", () => {
     });
 
     it("should run alpine container with custom echo command", async () => {
-      const available = await client.isAvailable();
-      if (!available) {
-        return;
-      }
-
       const containerName = "hardhat-arb-utils-test-alpine";
       await cleanupContainer(client, containerName);
 
@@ -146,11 +122,6 @@ describe("Docker Container Utilities", () => {
     });
 
     it("should run container with volume and write output to host", async () => {
-      const available = await client.isAvailable();
-      if (!available) {
-        return;
-      }
-
       const containerName = "hardhat-arb-utils-test-volume";
       await cleanupContainer(client, containerName);
 
@@ -196,11 +167,6 @@ describe("Docker Container Utilities", () => {
     });
 
     it("should handle readonly volume mounts", async () => {
-      const available = await client.isAvailable();
-      if (!available) {
-        return;
-      }
-
       const containerName = "hardhat-arb-utils-test-readonly";
       await cleanupContainer(client, containerName);
 

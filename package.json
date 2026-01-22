@@ -15,6 +15,7 @@
     "build": "pnpm run --recursive --if-present build",
     "clean": "pnpm run --recursive --if-present clean",
     "test": "pnpm run --recursive --if-present test",
+    "test:no-bail": "pnpm run --recursive --if-present --no-bail test",
     "prelint": "pnpm build",
     "lint": "pnpm run --recursive --if-present lint",
     "lint:fix": "pnpm run --recursive --if-present lint:fix",
