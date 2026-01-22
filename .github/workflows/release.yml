@@ -77,10 +77,15 @@ jobs:
           # Get list of packages that need publishing
           pnpm publish --filter "./packages/**" -r --no-git-checks --access public --dry-run --report-summary
 
-          # Publish each package using npm directly (pnpm doesn't support OIDC)
+          # Publish each package using pnpm pack + npm publish (pnpm pack transforms workspace: protocol)
           jq -r '.publishedPackages[] | "\(.name)|\(.version)"' pnpm-publish-summary.json | while IFS='|' read -r name version; do
             echo "Publishing $name@$version"
-            cd "packages/$(echo $name | sed 's/@cobuilders\///')"
+            PKG_DIR="packages/$(echo $name | sed 's/@cobuilders\///')"
+            cd "$PKG_DIR"
+            
+            # Use pnpm pack to create tarball (transforms workspace: protocol to actual versions)
+            pnpm pack
+            TARBALL=$(ls *.tgz)
             
             # Determine the appropriate tag for prerelease versions
             if [[ "$version" == *"-alpha"* ]]; then
@@ -94,7 +99,8 @@ jobs:
             fi
             
             echo "Using tag: $TAG"
-            npm publish --access public --provenance --tag "$TAG"
+            npm publish "$TARBALL" --access public --provenance --tag "$TAG"
+            rm "$TARBALL"
             cd ../..
           done
 
