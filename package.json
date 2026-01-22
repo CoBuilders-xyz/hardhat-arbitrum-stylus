@@ -14,8 +14,8 @@
   "scripts": {
     "build": "pnpm run --recursive --if-present build",
     "clean": "pnpm run --recursive --if-present clean",
-    "clean:all": "rimraf node_modules packages/**/node_modules && pnpm store prune",
     "test": "pnpm run --recursive --if-present test",
+    "test:no-bail": "pnpm run --recursive --if-present --no-bail test",
     "prelint": "pnpm build",
     "lint": "pnpm run --recursive --if-present lint",
     "lint:fix": "pnpm run --recursive --if-present lint:fix",

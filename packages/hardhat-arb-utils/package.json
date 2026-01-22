@@ -27,6 +27,10 @@
     "./container": {
       "types": "./dist/src/container/index.d.ts",
       "default": "./dist/src/container/index.js"
+    },
+    "./errors": {
+      "types": "./dist/src/errors/index.d.ts",
+      "default": "./dist/src/errors/index.js"
     }
   },
   "scripts": {
@@ -45,10 +49,14 @@
   "devDependencies": {
     "@types/node": "^22.0.0",
     "eslint": "^9.18.0",
+    "hardhat": "^3.0.0",
     "prettier": "^3.4.0",
     "rimraf": "^6.0.0",
     "tsx": "^4.19.3",
     "typescript": "^5.7.3"
+  },
+  "peerDependencies": {
+    "hardhat": "^3.0.0"
   },
   "publishConfig": {
     "access": "public"
