@@ -1,5 +1,11 @@
 # @cobuilders/hardhat-arb-node
 
+## 0.0.1-alpha.14
+
+### Patch Changes
+
+- 6b05403: Fixed dependency version auto bump
+
 ## 0.0.1-alpha.13
 
 ### Patch Changes

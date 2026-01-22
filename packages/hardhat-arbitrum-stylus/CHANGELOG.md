@@ -1,5 +1,13 @@
 # @cobuilders/hardhat-arbitrum-stylus
 
+## 0.0.1-alpha.13
+
+### Patch Changes
+
+- 6b05403: Fixed dependency version auto bump
+- Updated dependencies [6b05403]
+  - @cobuilders/hardhat-arb-node@0.0.1-alpha.14
+
 ## 0.0.1-alpha.12
 
 ### Patch Changes
