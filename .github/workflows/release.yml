@@ -21,6 +21,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          # PAT needed for push to trigger CI workflows
+          token: ${{ secrets.RELEASE_PAT }}
 
       - uses: pnpm/action-setup@v4
 
@@ -39,7 +41,6 @@ jobs:
           commit: 'chore: version packages'
           version: pnpm version-for-release
         env:
-          # PAT triggers CI on release PR (GITHUB_TOKEN doesn't trigger workflows)
           GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}
 
   # Job 2: Build and publish if no changesets (versions already bumped)
