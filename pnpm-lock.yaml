@@ -73,7 +73,7 @@ importers:
         version: 2.44.4(typescript@5.9.3)(zod@3.25.76)
     devDependencies:
       '@cobuilders/hardhat-arb-utils':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../hardhat-arb-utils
       '@types/node':
         specifier: ^22.0.0
@@ -133,16 +133,16 @@ importers:
   packages/hardhat-arbitrum-stylus:
     devDependencies:
       '@cobuilders/hardhat-arb-compile':
-        specifier: workspace:^0.0.1-alpha.12
+        specifier: workspace:^
         version: link:../hardhat-arb-compile
       '@cobuilders/hardhat-arb-deploy':
-        specifier: workspace:^0.0.1-alpha.12
+        specifier: workspace:^
         version: link:../hardhat-arb-deploy
       '@cobuilders/hardhat-arb-node':
-        specifier: workspace:^0.0.1-alpha.12
+        specifier: workspace:^
         version: link:../hardhat-arb-node
       '@cobuilders/hardhat-arb-test':
-        specifier: workspace:^0.0.1-alpha.12
+        specifier: workspace:^
         version: link:../hardhat-arb-test
       '@types/node':
         specifier: ^22.0.0

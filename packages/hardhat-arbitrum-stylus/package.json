@@ -41,10 +41,10 @@
     "CHANGELOG.md"
   ],
   "devDependencies": {
-    "@cobuilders/hardhat-arb-node": "workspace:^0.0.1-alpha.12",
-    "@cobuilders/hardhat-arb-compile": "workspace:^0.0.1-alpha.12",
-    "@cobuilders/hardhat-arb-deploy": "workspace:^0.0.1-alpha.12",
-    "@cobuilders/hardhat-arb-test": "workspace:^0.0.1-alpha.12",
+    "@cobuilders/hardhat-arb-node": "workspace:^",
+    "@cobuilders/hardhat-arb-compile": "workspace:^",
+    "@cobuilders/hardhat-arb-deploy": "workspace:^",
+    "@cobuilders/hardhat-arb-test": "workspace:^",
     "@types/node": "^22.0.0",
     "eslint": "^9.18.0",
     "hardhat": "^3.0.0",
@@ -53,10 +53,10 @@
     "tsx": "^4.19.3"
   },
   "peerDependencies": {
-    "@cobuilders/hardhat-arb-node": "^0.0.1-alpha.12",
-    "@cobuilders/hardhat-arb-compile": "^0.0.1-alpha.12",
-    "@cobuilders/hardhat-arb-deploy": "^0.0.1-alpha.12",
-    "@cobuilders/hardhat-arb-test": "^0.0.1-alpha.12",
+    "@cobuilders/hardhat-arb-node": "workspace:^",
+    "@cobuilders/hardhat-arb-compile": "workspace:^",
+    "@cobuilders/hardhat-arb-deploy": "workspace:^",
+    "@cobuilders/hardhat-arb-test": "workspace:^",
     "hardhat": "^3.0.0"
   },
   "publishConfig": {
