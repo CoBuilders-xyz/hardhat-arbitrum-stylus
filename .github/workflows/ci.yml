@@ -4,9 +4,6 @@ on:
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened, labeled, unlabeled]
-  # Run on push to changeset-release branch (bot pushes don't trigger pull_request)
-  push:
-    branches: [changeset-release/main]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -48,7 +45,7 @@ jobs:
   changeset:
     name: Changeset Check
     runs-on: ubuntu-latest
-    # Skip for release PRs (they consume changesets, not add them) and labeled PRs
+    # Skip for release PRs and labeled PRs
     if: ${{ github.head_ref != 'changeset-release/main' && !contains(github.event.pull_request.labels.*.name, 'no changeset needed') }}
 
     steps:

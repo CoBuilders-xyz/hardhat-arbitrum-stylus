@@ -39,7 +39,8 @@ jobs:
           commit: 'chore: version packages'
           version: pnpm version-for-release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # PAT triggers CI on release PR (GITHUB_TOKEN doesn't trigger workflows)
+          GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}
 
   # Job 2: Build and publish if no changesets (versions already bumped)
   publish:
