@@ -124,6 +124,21 @@ export class DockerClient {
   }
 
   /**
+   * Start a stopped container.
+   */
+  async startContainer(containerId: string): Promise<void> {
+    const result = await this.exec(["start", containerId]);
+    if (result.exitCode !== 0) {
+      throw new DockerError(
+        `Failed to start container ${containerId}: ${result.stderr}`,
+        `docker start ${containerId}`,
+        result.exitCode,
+        result.stderr,
+      );
+    }
+  }
+
+  /**
    * Remove a container.
    */
   async remove(containerId: string, force: boolean = false): Promise<void> {
