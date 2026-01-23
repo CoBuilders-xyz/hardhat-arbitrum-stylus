@@ -129,6 +129,9 @@ importers:
       typescript:
         specifier: ^5.7.3
         version: 5.9.3
+      viem:
+        specifier: ^2.30.0
+        version: 2.44.4(typescript@5.9.3)(zod@3.25.76)
 
   packages/hardhat-arbitrum-stylus:
     devDependencies:

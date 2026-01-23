@@ -1,17 +1,25 @@
 import {
-  createWalletClient,
-  http,
   type Hex,
   type Chain,
   type WalletClient,
   type HttpTransport,
+  type PrivateKeyAccount,
   encodeFunctionData,
-  keccak256,
   getAddress,
-} from 'viem';
-import { privateKeyToAccount, type PrivateKeyAccount } from 'viem/accounts';
+  createPluginError,
+  createChain,
+  createWalletClientFromKey,
+  getTransactionReceipt,
+  computeCreate2Address,
+} from '@cobuilders/hardhat-arb-utils';
 
-import { createPluginError } from '@cobuilders/hardhat-arb-utils';
+// Re-export web3 utilities for backwards compatibility
+export {
+  sendRawTransaction,
+  getCode,
+  waitForReceipt,
+  computeCreate2Address,
+} from '@cobuilders/hardhat-arb-utils';
 
 /**
  * Arbitrum precompile addresses (checksummed)
@@ -30,41 +38,24 @@ export const CREATE2_FACTORY: { ADDRESS: Hex; DEPLOYER: Hex } = {
 };
 
 /**
- * Create a custom chain for the local Arbitrum node
+ * Default chain ID for local Arbitrum node
  */
-function createLocalArbitrumChain(
-  rpcUrl: string,
-  chainId: number = 412346,
-): Chain {
-  return {
-    id: chainId,
-    name: 'Arbitrum Local',
-    nativeCurrency: {
-      name: 'Ether',
-      symbol: 'ETH',
-      decimals: 18,
-    },
-    rpcUrls: {
-      default: { http: [rpcUrl] },
-    },
-  };
-}
+const LOCAL_CHAIN_ID = 412346;
 
 /**
- * Create a wallet client for sending transactions
+ * Create a wallet client for the local Arbitrum node
  */
 export function createNodeClient(
   rpcUrl: string,
   privateKey: Hex,
 ): WalletClient<HttpTransport, Chain, PrivateKeyAccount> {
-  const account = privateKeyToAccount(privateKey);
-  const chain = createLocalArbitrumChain(rpcUrl);
-
-  return createWalletClient({
-    account,
-    chain,
-    transport: http(rpcUrl),
+  const chain = createChain({
+    chainId: LOCAL_CHAIN_ID,
+    name: 'Arbitrum Local',
+    rpcUrl,
   });
+
+  return createWalletClientFromKey(rpcUrl, privateKey, chain);
 }
 
 /**
@@ -140,27 +131,13 @@ export async function deployContract(
     chain: null,
   });
 
-  // Wait for receipt to get contract address
-  const response = await fetch(rpcUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      jsonrpc: '2.0',
-      method: 'eth_getTransactionReceipt',
-      params: [txHash],
-      id: 1,
-    }),
-  });
+  const receipt = await getTransactionReceipt(rpcUrl, txHash);
 
-  const result = (await response.json()) as {
-    result: { contractAddress: Hex } | null;
-  };
-
-  if (!result.result?.contractAddress) {
+  if (!receipt?.contractAddress) {
     throw createPluginError('Failed to get contract address from receipt');
   }
 
-  return { txHash, contractAddress: result.result.contractAddress };
+  return { txHash, contractAddress: receipt.contractAddress };
 }
 
 /**
@@ -179,53 +156,6 @@ export async function sendEth(
     value,
     chain: null,
   });
-}
-
-/**
- * Send a raw signed transaction (for CREATE2 factory)
- */
-export async function sendRawTransaction(
-  rpcUrl: string,
-  signedTx: Hex,
-): Promise<Hex> {
-  const response = await fetch(rpcUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      jsonrpc: '2.0',
-      method: 'eth_sendRawTransaction',
-      params: [signedTx],
-      id: 1,
-    }),
-  });
-
-  const result = (await response.json()) as { result?: Hex; error?: unknown };
-  if (!result.result) {
-    throw createPluginError(
-      `Failed to send raw transaction: ${JSON.stringify(result.error)}`,
-    );
-  }
-
-  return result.result;
-}
-
-/**
- * Get contract code at an address
- */
-export async function getCode(rpcUrl: string, address: Hex): Promise<Hex> {
-  const response = await fetch(rpcUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      jsonrpc: '2.0',
-      method: 'eth_getCode',
-      params: [address, 'latest'],
-      id: 1,
-    }),
-  });
-
-  const result = (await response.json()) as { result: Hex };
-  return result.result;
 }
 
 /**
@@ -286,57 +216,4 @@ export async function deployViaCreate2(
   );
 
   return { txHash, contractAddress };
-}
-
-/**
- * Compute CREATE2 address
- */
-export function computeCreate2Address(
-  factory: Hex,
-  salt: Hex,
-  initCode: Hex,
-): Hex {
-  const initCodeHash = keccak256(initCode);
-  const data = ('0xff' +
-    factory.slice(2) +
-    salt.slice(2) +
-    initCodeHash.slice(2)) as Hex;
-  const hash = keccak256(data);
-  return ('0x' + hash.slice(-40)) as Hex;
-}
-
-/**
- * Wait for a transaction receipt
- */
-export async function waitForReceipt(
-  rpcUrl: string,
-  txHash: Hex,
-  timeout: number = 30000,
-): Promise<boolean> {
-  const startTime = Date.now();
-
-  while (Date.now() - startTime < timeout) {
-    const response = await fetch(rpcUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        method: 'eth_getTransactionReceipt',
-        params: [txHash],
-        id: 1,
-      }),
-    });
-
-    const result = (await response.json()) as {
-      result: { status: Hex } | null;
-    };
-
-    if (result.result) {
-      return result.result.status === '0x1';
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 500));
-  }
-
-  return false;
 }
