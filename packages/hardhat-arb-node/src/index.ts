@@ -29,6 +29,10 @@ const hardhatArbNodePlugin: HardhatPlugin = {
         description:
           'Deploy CREATE2 factory, Cache Manager, and StylusDeployer',
       })
+      .addFlag({
+        name: 'persist',
+        description: 'Keep container after stop (survives Ctrl+C)',
+      })
       .setAction(() => import('./tasks/start.js'))
       .build(),
 
