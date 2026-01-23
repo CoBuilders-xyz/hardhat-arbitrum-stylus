@@ -10,6 +10,8 @@ const hardhatArbNodePlugin: HardhatPlugin = {
   npmPackage: '@cobuilders/hardhat-arb-node',
   hookHandlers: {
     config: () => import('./hook-handlers/config.js'),
+    hre: () => import('./hook-handlers/hre.js'),
+    network: () => import('./hook-handlers/network.js'),
   },
   tasks: [
     emptyTask('arb:node', 'Manage Arbitrum nitro-devnode').build(),
