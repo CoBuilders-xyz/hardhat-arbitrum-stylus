@@ -7,3 +7,4 @@
 export * from "./container/index.js";
 export * from "./errors/index.js";
 export * from "./web3/index.js";
+export * from "./testing/index.js";

@@ -3,7 +3,7 @@ import path from 'node:path';
 import { describe, it } from 'node:test';
 import { pathToFileURL } from 'node:url';
 
-import { useFixtureProject } from './helpers/useFixtureProject.js';
+import { useFixtureProject } from '@cobuilders/hardhat-arb-utils/testing';
 import { createHardhatRuntimeEnvironment } from 'hardhat/hre';
 
 describe('@cobuilders/hardhat-arbitrum-stylus', () => {

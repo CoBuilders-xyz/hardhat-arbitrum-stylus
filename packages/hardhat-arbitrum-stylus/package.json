@@ -27,7 +27,8 @@
     "build": "tsc --build .",
     "clean": "rimraf dist",
     "prepublishOnly": "pnpm build",
-    "test": "node --import tsx/esm --test --test-reporter=spec \"test/*.ts\" \"test/!(fixture-project|fixture-projects|helpers)/**/*.ts\"",
+    "test": "node --import tsx/esm --test --test-reporter=spec \"test/!(*.integration).ts\"",
+    "test:integration": "node --import tsx/esm --test --test-reporter=spec \"test/*.integration.ts\"",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --check .",
@@ -45,12 +46,16 @@
     "@cobuilders/hardhat-arb-compile": "workspace:^",
     "@cobuilders/hardhat-arb-deploy": "workspace:^",
     "@cobuilders/hardhat-arb-test": "workspace:^",
+    "@cobuilders/hardhat-arb-utils": "workspace:^",
+    "@nomicfoundation/hardhat-node-test-runner": "^3.0.0",
+    "@nomicfoundation/hardhat-viem": "^3.0.0",
     "@types/node": "^22.0.0",
     "eslint": "^9.18.0",
     "hardhat": "^3.0.0",
     "prettier": "^3.4.0",
     "rimraf": "^5.0.5",
-    "tsx": "^4.19.3"
+    "tsx": "^4.19.3",
+    "viem": "^2.0.0"
   },
   "peerDependencies": {
     "@cobuilders/hardhat-arb-node": "workspace:^",

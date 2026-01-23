@@ -3,10 +3,8 @@ import path from 'node:path';
 import { describe, it, after } from 'node:test';
 import { pathToFileURL } from 'node:url';
 
+import { DockerClient, useFixtureProject } from '@cobuilders/hardhat-arb-utils';
 import { createHardhatRuntimeEnvironment } from 'hardhat/hre';
-import { DockerClient } from '@cobuilders/hardhat-arb-utils';
-
-import { useFixtureProject } from './helpers/useFixtureProject.js';
 import { CONTAINER_NAME } from '../src/config/defaults.js';
 import {
   getCode,
