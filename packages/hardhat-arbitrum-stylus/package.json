@@ -28,7 +28,6 @@
     "clean": "rimraf dist",
     "prepublishOnly": "pnpm build",
     "test": "node --import tsx/esm --test --test-reporter=spec \"test/!(*.integration).ts\"",
-    "test:integration": "node --import tsx/esm --test --test-reporter=spec \"test/*.integration.ts\"",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --check .",

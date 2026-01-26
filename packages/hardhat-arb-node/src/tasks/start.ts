@@ -2,13 +2,14 @@ import { createConnection } from 'node:net';
 
 import type { HardhatRuntimeEnvironment } from 'hardhat/types/hre';
 import type { NewTaskActionFunction } from 'hardhat/types/tasks';
-import { getAddress, type Hex } from 'viem';
 
 import {
+  type ContainerConfig,
+  type Hex,
   ContainerManager,
   DockerClient,
-  type ContainerConfig,
   createPluginError,
+  getAddress,
 } from '@cobuilders/hardhat-arb-utils';
 
 import { CONTAINER_NAME, HARDHAT_ACCOUNTS } from '../config/defaults.js';
