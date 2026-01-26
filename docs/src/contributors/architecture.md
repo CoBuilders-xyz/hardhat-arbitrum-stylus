@@ -1,33 +1,53 @@
 # Architecture
 
 <!-- 
-CONTENT DESCRIPTION:
-Merged architecture overview for contributors. Covers plugin system, packages, 
-container management, and internals. Single comprehensive reference.
+=============================================================================
+CONTENT DESCRIPTION FOR DOCUMENTATION AGENT
+=============================================================================
+
+Technical architecture for contributors. More granular than before.
+
+WHAT TO WRITE:
+- Package structure and responsibilities
+- Plugin system (Hardhat 3)
+- Hook handlers explained
+- Task system
+- Container management
+- Chain setup process
+- Error handling
+- Key files reference
+
+REFERENCE MATERIALS:
+- packages/*/src/index.ts
+- packages/hardhat-arb-node/src/hook-handlers/*.ts
+- packages/hardhat-arb-node/src/tasks/*.ts
+- packages/hardhat-arb-utils/src/container/*.ts
+- packages/hardhat-arb-utils/src/errors/*.ts
+
+=============================================================================
 -->
 
-This page explains how Hardhat Arbitrum Stylus is built.
+Technical architecture of Hardhat Arbitrum Stylus Plugin.
 
 ## Package Structure
 
 ```
-hardhat-arbitrum-stylus/
-├── packages/
-│   ├── hardhat-arbitrum-stylus/   # Toolbox (bundles all plugins)
-│   ├── hardhat-arb-node/          # Node management
-│   ├── hardhat-arb-compile/       # Compilation (placeholder)
-│   ├── hardhat-arb-deploy/        # Deployment (placeholder)
-│   ├── hardhat-arb-test/          # Testing (placeholder)
-│   ├── hardhat-arb-utils/         # Shared utilities
-│   └── config/                    # Shared dev config (private)
+packages/
+├── hardhat-arbitrum-stylus/   # Toolbox (bundles all plugins)
+├── hardhat-arb-node/          # Node management ✅
+├── hardhat-arb-compile/       # Compilation (placeholder)
+├── hardhat-arb-deploy/        # Deployment (placeholder)
+├── hardhat-arb-test/          # Testing (placeholder)
+├── hardhat-arb-utils/         # Shared utilities
+└── config/                    # Dev config (private)
 ```
 
-## Plugin System
+## Plugin System (Hardhat 3)
 
-Plugins use Hardhat 3's declarative plugin system:
+Plugins are declarative objects:
 
 ```typescript
-const hardhatArbNodePlugin: HardhatPlugin = {
+const plugin: HardhatPlugin = {
   id: 'hardhat-arb-node',
   npmPackage: '@cobuilders/hardhat-arb-node',
   hookHandlers: {
@@ -35,25 +55,45 @@ const hardhatArbNodePlugin: HardhatPlugin = {
     hre: () => import('./hook-handlers/hre.js'),
   },
   tasks: [
-    task(['arb:node', 'start'], 'Start the local Arbitrum node')
-      .addFlag({ name: 'detach', description: 'Run in background' })
+    task(['arb:node', 'start'], 'Start node')
+      .addFlag({ name: 'detach' })
       .setAction(() => import('./tasks/start.js'))
       .build(),
   ],
 };
 ```
 
-### Hook Handlers
+## Hook Handlers
 
-| Hook | Purpose | Example |
-|------|---------|---------|
-| `config` | Extend/validate configuration | Add `arbNode` defaults |
-| `hre` | Extend runtime environment | Add helpers to HRE |
-| `network` | Network-specific behavior | Auto-configure local network |
+### Config Hook
+
+Extends and validates configuration:
+
+```typescript
+const configHookHandler: ConfigHookHandler = {
+  extendUserConfig: async (config) => ({
+    ...config,
+    arbNode: { ...DEFAULTS, ...config.arbNode },
+  }),
+  validateUserConfig: async (config) => {
+    // Validation logic
+  },
+};
+```
+
+### HRE Hook
+
+Extends Hardhat Runtime Environment:
+
+```typescript
+const hreHookHandler: HreHookHandler = {
+  extendHardhatRuntimeEnvironment: async (hre) => {
+    // Add properties to hre
+  },
+};
+```
 
 ### Type Extensions
-
-Plugins extend Hardhat types via declaration merging:
 
 ```typescript
 declare module 'hardhat/types/config' {
@@ -65,68 +105,55 @@ declare module 'hardhat/types/config' {
 
 ## Container Management
 
-The node plugin uses Docker via `hardhat-arb-utils`:
-
 ```
-┌─────────────────────┐
-│   Node Plugin       │  ← arb:node start
-├─────────────────────┤
-│  ContainerManager   │  ← High-level lifecycle
-├─────────────────────┤
-│    DockerClient     │  ← CLI wrapper
-├─────────────────────┤
-│      Docker         │  ← nitro-devnode container
-└─────────────────────┘
+Node Plugin
+    │
+    ▼
+ContainerManager (hardhat-arb-utils)
+    │
+    ▼
+DockerClient (CLI wrapper)
+    │
+    ▼
+Docker daemon → nitro-devnode container
 ```
 
-### ContainerManager
+**ContainerManager** handles:
+- Image pulling
+- Container lifecycle (start/stop)
+- Readiness checks (HTTP/TCP/exec)
 
-```typescript
-const manager = new ContainerManager();
-
-const container = await manager.start({
-  image: 'offchainlabs/nitro-node',
-  tag: 'v3.7.1-926f1ab',
-  ports: [{ host: 8547, container: 8547 }],
-  readinessCheck: {
-    type: 'http',
-    target: 'http://localhost:8547',
-    timeout: 60000,
-  },
-});
-
-await manager.stop(container.id);
-```
+**DockerClient** wraps Docker CLI commands.
 
 ## Chain Setup
 
-When node starts, it performs:
+When `arb:node start` runs:
 
-1. **Chain ownership** — Become chain owner via ArbOwner precompile
-2. **L1 price = 0** — Simplify gas for development
-3. **Prefund accounts** — 10 ETH to Hardhat's 20 default accounts
-4. **Stylus infrastructure** (with `--stylus-ready`):
-   - CREATE2 Factory
-   - Cache Manager
-   - StylusDeployer
+1. Start nitro-devnode container
+2. Wait for RPC ready
+3. `becomeChainOwner()` via ArbOwner precompile
+4. `setL1PricePerUnit(0)` for dev gas costs
+5. Prefund 20 Hardhat accounts (10 ETH each)
+6. If `--stylus-ready`:
+   - Deploy CREATE2 Factory
+   - Deploy Cache Manager
+   - Deploy StylusDeployer
 
 ## Error Handling
-
-Use `createPluginError` for user-facing errors:
 
 ```typescript
 import { createPluginError } from '@cobuilders/hardhat-arb-utils';
 
-if (await isPortInUse(port)) {
-  throw createPluginError(`Port ${port} is already in use`);
-}
+throw createPluginError('Port 8547 is already in use');
 ```
 
 ## Key Files
 
 | File | Purpose |
 |------|---------|
-| `packages/*/src/index.ts` | Plugin entry point |
-| `packages/*/src/tasks/*.ts` | Task implementations |
-| `packages/*/src/hook-handlers/*.ts` | Hardhat hooks |
-| `packages/hardhat-arb-utils/src/container/` | Docker utilities |
+| `hardhat-arb-node/src/index.ts` | Plugin definition |
+| `hardhat-arb-node/src/tasks/start.ts` | Start task |
+| `hardhat-arb-node/src/hook-handlers/config.ts` | Config hook |
+| `hardhat-arb-utils/src/container/container-manager.ts` | Container lifecycle |
+| `hardhat-arb-utils/src/container/docker-client.ts` | Docker CLI wrapper |
+| `hardhat-arb-utils/src/errors/index.ts` | Error utilities |

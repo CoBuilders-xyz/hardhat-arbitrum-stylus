@@ -1,4 +1,4 @@
-site_name: Hardhat Arbitrum Stylus
+site_name: Hardhat Arbitrum Stylus Plugin
 site_description: Hardhat plugin suite for Arbitrum Stylus development
 site_url: https://cobuilders-xyz.github.io/hardhat-arbitrum-stylus
 repo_name: CoBuilders-xyz/hardhat-arbitrum-stylus
@@ -8,6 +8,8 @@ docs_dir: src
 
 theme:
   name: material
+  logo: assets/logo.webp
+  favicon: assets/logo.webp
   palette:
     - media: '(prefers-color-scheme: dark)'
       scheme: slate
@@ -71,8 +73,7 @@ plugins:
   - search
 
 nav:
-  - Home: index.md
-  - Getting Started: getting-started.md
+  - Getting Started: index.md
   - Plugins:
       - Overview: plugins/index.md
       - Node: plugins/node.md
@@ -82,9 +83,8 @@ nav:
   - Configuration: configuration.md
   - Guides:
       - Local Development: guides/local-development.md
+      - First Stylus Contract: guides/first-stylus-contract.md
       - Troubleshooting: guides/troubleshooting.md
-  - Tutorial: tutorial.md
-  - For Contributors:
+  - Contributors:
       - Architecture: contributors/architecture.md
-      - Development: contributors/development.md
-      - Versioning: contributors/versioning.md
+      - Contributing: contributors/contributing.md

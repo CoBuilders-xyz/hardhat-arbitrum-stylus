@@ -131,5 +131,5 @@ Stop the node: `npx hardhat arb:node stop`
 
 ## Next Steps
 
-- [Node Plugin Reference](plugins/node.md)
-- [Local Development Guide](guides/local-development.md)
+- [Node Plugin Reference](../plugins/node.md)
+- [Local Development Guide](local-development.md)

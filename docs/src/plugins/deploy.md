@@ -1,5 +1,20 @@
 # Deploy Plugin
 
+<!-- 
+=============================================================================
+CONTENT DESCRIPTION FOR DOCUMENTATION AGENT
+=============================================================================
+
+Placeholder page for the deploy plugin.
+
+WHAT TO WRITE:
+- Status: Coming Soon
+- Brief description of planned features
+- Keep it minimal
+
+=============================================================================
+-->
+
 **Package:** `@cobuilders/hardhat-arb-deploy`
 
 **Status:** 🔜 Coming Soon
@@ -11,14 +26,5 @@
 
 - Deploy Stylus contracts
 - Deploy Solidity contracts
-- Deployment tracking
-
-## Current Workaround
-
-Deploy manually with cargo-stylus:
-
-```bash
-cargo stylus deploy \
-  --endpoint http://localhost:8547 \
-  --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-```
+- Deployment tracking across networks
+- Verification integration

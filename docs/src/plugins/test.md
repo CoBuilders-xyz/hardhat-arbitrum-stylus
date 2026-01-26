@@ -1,5 +1,20 @@
 # Test Plugin
 
+<!-- 
+=============================================================================
+CONTENT DESCRIPTION FOR DOCUMENTATION AGENT
+=============================================================================
+
+Placeholder page for the test plugin.
+
+WHAT TO WRITE:
+- Status: Coming Soon
+- Brief description of planned features
+- Keep it minimal
+
+=============================================================================
+-->
+
 **Package:** `@cobuilders/hardhat-arb-test`
 
 **Status:** 🔜 Coming Soon
@@ -12,15 +27,4 @@
 - Test runner integration
 - Auto-start node for tests
 - Snapshot/revert for test isolation
-
-## Current Workaround
-
-1. Start node in one terminal:
-   ```bash
-   npx hardhat arb:node start --stylus-ready
-   ```
-
-2. Run tests in another:
-   ```bash
-   npx hardhat test
-   ```
+- Gas consumption reporting
