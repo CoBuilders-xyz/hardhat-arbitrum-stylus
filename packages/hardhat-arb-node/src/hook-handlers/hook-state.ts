@@ -47,4 +47,3 @@ export function getHookWsPort(): number {
   }
   return hookWsPort!;
 }
-

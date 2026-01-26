@@ -32,7 +32,6 @@ interface TaskStartArguments {
   quiet: boolean;
   detach: boolean;
   stylusReady: boolean;
-  persist: boolean;
   name: string;
   httpPort: number;
   wsPort: number;
@@ -219,12 +218,9 @@ async function deployStylusDeployer(
 
 /**
  * Attach to container logs (only new logs from this point)
- * Stops the container when user presses Ctrl+C (unless persist is true)
+ * Stops the container when user presses Ctrl+C
  */
-async function attachToLogs(
-  containerId: string,
-  persist: boolean,
-): Promise<void> {
+async function attachToLogs(containerId: string): Promise<void> {
   const client = new DockerClient();
 
   console.log('Listening for transactions...\n');
@@ -238,15 +234,11 @@ async function attachToLogs(
   // Handle graceful shutdown - stop container when user presses Ctrl+C
   const cleanup = async () => {
     logProcess.kill();
-    if (persist) {
-      console.log('\nDetaching from node (container will keep running)...');
-    } else {
-      console.log('\nStopping node...');
-      try {
-        await client.stop(containerId);
-      } catch {
-        // Container may already be stopped
-      }
+    console.log('\nStopping node...');
+    try {
+      await client.stop(containerId);
+    } catch {
+      // Container may already be stopped
     }
     process.exit(0);
   };
@@ -268,13 +260,11 @@ const taskStart: NewTaskActionFunction<TaskStartArguments> = async (
     quiet,
     detach,
     stylusReady,
-    persist,
     name,
     httpPort: customHttpPort,
     wsPort: customWsPort,
   } = args;
   const config = hre.config.arbNode;
-  const client = new DockerClient();
   const manager = new ContainerManager();
 
   // Use custom ports if provided, otherwise use config
@@ -284,50 +274,6 @@ const taskStart: NewTaskActionFunction<TaskStartArguments> = async (
 
   // Use custom name if provided, otherwise use default
   const containerName = name || CONTAINER_NAME;
-
-  // Check if a persistent container already exists
-  const existingContainerId = await client.findByName(containerName);
-  if (persist && existingContainerId) {
-    const status = await client.getStatus(existingContainerId);
-
-    if (status === 'running') {
-      if (!quiet) {
-        console.log('Persistent node is already running.\n');
-        printStartupInfo({ ...config, httpPort, wsPort });
-      }
-      if (!detach) {
-        await attachToLogs(existingContainerId, persist);
-      }
-      return;
-    }
-
-    // Container exists but is stopped/exited - restart it
-    if (status === 'exited' || status === 'stopped' || status === 'created') {
-      if (!quiet) {
-        console.log('Restarting persistent node...\n');
-      }
-      await client.startContainer(existingContainerId);
-
-      // Wait for readiness
-      const info = await client.inspect(existingContainerId);
-      if (info) {
-        await manager.waitForReady(info, {
-          type: 'http',
-          target: rpcUrl,
-          timeout: 60000,
-          interval: 1000,
-        });
-      }
-
-      if (!quiet) {
-        printStartupInfo({ ...config, httpPort, wsPort });
-      }
-      if (!detach) {
-        await attachToLogs(existingContainerId, persist);
-      }
-      return;
-    }
-  }
 
   if (!quiet) {
     console.log('Starting Arbitrum nitro-devnode...\n');
@@ -357,7 +303,7 @@ const taskStart: NewTaskActionFunction<TaskStartArguments> = async (
       timeout: 60000,
       interval: 1000,
     },
-    autoRemove: !persist,
+    autoRemove: true,
     detach: true,
   };
 
@@ -387,7 +333,7 @@ const taskStart: NewTaskActionFunction<TaskStartArguments> = async (
 
   // Attach to logs unless detach flag is set
   if (!detach) {
-    await attachToLogs(containerInfo.id, persist);
+    await attachToLogs(containerInfo.id);
   }
 };
 

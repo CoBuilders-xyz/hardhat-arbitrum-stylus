@@ -151,7 +151,6 @@ export default async (): Promise<Partial<NetworkHooks>> => {
                   quiet: true,
                   detach: true,
                   stylusReady: false,
-                  persist: false,
                   name: tempContainerName,
                   httpPort: hookHttpPort,
                   wsPort: hookWsPort,

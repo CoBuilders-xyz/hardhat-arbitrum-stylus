@@ -59,7 +59,6 @@ describe(
           quiet: false,
           detach: true,
           stylusReady: false,
-          persist: false,
         });
 
         // Verify node is running by making an RPC call
@@ -105,7 +104,6 @@ describe(
           quiet: false,
           detach: true,
           stylusReady: true,
-          persist: false,
         });
 
         // Verify CREATE2 factory is deployed
@@ -137,7 +135,6 @@ describe(
             quiet: true,
             detach: true,
             stylusReady: false,
-            persist: false,
           });
         }
 
@@ -178,83 +175,10 @@ describe(
           quiet: true,
           detach: true,
           stylusReady: false,
-          persist: false,
         });
 
         // Status should report running
         await hre.tasks.getTask(['arb:node', 'status']).run({});
-      });
-    });
-
-    describe('arb:node start --persist', () => {
-      after(async () => {
-        await cleanupContainer();
-      });
-
-      it('persistent container survives stop and can be restarted', async () => {
-        // Clean up any existing container first
-        await cleanupContainer();
-
-        const hardhatConfig = await import(
-          pathToFileURL(path.join(process.cwd(), 'hardhat.config.js')).href
-        );
-
-        const hre = await createHardhatRuntimeEnvironment(
-          hardhatConfig.default,
-        );
-        const config = hre.config.arbNode;
-        const rpcUrl = `http://localhost:${config.httpPort}`;
-        const client = new DockerClient();
-
-        // Start the node with persist flag
-        await hre.tasks.getTask(['arb:node', 'start']).run({
-          quiet: false,
-          detach: true,
-          stylusReady: false,
-          persist: true,
-        });
-
-        // Verify node is running
-        let containerId = await client.findByName(CONTAINER_NAME);
-        assert.ok(containerId, 'Container should exist');
-        let isRunning = await client.isRunning(containerId);
-        assert.ok(isRunning, 'Container should be running');
-
-        // Stop the container (simulating Ctrl+C behavior)
-        await client.stop(containerId);
-
-        // Verify container still exists but is stopped
-        containerId = await client.findByName(CONTAINER_NAME);
-        assert.ok(containerId, 'Container should still exist after stop');
-        isRunning = await client.isRunning(containerId);
-        assert.ok(!isRunning, 'Container should not be running after stop');
-
-        // Restart with persist flag - should reuse existing container
-        await hre.tasks.getTask(['arb:node', 'start']).run({
-          quiet: false,
-          detach: true,
-          stylusReady: false,
-          persist: true,
-        });
-
-        // Verify node is running again
-        const response = await fetch(rpcUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            jsonrpc: '2.0',
-            method: 'eth_chainId',
-            params: [],
-            id: 1,
-          }),
-        });
-
-        const result = (await response.json()) as { result: string };
-        assert.equal(
-          result.result,
-          '0x' + config.chainId.toString(16),
-          'Chain ID should match after restart',
-        );
       });
     });
   },
