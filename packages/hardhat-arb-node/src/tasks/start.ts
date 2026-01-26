@@ -33,6 +33,9 @@ interface TaskStartArguments {
   detach: boolean;
   stylusReady: boolean;
   persist: boolean;
+  name: string;
+  httpPort: number;
+  wsPort: number;
 }
 
 /**
@@ -261,21 +264,36 @@ const taskStart: NewTaskActionFunction<TaskStartArguments> = async (
   args,
   hre: HardhatRuntimeEnvironment,
 ) => {
-  const { quiet, detach, stylusReady, persist } = args;
+  const {
+    quiet,
+    detach,
+    stylusReady,
+    persist,
+    name,
+    httpPort: customHttpPort,
+    wsPort: customWsPort,
+  } = args;
   const config = hre.config.arbNode;
   const client = new DockerClient();
   const manager = new ContainerManager();
-  const rpcUrl = `http://localhost:${config.httpPort}`;
+
+  // Use custom ports if provided, otherwise use config
+  const httpPort = customHttpPort || config.httpPort;
+  const wsPort = customWsPort || config.wsPort;
+  const rpcUrl = `http://localhost:${httpPort}`;
+
+  // Use custom name if provided, otherwise use default
+  const containerName = name || CONTAINER_NAME;
 
   // Check if a persistent container already exists
-  const existingContainerId = await client.findByName(CONTAINER_NAME);
+  const existingContainerId = await client.findByName(containerName);
   if (persist && existingContainerId) {
     const status = await client.getStatus(existingContainerId);
 
     if (status === 'running') {
       if (!quiet) {
         console.log('Persistent node is already running.\n');
-        printStartupInfo(config);
+        printStartupInfo({ ...config, httpPort, wsPort });
       }
       if (!detach) {
         await attachToLogs(existingContainerId, persist);
@@ -302,7 +320,7 @@ const taskStart: NewTaskActionFunction<TaskStartArguments> = async (
       }
 
       if (!quiet) {
-        printStartupInfo(config);
+        printStartupInfo({ ...config, httpPort, wsPort });
       }
       if (!detach) {
         await attachToLogs(existingContainerId, persist);
@@ -318,10 +336,10 @@ const taskStart: NewTaskActionFunction<TaskStartArguments> = async (
   const containerConfig: ContainerConfig = {
     image: config.image,
     tag: config.tag,
-    name: CONTAINER_NAME,
+    name: containerName,
     ports: [
-      { host: config.httpPort, container: 8547 },
-      { host: config.wsPort, container: 8548 },
+      { host: httpPort, container: 8547 },
+      { host: wsPort, container: 8548 },
     ],
     command: [
       '--dev',
@@ -364,7 +382,7 @@ const taskStart: NewTaskActionFunction<TaskStartArguments> = async (
 
   // Print startup info
   if (!quiet) {
-    printStartupInfo(config);
+    printStartupInfo({ ...config, httpPort, wsPort });
   }
 
   // Attach to logs unless detach flag is set

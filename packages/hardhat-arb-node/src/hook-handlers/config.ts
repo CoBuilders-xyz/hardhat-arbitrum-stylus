@@ -10,6 +10,7 @@ import {
   HARDHAT_ACCOUNTS,
 } from '../config/defaults.js';
 import { resolveArbNodeConfig } from '../config/resolver.js';
+import { getHookHttpPort } from './hook-state.js';
 
 export default async (): Promise<Partial<ConfigHooks>> => {
   const handlers: Partial<ConfigHooks> = {
@@ -20,18 +21,19 @@ export default async (): Promise<Partial<ConfigHooks>> => {
       const extendedConfig = await next(config);
 
       const arbNodeUserConfig = config.arbNode;
-      const httpPort =
-        arbNodeUserConfig?.httpPort ?? DEFAULT_ARB_NODE_CONFIG.httpPort;
       const chainId =
         arbNodeUserConfig?.chainId ?? DEFAULT_ARB_NODE_CONFIG.chainId;
 
       const networks: Record<string, NetworkUserConfig> =
         extendedConfig.networks ?? {};
 
-      // Override the default network to use arb-node via HTTP
+      // Use the hook's random port for the default network
+      // This ensures complete decoupling from task nodes
+      const hookHttpPort = getHookHttpPort();
+
       const arbNodeNetwork: HttpNetworkUserConfig = {
         type: 'http',
-        url: `http://127.0.0.1:${httpPort}`,
+        url: `http://127.0.0.1:${hookHttpPort}`,
         chainId,
         accounts: HARDHAT_ACCOUNTS.map((acc) => acc.privateKey),
       };

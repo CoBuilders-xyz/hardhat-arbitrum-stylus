@@ -1,7 +1,75 @@
 import type { HookContext, NetworkHooks } from 'hardhat/types/hooks';
 import type { ChainType, NetworkConnection } from 'hardhat/types/network';
 
+import { DockerClient } from '@cobuilders/hardhat-arb-utils';
+
 import { getHre } from './hre.js';
+import { getHookHttpPort, getHookWsPort } from './hook-state.js';
+
+/** Prefix for temporary containers created by the hook */
+const TEMP_CONTAINER_PREFIX = 'nitro-devnode-tmp-';
+
+/** Track temporary containers per connection for cleanup */
+const tempContainersPerConnection = new WeakMap<
+  NetworkConnection<ChainType | string>,
+  string
+>();
+
+/** Track all temp containers globally for process exit cleanup */
+const allTempContainers = new Set<string>();
+
+/** Track if we have started a temp container for this process */
+let activeTempContainer: string | null = null;
+
+/** Register process exit handler once */
+let exitHandlerRegistered = false;
+
+function registerExitHandler(): void {
+  if (exitHandlerRegistered) return;
+  exitHandlerRegistered = true;
+
+  const cleanup = async () => {
+    if (allTempContainers.size === 0) return;
+
+    const client = new DockerClient();
+    for (const containerName of allTempContainers) {
+      try {
+        const containerId = await client.findByName(containerName);
+        if (containerId) {
+          await client.stop(containerId);
+          await client.remove(containerId, true);
+        }
+      } catch {
+        // Ignore cleanup errors during exit
+      }
+    }
+    allTempContainers.clear();
+    activeTempContainer = null;
+  };
+
+  // Handle graceful shutdown
+  process.on('beforeExit', () => void cleanup());
+  process.on('SIGINT', () => void cleanup().then(() => process.exit(130)));
+  process.on('SIGTERM', () => void cleanup().then(() => process.exit(143)));
+}
+
+/**
+ * Generate a random container name for hook-started nodes
+ */
+function generateTempContainerName(): string {
+  const randomId = Math.random().toString(36).substring(2, 10);
+  return `${TEMP_CONTAINER_PREFIX}${randomId}`;
+}
+
+/**
+ * Check if our temp container is still running
+ */
+async function isTempContainerRunning(containerName: string): Promise<boolean> {
+  const client = new DockerClient();
+  const containerId = await client.findByName(containerName);
+  if (!containerId) return false;
+  return client.isRunning(containerId);
+}
 
 /**
  * Check if the arb-node is running by trying to connect to it
@@ -39,36 +107,106 @@ export default async (): Promise<Partial<NetworkHooks>> => {
         nextContext: HookContext,
       ) => Promise<NetworkConnection<ChainTypeT>>,
     ): Promise<NetworkConnection<ChainTypeT>> {
-      const config = context.config.arbNode;
-      const rpcUrl = `http://127.0.0.1:${config.httpPort}`;
+      // Get the random hook ports (same as used in config hook)
+      const hookHttpPort = getHookHttpPort();
+      const hookWsPort = getHookWsPort();
+      const hookRpcUrl = `http://127.0.0.1:${hookHttpPort}`;
 
-      // Check if connecting to the default network (our arb-node)
+      // Check if connecting to the default network
       const defaultNetwork = context.config.networks.default;
+      let tempContainerName: string | undefined;
+
       if (defaultNetwork?.type === 'http') {
         const networkUrl = await defaultNetwork.url.getUrl();
 
-        // Compare normalized URLs (localhost === 127.0.0.1)
-        if (normalizeUrl(networkUrl) === normalizeUrl(rpcUrl)) {
-          // Check if node is already running
-          const running = await isNodeRunning(rpcUrl);
+        // Check if this is a connection to our hook network (random port)
+        if (normalizeUrl(networkUrl) === normalizeUrl(hookRpcUrl)) {
+          // Register exit handler for cleanup
+          registerExitHandler();
 
-          if (!running) {
-            // Get the captured HRE to access tasks
-            const hre = getHre();
-            if (hre) {
-              // Use the actual task to start the node
-              await hre.tasks.getTask(['arb:node', 'start']).run({
-                quiet: true,
-                detach: true,
-                stylusReady: false,
-                persist: false,
-              });
+          // Check if we already have an active temp container
+          if (
+            activeTempContainer &&
+            (await isTempContainerRunning(activeTempContainer))
+          ) {
+            // Reuse existing temp container
+            tempContainerName = activeTempContainer;
+          } else {
+            // Check if our hook port has a node running (from previous run)
+            const nodeRunning = await isNodeRunning(hookRpcUrl);
+
+            if (!nodeRunning) {
+              // Need to start a new temp container
+              const hre = getHre();
+              if (hre) {
+                // Generate a temporary container name
+                tempContainerName = generateTempContainerName();
+
+                // Track for cleanup
+                allTempContainers.add(tempContainerName);
+                activeTempContainer = tempContainerName;
+
+                // Start the node on the random hook ports
+                await hre.tasks.getTask(['arb:node', 'start']).run({
+                  quiet: true,
+                  detach: true,
+                  stylusReady: false,
+                  persist: false,
+                  name: tempContainerName,
+                  httpPort: hookHttpPort,
+                  wsPort: hookWsPort,
+                });
+              }
             }
           }
         }
       }
 
-      return next(context);
+      const connection = await next(context);
+
+      // Track the temp container for cleanup on close
+      if (tempContainerName) {
+        tempContainersPerConnection.set(connection, tempContainerName);
+      }
+
+      return connection;
+    },
+
+    async closeConnection<ChainTypeT extends ChainType | string>(
+      context: HookContext,
+      networkConnection: NetworkConnection<ChainTypeT>,
+      next: (
+        nextContext: HookContext,
+        nextNetworkConnection: NetworkConnection<ChainTypeT>,
+      ) => Promise<void>,
+    ): Promise<void> {
+      // Clean up temp container if one was created for this connection
+      const tempContainerName =
+        tempContainersPerConnection.get(networkConnection);
+
+      if (tempContainerName) {
+        const client = new DockerClient();
+        const containerId = await client.findByName(tempContainerName);
+
+        if (containerId) {
+          try {
+            await client.stop(containerId);
+            await client.remove(containerId, true);
+          } catch {
+            // Ignore cleanup errors
+          }
+        }
+
+        tempContainersPerConnection.delete(networkConnection);
+        allTempContainers.delete(tempContainerName);
+
+        // Clear active temp container if this was it
+        if (activeTempContainer === tempContainerName) {
+          activeTempContainer = null;
+        }
+      }
+
+      return next(context, networkConnection);
     },
   };
 

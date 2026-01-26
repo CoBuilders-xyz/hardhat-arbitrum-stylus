@@ -35,6 +35,24 @@ const hardhatArbNodePlugin: HardhatPlugin = {
         name: 'persist',
         description: 'Keep container after stop (survives Ctrl+C)',
       })
+      .addOption({
+        name: 'name',
+        type: ArgumentType.STRING,
+        defaultValue: '',
+        description: 'Custom container name (default: nitro-devnode)',
+      })
+      .addOption({
+        name: 'httpPort',
+        type: ArgumentType.INT,
+        defaultValue: 0,
+        description: 'Custom HTTP port (default: from config)',
+      })
+      .addOption({
+        name: 'wsPort',
+        type: ArgumentType.INT,
+        defaultValue: 0,
+        description: 'Custom WebSocket port (default: from config)',
+      })
       .setAction(() => import('./tasks/start.js'))
       .build(),
 

@@ -45,7 +45,7 @@ describe('@cobuilders/hardhat-arb-node', () => {
       );
     });
 
-    it('sets default network to arb-node', async () => {
+    it('sets default network to arb-node with random hook port', async () => {
       const hardhatConfig = await import(
         pathToFileURL(path.join(process.cwd(), 'hardhat.config.js')).href
       );
@@ -57,7 +57,13 @@ describe('@cobuilders/hardhat-arb-node', () => {
       assert.equal(defaultNetwork.chainId, 412346);
       if (defaultNetwork.type === 'http') {
         const url = await defaultNetwork.url.get();
-        assert.equal(url, 'http://127.0.0.1:8547');
+        // Hook uses random port (10000-60000) for complete decoupling from task nodes
+        assert.match(url, /^http:\/\/127\.0\.0\.1:\d+$/);
+        const port = parseInt(url.split(':').pop()!);
+        assert.ok(
+          port >= 10000 && port < 60000,
+          `Port ${port} should be in hook range`,
+        );
       }
     });
   });
@@ -72,7 +78,7 @@ describe('@cobuilders/hardhat-arb-node', () => {
 
       const hre = await createHardhatRuntimeEnvironment(hardhatConfig.default);
 
-      // Custom values should be used
+      // Custom values should be used for task commands
       assert.equal(hre.config.arbNode.httpPort, 9547);
       assert.equal(hre.config.arbNode.wsPort, 9548);
 
@@ -81,7 +87,7 @@ describe('@cobuilders/hardhat-arb-node', () => {
       assert.equal(hre.config.arbNode.tag, 'v3.7.1-926f1ab');
     });
 
-    it('sets default network to arb-node with custom port', async () => {
+    it('default network uses random hook port regardless of config', async () => {
       const hardhatConfig = await import(
         pathToFileURL(path.join(process.cwd(), 'hardhat.config.js')).href
       );
@@ -92,7 +98,13 @@ describe('@cobuilders/hardhat-arb-node', () => {
       assert.equal(defaultNetwork.type, 'http');
       if (defaultNetwork.type === 'http') {
         const url = await defaultNetwork.url.get();
-        assert.equal(url, 'http://127.0.0.1:9547');
+        // Hook uses random port for complete decoupling from task nodes
+        assert.match(url, /^http:\/\/127\.0\.0\.1:\d+$/);
+        const port = parseInt(url.split(':').pop()!);
+        assert.ok(
+          port >= 10000 && port < 60000,
+          `Port ${port} should be in hook range`,
+        );
       }
     });
   });
