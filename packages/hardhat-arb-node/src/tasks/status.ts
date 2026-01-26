@@ -5,26 +5,32 @@ import { DockerClient } from '@cobuilders/hardhat-arb-utils';
 
 import { CONTAINER_NAME } from '../config/defaults.js';
 
-const taskStatus: NewTaskActionFunction<{}> = async (
-  _args,
+interface TaskStatusArguments {
+  name: string;
+}
+
+const taskStatus: NewTaskActionFunction<TaskStatusArguments> = async (
+  args,
   hre: HardhatRuntimeEnvironment,
 ) => {
+  const { name } = args;
+  const containerName = name || CONTAINER_NAME;
   const config = hre.config.arbNode;
   const client = new DockerClient();
 
-  const containerId = await client.findByName(CONTAINER_NAME);
+  const containerId = await client.findByName(containerName);
   if (!containerId) {
-    console.log('Node is not running.');
+    console.log(`Node ${containerName} is not running.`);
     return;
   }
 
   const isRunning = await client.isRunning(containerId);
   if (isRunning) {
-    console.log('Node is running.');
+    console.log(`Node ${containerName} is running.`);
     console.log(`  HTTP RPC: http://localhost:${config.httpPort}`);
     console.log(`  WebSocket: ws://localhost:${config.wsPort}`);
   } else {
-    console.log('Node container exists but is not running.');
+    console.log(`Node ${containerName} container exists but is not running.`);
   }
 };
 

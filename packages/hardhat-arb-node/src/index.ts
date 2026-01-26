@@ -57,10 +57,22 @@ const hardhatArbNodePlugin: HardhatPlugin = {
         name: 'quiet',
         description: 'Suppress output',
       })
+      .addOption({
+        name: 'name',
+        type: ArgumentType.STRING,
+        defaultValue: '',
+        description: 'Container name (default: nitro-devnode)',
+      })
       .setAction(() => import('./tasks/stop.js'))
       .build(),
 
     task(['arb:node', 'status'], 'Check if the Arbitrum node is running')
+      .addOption({
+        name: 'name',
+        type: ArgumentType.STRING,
+        defaultValue: '',
+        description: 'Container name (default: nitro-devnode)',
+      })
       .setAction(() => import('./tasks/status.js'))
       .build(),
 
@@ -76,6 +88,12 @@ const hardhatArbNodePlugin: HardhatPlugin = {
         type: ArgumentType.INT,
         defaultValue: 50,
         description: 'Number of lines to show from end of logs',
+      })
+      .addOption({
+        name: 'name',
+        type: ArgumentType.STRING,
+        defaultValue: '',
+        description: 'Container name (default: nitro-devnode)',
       })
       .setAction(() => import('./tasks/logs.js'))
       .build(),

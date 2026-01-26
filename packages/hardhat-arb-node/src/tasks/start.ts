@@ -275,6 +275,20 @@ const taskStart: NewTaskActionFunction<TaskStartArguments> = async (
   // Use custom name if provided, otherwise use default
   const containerName = name || CONTAINER_NAME;
 
+  // Check if container with same name is already running
+  const client = new DockerClient();
+  const existingId = await client.findByName(containerName);
+  if (existingId) {
+    const isRunning = await client.isRunning(existingId);
+    if (isRunning) {
+      console.log(
+        `Node ${containerName} is already running. Use a different --name or attach to logs with:\n` +
+          `  npx hardhat arb:node logs --name ${containerName}`,
+      );
+      return;
+    }
+  }
+
   if (!quiet) {
     console.log('Starting Arbitrum nitro-devnode...\n');
   }
