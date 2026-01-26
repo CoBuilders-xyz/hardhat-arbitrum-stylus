@@ -25,7 +25,10 @@ const taskStop: NewTaskActionFunction<TaskStopArguments> = async (
   const containerId = await client.findByName(containerName);
   if (!containerId) {
     if (!quiet) {
-      console.log('Node is not running.');
+      console.log(`Node ${containerName} is not running.`);
+      console.log(
+        'If the node was started with a custom name, use --name to specify it.',
+      );
     }
     return;
   }

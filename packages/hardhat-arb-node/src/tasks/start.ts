@@ -1,3 +1,5 @@
+import { createConnection } from 'node:net';
+
 import type { HardhatRuntimeEnvironment } from 'hardhat/types/hre';
 import type { NewTaskActionFunction } from 'hardhat/types/tasks';
 import { getAddress, type Hex } from 'viem';
@@ -35,6 +37,27 @@ interface TaskStartArguments {
   name: string;
   httpPort: number;
   wsPort: number;
+}
+
+/**
+ * Check if a port is already in use.
+ */
+function isPortInUse(port: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    const socket = createConnection({ port, host: '127.0.0.1' }, () => {
+      socket.end();
+      resolve(true);
+    });
+
+    socket.on('error', () => {
+      resolve(false);
+    });
+
+    socket.setTimeout(1000, () => {
+      socket.destroy();
+      resolve(false);
+    });
+  });
 }
 
 /**
@@ -287,6 +310,14 @@ const taskStart: NewTaskActionFunction<TaskStartArguments> = async (
       );
       return;
     }
+  }
+
+  // Check if ports are available
+  if (await isPortInUse(httpPort)) {
+    throw createPluginError(`HTTP port ${httpPort} is already in use`);
+  }
+  if (await isPortInUse(wsPort)) {
+    throw createPluginError(`WebSocket port ${wsPort} is already in use`);
   }
 
   if (!quiet) {

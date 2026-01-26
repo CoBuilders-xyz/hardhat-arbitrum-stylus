@@ -21,6 +21,9 @@ const taskStatus: NewTaskActionFunction<TaskStatusArguments> = async (
   const containerId = await client.findByName(containerName);
   if (!containerId) {
     console.log(`Node ${containerName} is not running.`);
+    console.log(
+      'If the node was started with a custom name, use --name to specify it.',
+    );
     return;
   }
 
