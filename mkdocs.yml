@@ -1,0 +1,122 @@
+site_name: Hardhat Arbitrum Stylus
+site_description: Hardhat plugin suite for Arbitrum Stylus development
+site_url: https://cobuilders-xyz.github.io/hardhat-arbitrum-stylus
+repo_name: CoBuilders-xyz/hardhat-arbitrum-stylus
+repo_url: https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus
+
+theme:
+  name: material
+  custom_dir: docs/overrides
+  logo: docs/assets/logo.svg
+  favicon: docs/assets/favicon.ico
+  palette:
+    - media: '(prefers-color-scheme: dark)'
+      scheme: slate
+      primary: custom
+      accent: yellow
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - media: '(prefers-color-scheme: light)'
+      scheme: default
+      primary: custom
+      accent: yellow
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.indexes
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+  icon:
+    repo: fontawesome/brands/github
+
+extra_css:
+  - stylesheets/extra.css
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus
+    - icon: fontawesome/brands/npm
+      link: https://www.npmjs.com/package/@cobuilders/hardhat-arbitrum-stylus
+    - icon: fontawesome/brands/x-twitter
+      link: https://twitter.com/ArbDevOfficial
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+  - tags
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - getting-started/index.md
+      - Prerequisites: getting-started/prerequisites.md
+      - Installation: getting-started/installation.md
+      - Quick Start: getting-started/quick-start.md
+  - Plugins:
+      - plugins/index.md
+      - Toolbox: plugins/toolbox.md
+      - Node: plugins/node.md
+      - Compile: plugins/compile.md
+      - Deploy: plugins/deploy.md
+      - Test: plugins/test.md
+  - Configuration:
+      - configuration/index.md
+      - Node Configuration: configuration/node-config.md
+      - Network Configuration: configuration/network-config.md
+  - Guides:
+      - guides/index.md
+      - Local Development: guides/local-development.md
+      - Testing Stylus Contracts: guides/testing-stylus.md
+      - Troubleshooting: guides/troubleshooting.md
+  - Tutorials:
+      - tutorials/index.md
+      - Your First Stylus Contract: tutorials/first-stylus-contract.md
+  - Architecture:
+      - architecture/index.md
+      - Plugin System: architecture/plugin-system.md
+      - Container Management: architecture/container-management.md
+      - Chain Setup: architecture/chain-setup.md
+      - Package Structure: architecture/package-structure.md
+  - Internals:
+      - internals/index.md
+      - Utils Package: internals/utils-package.md
+      - Hook Handlers: internals/hook-handlers.md
+      - Error Handling: internals/error-handling.md
+  - Contributing:
+      - contributing/index.md
+      - Development Setup: contributing/development-setup.md
+      - Testing: contributing/testing.md
+      - Versioning & Releases: contributing/versioning.md
