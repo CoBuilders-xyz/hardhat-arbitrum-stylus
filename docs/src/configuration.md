@@ -34,7 +34,7 @@ export default {
 ### Command-Line Overrides
 
 ```bash
-npx hardhat arb:node start --http-port 9545 --ws-port 9546
+npx hardhat arb:node start --httpPort 9545 --wsPort 9546
 ```
 
 ## Default Network
