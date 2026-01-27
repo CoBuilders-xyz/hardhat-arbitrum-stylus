@@ -1,5 +1,17 @@
 # @cobuilders/hardhat-arb-node
 
+## 0.0.1-alpha.16
+
+### Patch Changes
+
+- e1cf6d8: add web3 utilities and refactor transaction handling
+- e9ef916: add 'persist' flag to node start task for container mgmt
+- 12f59ed: Default network hook spins up arb devnode
+- Updated dependencies [e1cf6d8]
+- Updated dependencies [e9ef916]
+- Updated dependencies [12f59ed]
+  - @cobuilders/hardhat-arb-utils@0.0.1-alpha.15
+
 ## 0.0.1-alpha.15
 
 ### Patch Changes

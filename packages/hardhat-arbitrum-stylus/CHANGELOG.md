@@ -1,5 +1,15 @@
 # @cobuilders/hardhat-arbitrum-stylus
 
+## 0.0.1-alpha.15
+
+### Patch Changes
+
+- 12f59ed: Default network hook spins up arb devnode
+- Updated dependencies [e1cf6d8]
+- Updated dependencies [e9ef916]
+- Updated dependencies [12f59ed]
+  - @cobuilders/hardhat-arb-node@0.0.1-alpha.16
+
 ## 0.0.1-alpha.14
 
 ### Patch Changes
