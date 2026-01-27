@@ -1,8 +1,5 @@
 {
-  "name": "hardhat-project",
+  "name": "stylus-plugin-fixture",
   "private": true,
-  "type": "module",
-  "dependencies": {
-    "hardhat": "^3.0.0"
-  }
+  "type": "module"
 }

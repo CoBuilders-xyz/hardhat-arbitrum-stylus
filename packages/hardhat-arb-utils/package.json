@@ -35,6 +35,10 @@
     "./web3": {
       "types": "./dist/src/web3/index.d.ts",
       "default": "./dist/src/web3/index.js"
+    },
+    "./testing": {
+      "types": "./dist/src/testing/index.d.ts",
+      "default": "./dist/src/testing/index.js"
     }
   },
   "scripts": {

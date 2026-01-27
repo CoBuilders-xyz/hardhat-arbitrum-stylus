@@ -10,6 +10,8 @@ const hardhatArbNodePlugin: HardhatPlugin = {
   npmPackage: '@cobuilders/hardhat-arb-node',
   hookHandlers: {
     config: () => import('./hook-handlers/config.js'),
+    hre: () => import('./hook-handlers/hre.js'),
+    network: () => import('./hook-handlers/network.js'),
   },
   tasks: [
     emptyTask('arb:node', 'Manage Arbitrum nitro-devnode').build(),
@@ -29,9 +31,23 @@ const hardhatArbNodePlugin: HardhatPlugin = {
         description:
           'Deploy CREATE2 factory, Cache Manager, and StylusDeployer',
       })
-      .addFlag({
-        name: 'persist',
-        description: 'Keep container after stop (survives Ctrl+C)',
+      .addOption({
+        name: 'name',
+        type: ArgumentType.STRING,
+        defaultValue: '',
+        description: 'Custom container name (default: nitro-devnode)',
+      })
+      .addOption({
+        name: 'httpPort',
+        type: ArgumentType.INT,
+        defaultValue: 0,
+        description: 'Custom HTTP port (default: from config)',
+      })
+      .addOption({
+        name: 'wsPort',
+        type: ArgumentType.INT,
+        defaultValue: 0,
+        description: 'Custom WebSocket port (default: from config)',
       })
       .setAction(() => import('./tasks/start.js'))
       .build(),
@@ -41,10 +57,22 @@ const hardhatArbNodePlugin: HardhatPlugin = {
         name: 'quiet',
         description: 'Suppress output',
       })
+      .addOption({
+        name: 'name',
+        type: ArgumentType.STRING,
+        defaultValue: '',
+        description: 'Container name (default: nitro-devnode)',
+      })
       .setAction(() => import('./tasks/stop.js'))
       .build(),
 
     task(['arb:node', 'status'], 'Check if the Arbitrum node is running')
+      .addOption({
+        name: 'name',
+        type: ArgumentType.STRING,
+        defaultValue: '',
+        description: 'Container name (default: nitro-devnode)',
+      })
       .setAction(() => import('./tasks/status.js'))
       .build(),
 
@@ -60,6 +88,12 @@ const hardhatArbNodePlugin: HardhatPlugin = {
         type: ArgumentType.INT,
         defaultValue: 50,
         description: 'Number of lines to show from end of logs',
+      })
+      .addOption({
+        name: 'name',
+        type: ArgumentType.STRING,
+        defaultValue: '',
+        description: 'Container name (default: nitro-devnode)',
       })
       .setAction(() => import('./tasks/logs.js'))
       .build(),

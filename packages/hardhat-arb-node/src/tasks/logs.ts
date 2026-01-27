@@ -8,18 +8,23 @@ import { CONTAINER_NAME } from '../config/defaults.js';
 interface TaskLogsArguments {
   follow: boolean;
   tail: number;
+  name: string;
 }
 
 const taskLogs: NewTaskActionFunction<TaskLogsArguments> = async (
   args,
   _hre: HardhatRuntimeEnvironment,
 ) => {
-  const { follow, tail } = args;
+  const { follow, tail, name } = args;
+  const containerName = name || CONTAINER_NAME;
   const client = new DockerClient();
 
-  const containerId = await client.findByName(CONTAINER_NAME);
+  const containerId = await client.findByName(containerName);
   if (!containerId) {
-    console.log('Node is not running.');
+    console.log(`Node ${containerName} is not running.`);
+    console.log(
+      'If the node was started with a custom name, use --name to specify it.',
+    );
     return;
   }
 

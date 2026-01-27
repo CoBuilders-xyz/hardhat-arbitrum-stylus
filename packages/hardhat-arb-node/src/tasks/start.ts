@@ -1,12 +1,15 @@
+import { createConnection } from 'node:net';
+
 import type { HardhatRuntimeEnvironment } from 'hardhat/types/hre';
 import type { NewTaskActionFunction } from 'hardhat/types/tasks';
-import { getAddress, type Hex } from 'viem';
 
 import {
+  type ContainerConfig,
+  type Hex,
   ContainerManager,
   DockerClient,
-  type ContainerConfig,
   createPluginError,
+  getAddress,
 } from '@cobuilders/hardhat-arb-utils';
 
 import { CONTAINER_NAME, HARDHAT_ACCOUNTS } from '../config/defaults.js';
@@ -32,7 +35,30 @@ interface TaskStartArguments {
   quiet: boolean;
   detach: boolean;
   stylusReady: boolean;
-  persist: boolean;
+  name: string;
+  httpPort: number;
+  wsPort: number;
+}
+
+/**
+ * Check if a port is already in use.
+ */
+function isPortInUse(port: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    const socket = createConnection({ port, host: '127.0.0.1' }, () => {
+      socket.end();
+      resolve(true);
+    });
+
+    socket.on('error', () => {
+      resolve(false);
+    });
+
+    socket.setTimeout(1000, () => {
+      socket.destroy();
+      resolve(false);
+    });
+  });
 }
 
 /**
@@ -216,12 +242,9 @@ async function deployStylusDeployer(
 
 /**
  * Attach to container logs (only new logs from this point)
- * Stops the container when user presses Ctrl+C (unless persist is true)
+ * Stops the container when user presses Ctrl+C
  */
-async function attachToLogs(
-  containerId: string,
-  persist: boolean,
-): Promise<void> {
+async function attachToLogs(containerId: string): Promise<void> {
   const client = new DockerClient();
 
   console.log('Listening for transactions...\n');
@@ -235,15 +258,11 @@ async function attachToLogs(
   // Handle graceful shutdown - stop container when user presses Ctrl+C
   const cleanup = async () => {
     logProcess.kill();
-    if (persist) {
-      console.log('\nDetaching from node (container will keep running)...');
-    } else {
-      console.log('\nStopping node...');
-      try {
-        await client.stop(containerId);
-      } catch {
-        // Container may already be stopped
-      }
+    console.log('\nStopping node...');
+    try {
+      await client.stop(containerId);
+    } catch {
+      // Container may already be stopped
     }
     process.exit(0);
   };
@@ -261,54 +280,45 @@ const taskStart: NewTaskActionFunction<TaskStartArguments> = async (
   args,
   hre: HardhatRuntimeEnvironment,
 ) => {
-  const { quiet, detach, stylusReady, persist } = args;
+  const {
+    quiet,
+    detach,
+    stylusReady,
+    name,
+    httpPort: customHttpPort,
+    wsPort: customWsPort,
+  } = args;
   const config = hre.config.arbNode;
-  const client = new DockerClient();
   const manager = new ContainerManager();
-  const rpcUrl = `http://localhost:${config.httpPort}`;
 
-  // Check if a persistent container already exists
-  const existingContainerId = await client.findByName(CONTAINER_NAME);
-  if (persist && existingContainerId) {
-    const status = await client.getStatus(existingContainerId);
+  // Use custom ports if provided, otherwise use config
+  const httpPort = customHttpPort || config.httpPort;
+  const wsPort = customWsPort || config.wsPort;
+  const rpcUrl = `http://localhost:${httpPort}`;
 
-    if (status === 'running') {
-      if (!quiet) {
-        console.log('Persistent node is already running.\n');
-        printStartupInfo(config);
-      }
-      if (!detach) {
-        await attachToLogs(existingContainerId, persist);
-      }
+  // Use custom name if provided, otherwise use default
+  const containerName = name || CONTAINER_NAME;
+
+  // Check if container with same name is already running
+  const client = new DockerClient();
+  const existingId = await client.findByName(containerName);
+  if (existingId) {
+    const isRunning = await client.isRunning(existingId);
+    if (isRunning) {
+      console.log(
+        `Node ${containerName} is already running. Use a different --name or attach to logs with:\n` +
+          `  npx hardhat arb:node logs --name ${containerName}`,
+      );
       return;
     }
+  }
 
-    // Container exists but is stopped/exited - restart it
-    if (status === 'exited' || status === 'stopped' || status === 'created') {
-      if (!quiet) {
-        console.log('Restarting persistent node...\n');
-      }
-      await client.startContainer(existingContainerId);
-
-      // Wait for readiness
-      const info = await client.inspect(existingContainerId);
-      if (info) {
-        await manager.waitForReady(info, {
-          type: 'http',
-          target: rpcUrl,
-          timeout: 60000,
-          interval: 1000,
-        });
-      }
-
-      if (!quiet) {
-        printStartupInfo(config);
-      }
-      if (!detach) {
-        await attachToLogs(existingContainerId, persist);
-      }
-      return;
-    }
+  // Check if ports are available
+  if (await isPortInUse(httpPort)) {
+    throw createPluginError(`HTTP port ${httpPort} is already in use`);
+  }
+  if (await isPortInUse(wsPort)) {
+    throw createPluginError(`WebSocket port ${wsPort} is already in use`);
   }
 
   if (!quiet) {
@@ -318,10 +328,10 @@ const taskStart: NewTaskActionFunction<TaskStartArguments> = async (
   const containerConfig: ContainerConfig = {
     image: config.image,
     tag: config.tag,
-    name: CONTAINER_NAME,
+    name: containerName,
     ports: [
-      { host: config.httpPort, container: 8547 },
-      { host: config.wsPort, container: 8548 },
+      { host: httpPort, container: 8547 },
+      { host: wsPort, container: 8548 },
     ],
     command: [
       '--dev',
@@ -339,7 +349,7 @@ const taskStart: NewTaskActionFunction<TaskStartArguments> = async (
       timeout: 60000,
       interval: 1000,
     },
-    autoRemove: !persist,
+    autoRemove: true,
     detach: true,
   };
 
@@ -364,12 +374,12 @@ const taskStart: NewTaskActionFunction<TaskStartArguments> = async (
 
   // Print startup info
   if (!quiet) {
-    printStartupInfo(config);
+    printStartupInfo({ ...config, httpPort, wsPort });
   }
 
   // Attach to logs unless detach flag is set
   if (!detach) {
-    await attachToLogs(containerInfo.id, persist);
+    await attachToLogs(containerInfo.id);
   }
 };
 
