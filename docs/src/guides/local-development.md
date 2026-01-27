@@ -1,10 +1,5 @@
 # Local Development
 
-<!-- 
-CONTENT DESCRIPTION:
-Development workflow guide. How to set up efficient local development.
--->
-
 Set up an efficient local development workflow for Stylus development.
 
 ## Project Structure
@@ -56,6 +51,61 @@ npx hardhat test
 
 Repeat steps 2-4.
 
+## Auto-Start for Tests
+
+Tests can run **without manually starting the node**. The plugin automatically starts a temporary node when you connect to the default network:
+
+```typescript
+// test/Counter.test.ts
+import { describe, it } from 'node:test';
+
+describe('Counter', () => {
+  it('should increment', async () => {
+    // Node starts automatically when connecting
+    const connection = await hre.network.connect();
+    // ... test logic
+  });
+});
+```
+
+```bash
+# Just run tests - no need to start the node first
+npx hardhat test
+```
+
+!!! info "Temporary Containers"
+    Auto-started nodes use random ports and are cleaned up automatically when the test process exits.
+
+### When to Use Manual vs Auto-Start
+
+| Scenario | Approach |
+|----------|----------|
+| Running tests | Auto-start (just `npx hardhat test`) |
+| Quick script execution | Auto-start |
+| Stylus contract deployment | Manual with `--stylus-ready` |
+| Interactive development | Manual for persistence |
+| Debugging with logs | Manual for log access |
+
+## When to Use --stylus-ready
+
+| Contract Type | `--stylus-ready` Needed? |
+|---------------|--------------------------|
+| Stylus (Rust/WASM) | Yes |
+| Solidity (EVM) | No |
+| Mixed project | Yes (for Stylus contracts) |
+
+The `--stylus-ready` flag deploys infrastructure needed for Stylus contracts:
+
+- CREATE2 Factory for deterministic addresses
+- Cache Manager for WASM caching
+- StylusDeployer helper contract
+
+For EVM-only contracts, skip this flag for faster startup:
+
+```bash
+npx hardhat arb:node start --detach  # Faster, no Stylus infra
+```
+
 ## Terminal Setup
 
 **Option A: Two terminals**
@@ -71,14 +121,6 @@ npx hardhat arb:node logs --follow  # When you need logs
 ```
 
 ## Tips
-
-### Always Use --stylus-ready
-
-For Stylus development:
-
-```bash
-npx hardhat arb:node start --stylus-ready
-```
 
 ### Don't Restart Unnecessarily
 
@@ -100,8 +142,17 @@ const USER = '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d
 npx hardhat arb:node logs --follow
 ```
 
+### Check Node Status
+
+```bash
+npx hardhat arb:node status
+```
+
 ## Shutting Down
 
 ```bash
 npx hardhat arb:node stop
 ```
+
+!!! note
+    Temporary nodes from auto-start are cleaned up automatically. You only need to stop manually-started nodes.

@@ -34,13 +34,13 @@
   border-color: #f6c343;
 }
 
-.md-typeset .tip > .admonition-title,
-.md-typeset .tip > summary {
+.md-typeset .tip>.admonition-title,
+.md-typeset .tip>summary {
   background-color: rgba(246, 195, 67, 0.1);
 }
 
-.md-typeset .tip > .admonition-title::before,
-.md-typeset .tip > summary::before {
+.md-typeset .tip>.admonition-title::before,
+.md-typeset .tip>summary::before {
   background-color: #f6c343;
 }
 

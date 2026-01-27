@@ -1,41 +1,5 @@
 # Hardhat Arbitrum Stylus Plugin
 
-<!-- 
-=============================================================================
-CONTENT DESCRIPTION FOR DOCUMENTATION AGENT
-=============================================================================
-
-This is the home page, merged with getting started content.
-
-WHAT TO WRITE:
-- Brief introduction to Hardhat Arbitrum Stylus Plugin
-- What's included (plugin table with status)
-- Prerequisites
-- Installation steps
-- Quick start (start node, verify)
-- Links to next steps
-
-TONE:
-- Concise, action-oriented
-- Get users running quickly
-- No fluff
-
-SECTIONS:
-1. Brief intro (1-2 sentences)
-2. What's included table
-3. Prerequisites (short list)
-4. Installation (3 steps)
-5. Quick Start (start node, verify)
-6. Next Steps links
-
-REFERENCE MATERIALS:
-- Package README files
-- Plugin package.json for versions
-- Hardhat 3 getting started docs
-
-=============================================================================
--->
-
 Hardhat plugin suite for Arbitrum Stylus development.
 
 !!! tip "Beta Status"
@@ -54,11 +18,14 @@ Hardhat plugin suite for Arbitrum Stylus development.
 
 | Tool | Version | Installation |
 |------|---------|--------------|
+| **Hardhat** | **v3** | Required (v2 not supported) |
 | Node.js | v22+ | [nodejs.org](https://nodejs.org) or `nvm install 22` |
 | Docker | Latest | [docker.com](https://docker.com) |
-| pnpm | v8+ | `npm install -g pnpm` |
+| pnpm/npm | Latest | Package manager |
 
-For Stylus contracts, also install Rust and cargo-stylus.
+
+!!! warning "Hardhat 3 Required"
+    This plugin uses Hardhat 3's plugin system. It is **not compatible** with Hardhat v2.
 
 ## Installation
 
@@ -114,3 +81,4 @@ npx hardhat arb:node start --stylus-ready
 - [Node Plugin](plugins/node.md) — All commands and options
 - [Configuration](configuration.md) — Customize settings
 - [First Stylus Contract](guides/first-stylus-contract.md) — Build and deploy a contract
+- [Troubleshooting](guides/troubleshooting.md) — Common issues and solutions

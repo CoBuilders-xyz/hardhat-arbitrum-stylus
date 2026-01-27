@@ -28,9 +28,9 @@ theme:
   features:
     - navigation.instant
     - navigation.tracking
-    - navigation.tabs
-    - navigation.sections
+    - navigation.expand
     - navigation.top
+    - navigation.indexes
     - search.suggest
     - search.highlight
     - content.code.copy
@@ -74,13 +74,13 @@ plugins:
 
 nav:
   - Getting Started: index.md
+  - Configuration: configuration.md
   - Plugins:
-      - Overview: plugins/index.md
+      - plugins/index.md
       - Node: plugins/node.md
       - Compile: plugins/compile.md
       - Deploy: plugins/deploy.md
       - Test: plugins/test.md
-  - Configuration: configuration.md
   - Guides:
       - Local Development: guides/local-development.md
       - First Stylus Contract: guides/first-stylus-contract.md
