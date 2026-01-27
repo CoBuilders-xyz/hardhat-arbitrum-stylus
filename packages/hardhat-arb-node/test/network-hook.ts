@@ -16,7 +16,6 @@ describe('Arb-node default network', () => {
     const hre = await createHardhatRuntimeEnvironment(hardhatConfig.default);
     const connection = await hre.network.connect();
 
-
     // Verify we're connected to the right chain (Arbitrum nitro-devnode chainId: 412346)
     const chainId = await connection.provider.request({
       method: 'eth_chainId',
