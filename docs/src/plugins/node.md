@@ -14,25 +14,22 @@ Included in the toolbox, or install standalone:
 npm install @cobuilders/hardhat-arb-node
 ```
 
-## Auto-Start Feature
+## Two Ways to Use the Node
 
-The node plugin automatically starts a temporary node when you connect to the default network. This is useful for tests and scripts that need a running node without manual setup.
+There are two ways to run an Arbitrum node with this plugin:
 
-```typescript
-// The node starts automatically when you use the default network
-const accounts = await hre.network.connect();
-```
+| Method | Use Case | Lifecycle |
+|--------|----------|-----------|
+| **CLI** (`arb:node start`) | Manual testing, interactive development | Persistent until stopped |
+| **HRE** (`network.connect()`) | Scripts, tests, automated workflows | Temporary, auto-cleanup |
 
-**How it works:**
+This is similar to how Hardhat works: you can run `npx hardhat node` for a persistent node, or just run `npx hardhat test` and Hardhat automatically spins up a temporary node for the tests.
 
-- When connecting to the `default` network, the plugin checks if a node is running
-- If not, it starts a temporary container with a random port (10000-60000)
-- The container is automatically cleaned up when the process exits
+---
 
-!!! info "Decoupled from manual nodes"
-    Auto-started nodes use random ports and don't conflict with nodes started via `arb:node start`.
+## CLI Commands (Manual Node)
 
-## Commands
+Use CLI commands to create an **isolated, persistent node** for manual testing and interactive development. The node runs until you explicitly stop it.
 
 ### `arb:node start`
 
@@ -88,9 +85,83 @@ npx hardhat arb:node logs [options]
 | `--tail`, `-n` | Lines to show | `50` |
 | `--name` | Container name | `nitro-devnode` |
 
+---
+
+## HRE Usage (Automatic Temporary Node)
+
+When you use `network.connect()` in scripts or tests without specifying a network, the plugin automatically spins up a **temporary node** that lives only for the duration of your script execution.
+
+```typescript
+// In a script or test
+const connection = await hre.network.connect();
+
+// A temporary Arbitrum node is now running
+// It will be cleaned up when the script exits
+```
+
+**How it works:**
+
+1. When connecting to the `default` network, the plugin checks if a node is already running
+2. If not, it starts a temporary container with a **random port** (10000-60000)
+3. The container is **automatically cleaned up** when the process exits
+
+This is the same pattern as Hardhat's built-in node: when you run `npx hardhat test`, Hardhat automatically creates a temporary node for the tests without you having to manually start one.
+
+!!! info "No conflicts with CLI nodes"
+    Temporary nodes use random ports and unique container names, so they don't conflict with nodes started via `arb:node start`.
+
+### Example: Running Tests
+
+```bash
+# No need to start a node first - it happens automatically
+npx hardhat test
+```
+
+### Example: Running Scripts
+
+```bash
+# The default network auto-starts a temporary node
+npx hardhat run scripts/deploy.ts
+```
+
+---
+
+## Stylus-Ready Mode
+
+`--stylus-ready` deploys the infrastructure needed for Stylus contracts:
+
+- **CREATE2 Factory** (`0x4e59b44847b379578588920ca78fbf26c0b4956c`) — Deterministic deployment
+- **Cache Manager** — WASM caching for Stylus contracts
+- **StylusDeployer** — Deployment helper contract
+
+Use this flag when deploying Stylus (Rust/WASM) contracts. Not needed for EVM-only contracts.
+
+!!! warning "Work in Progress"
+    The `--stylus-ready` flag is experimental. We're still working on Cache Manager support for nitro-devnode testing environments.
+
+---
+
+## Configuration
+
+```typescript
+export default {
+  arbNode: {
+    image: 'offchainlabs/nitro-node',
+    tag: 'v3.7.1-926f1ab',
+    httpPort: 8547,
+    wsPort: 8548,
+    chainId: 412346,
+  },
+};
+```
+
+See [Configuration](../configuration.md) for all options.
+
+---
+
 ## Pre-funded Accounts
 
-20 Hardhat accounts with 10 ETH each:
+Both CLI and HRE nodes come with 20 pre-funded Hardhat accounts (10 ETH each):
 
 | # | Address | Private Key |
 |---|---------|-------------|
@@ -125,29 +196,3 @@ Account #20 has ~800 ETH and is the L2 chain owner with ArbOwner privileges.
 
 !!! warning
     These are public keys. Never use on mainnet.
-
-## Stylus-Ready Mode
-
-`--stylus-ready` deploys:
-
-- **CREATE2 Factory** (`0x4e59b44847b379578588920ca78fbf26c0b4956c`) — Deterministic deployment
-- **Cache Manager** — WASM caching for Stylus contracts
-- **StylusDeployer** — Deployment helper contract
-
-Use this flag when deploying Stylus (Rust/WASM) contracts. Not needed for EVM-only contracts.
-
-## Configuration
-
-```typescript
-export default {
-  arbNode: {
-    image: 'offchainlabs/nitro-node',
-    tag: 'v3.7.1-926f1ab',
-    httpPort: 8547,
-    wsPort: 8548,
-    chainId: 412346,
-  },
-};
-```
-
-See [Configuration](../configuration.md) for all options.
