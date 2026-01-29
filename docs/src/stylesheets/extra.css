@@ -77,3 +77,16 @@
   margin-left: 0.5em;
   vertical-align: middle;
 }
+
+/* Button styling for dark mode */
+[data-md-color-scheme="slate"] .md-typeset .md-button {
+  color: #ffffff;
+  border-color: #f6c343;
+  background-color: rgba(246, 195, 67, 0.15);
+}
+
+[data-md-color-scheme="slate"] .md-typeset .md-button:hover {
+  color: #0d0d0d;
+  background-color: #f6c343;
+  border-color: #f6c343;
+}

@@ -1,5 +1,8 @@
 # Hardhat Arbitrum Stylus Plugin
 
+[![GitHub](https://img.shields.io/badge/GitHub-CoBuilders--xyz%2Fhardhat--arbitrum--stylus-blue?logo=github)](https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus)
+[![npm](https://img.shields.io/npm/v/@cobuilders/hardhat-arbitrum-stylus?logo=npm)](https://www.npmjs.com/package/@cobuilders/hardhat-arbitrum-stylus)
+
 Hardhat plugin suite for Arbitrum Stylus development.
 
 !!! tip "Beta Status"

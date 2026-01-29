@@ -4,6 +4,9 @@
 
 **Status:** ✅ Available
 
+[:fontawesome-brands-github: Source](https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arb-node){ .md-button }
+[:fontawesome-brands-npm: npm](https://www.npmjs.com/package/@cobuilders/hardhat-arb-node){ .md-button }
+
 Manages a local Arbitrum nitro-devnode for development.
 
 ## Two Ways to Use the Node
