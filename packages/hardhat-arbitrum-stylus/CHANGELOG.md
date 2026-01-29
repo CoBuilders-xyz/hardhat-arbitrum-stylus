@@ -1,5 +1,11 @@
 # @cobuilders/hardhat-arbitrum-stylus
 
+## 0.0.1-alpha.16
+
+### Patch Changes
+
+- b420c36: Add type extensions for Hardhat Arbitrum Stylus Bundler
+
 ## 0.0.1-alpha.15
 
 ### Patch Changes
