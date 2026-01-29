@@ -1,5 +1,7 @@
 import type { HardhatPlugin } from 'hardhat/types/plugins';
 
+import './type-extensions.js';
+
 const hardhatArbitrumStylusPlugin: HardhatPlugin = {
   id: 'hardhat-arbitrum-stylus',
   dependencies: () => [
