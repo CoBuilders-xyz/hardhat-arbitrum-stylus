@@ -34,37 +34,3 @@ export default config;
 | `chainId` | number | `412346` | Chain ID |
 
 All options are optional. Default values are used if not specified.
-
-## External Networks
-
-You can configure external Arbitrum networks for deployment:
-
-```typescript
-export default {
-  plugins: [hardhatArbitrumStylus],
-  
-  networks: {
-    arbitrumSepolia: {
-      type: 'http',
-      url: 'https://sepolia-rollup.arbitrum.io/rpc',
-      chainId: 421614,
-      accounts: [process.env.PRIVATE_KEY],
-    },
-    arbitrumOne: {
-      type: 'http',
-      url: 'https://arb1.arbitrum.io/rpc',
-      chainId: 42161,
-      accounts: [process.env.PRIVATE_KEY],
-    },
-  },
-};
-```
-
-## Chain IDs Reference
-
-| Network | Chain ID |
-|---------|----------|
-| Local (nitro-devnode) | 412346 |
-| Arbitrum One | 42161 |
-| Arbitrum Nova | 42170 |
-| Arbitrum Sepolia | 421614 |

@@ -6,14 +6,6 @@
 
 Manages a local Arbitrum nitro-devnode for development.
 
-## Installation
-
-Included in the toolbox, or install standalone:
-
-```bash
-npm install @cobuilders/hardhat-arb-node
-```
-
 ## Two Ways to Use the Node
 
 There are two ways to run an Arbitrum node with this plugin:
