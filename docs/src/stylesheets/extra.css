@@ -1,0 +1,79 @@
+/* Custom color scheme inspired by Hardhat docs */
+:root {
+  --md-primary-fg-color: #0a0a0a;
+  --md-primary-fg-color--light: #1a1a1a;
+  --md-primary-fg-color--dark: #000000;
+  --md-accent-fg-color: #f6c343;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #1a1a1a;
+  --md-default-bg-color: #0d0d0d;
+  --md-default-fg-color: #e6e6e6;
+  --md-accent-fg-color: #f6c343;
+  --md-typeset-a-color: #f6c343;
+}
+
+/* Bigger base font */
+.md-typeset {
+  font-size: 0.85rem;
+  line-height: 1.7;
+}
+
+/* Logo and header styling */
+.md-header {
+  background-color: var(--md-primary-fg-color);
+}
+
+/* Inline code styling - gray background */
+.md-typeset code {
+  background-color: rgba(128, 128, 128, 0.15);
+  color: inherit;
+}
+
+[data-md-color-scheme="slate"] .md-typeset code {
+  background-color: rgba(150, 150, 150, 0.2);
+}
+
+/* Code blocks - subtle gray */
+.md-typeset pre > code {
+  background-color: rgba(100, 100, 100, 0.1);
+}
+
+[data-md-color-scheme="slate"] .md-typeset pre > code {
+  background-color: rgba(40, 40, 40, 0.8);
+}
+
+/* Admonition styling */
+.md-typeset .admonition.tip,
+.md-typeset details.tip {
+  border-color: #f6c343;
+}
+
+.md-typeset .tip>.admonition-title,
+.md-typeset .tip>summary {
+  background-color: rgba(246, 195, 67, 0.1);
+}
+
+.md-typeset .tip>.admonition-title::before,
+.md-typeset .tip>summary::before {
+  background-color: #f6c343;
+}
+
+/* Navigation tabs */
+.md-tabs {
+  background-color: var(--md-primary-fg-color);
+}
+
+/* Coming soon badge */
+.coming-soon {
+  display: inline-block;
+  padding: 0.2em 0.6em;
+  font-size: 0.75em;
+  font-weight: 600;
+  background-color: rgba(246, 195, 67, 0.2);
+  color: #f6c343;
+  border-radius: 4px;
+  margin-left: 0.5em;
+  vertical-align: middle;
+}
