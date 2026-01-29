@@ -30,7 +30,7 @@ const taskLogs: NewTaskActionFunction<TaskLogsArguments> = async (
 
   if (follow) {
     console.log('Streaming logs (press Ctrl+C to stop)...\n');
-    const logProcess = client.streamLogs(containerId);
+    const logProcess = client.streamLogs(containerId, { tail });
 
     logProcess.stdout?.pipe(process.stdout);
     logProcess.stderr?.pipe(process.stderr);
