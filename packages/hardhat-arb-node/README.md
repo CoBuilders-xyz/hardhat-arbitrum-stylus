@@ -14,7 +14,7 @@ Starts a local Arbitrum node for development and testing.
 
 ## Documentation
 
-See the [docs](../../docs) folder for more information.
+📖 **[Read the docs](https://cobuilders-xyz.github.io/hardhat-arbitrum-stylus/plugins/node/)** | [Source](../../docs)
 
 ## License
 

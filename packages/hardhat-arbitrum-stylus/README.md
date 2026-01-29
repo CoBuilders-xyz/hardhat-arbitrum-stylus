@@ -28,7 +28,7 @@ This registers all Stylus tasks:
 
 ## Documentation
 
-See the [docs](../../docs) folder for more information.
+📖 **[Read the docs](https://cobuilders-xyz.github.io/hardhat-arbitrum-stylus/plugins/)** | [Source](../../docs)
 
 ## License
 

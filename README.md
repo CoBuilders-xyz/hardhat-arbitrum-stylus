@@ -34,7 +34,9 @@ export default {
 };
 ```
 
-See the [docs](./docs) folder for detailed documentation:
+## Documentation
+
+📖 **[Read the docs](https://cobuilders-xyz.github.io/hardhat-arbitrum-stylus/)** | [Source](./docs)
 
 ## License
 
