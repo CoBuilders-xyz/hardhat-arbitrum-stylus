@@ -81,10 +81,10 @@ nav:
       - Compile: plugins/compile.md
       - Deploy: plugins/deploy.md
       - Test: plugins/test.md
-  - Guides:
-      - Local Development: guides/local-development.md
-      - First Stylus Contract: guides/first-stylus-contract.md
-      - Troubleshooting: guides/troubleshooting.md
+  # - Guides:
+  #     - Local Development: guides/local-development.md
+  #     - First Stylus Contract: guides/first-stylus-contract.md
+  #     - Troubleshooting: guides/troubleshooting.md
   - Contributors:
-      - Architecture: contributors/architecture.md
       - Contributing: contributors/contributing.md
+      - Architecture: contributors/architecture.md

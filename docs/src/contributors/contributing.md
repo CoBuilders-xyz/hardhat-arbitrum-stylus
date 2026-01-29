@@ -1,45 +1,14 @@
 # Contributing
 
-<!-- 
-=============================================================================
-CONTENT DESCRIPTION FOR DOCUMENTATION AGENT
-=============================================================================
+Thanks for your interest in contributing! This guide walks you through the entire process.
 
-How to contribute: branching, changesets, PRs, releases.
-Based on existing CONTRIBUTING.md style.
+---
 
-WHAT TO WRITE:
-- Branching model (trunk-based)
-- Creating features/fixes
-- Changesets workflow
-- Opening PRs
-- How releases work
-- Development setup
-- Running tests
-- Quick checklist
+## Step-by-Step Guide
 
-REFERENCE MATERIALS:
-- docs/CONTRIBUTING.md (existing content)
-- Changesets documentation
+### 1. Setup Your Environment
 
-=============================================================================
--->
-
-Thanks for contributing!
-
-This repository uses **trunk-based development** and **Changesets** for versioning.
-
-## Branching Model
-
-```
-feature/*  ──►  main  ──►  Release PR  ──►  publish
-```
-
-- `main` is the integration branch
-- Feature branches merge directly to `main`
-- Releases are automated via CI
-
-## Development Setup
+Clone the repository and install dependencies:
 
 ```bash
 git clone https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus.git
@@ -48,64 +17,91 @@ pnpm install
 pnpm build
 ```
 
-**Requirements:** Node.js v22+, pnpm v8+, Docker (for tests)
+### 2. Create a Branch
 
-## Creating a Feature or Fix
+Always branch from an up-to-date `main`:
 
 ```bash
-git checkout main && git pull
-git checkout -b feature/my-change
-# Make changes
-pnpm build && pnpm test && pnpm lint
+git checkout main
+git pull
+git checkout -b feature/my-change   # or fix/my-fix
 ```
 
-## Changesets
+### 3. Make Your Changes
 
-If your change affects published packages:
+Write your code, then verify everything works:
+
+```bash
+pnpm build      # Compile all packages
+pnpm test       # Run test suite (requires Docker)
+pnpm lint       # Check code style
+pnpm format:fix # Fix format
+```
+
+Run the tests at the root level to guarantee everything works.
+```bash
+pnpm test
+```
+
+### 4. Create a Changeset
+
+If your change affects any published package, you need a changeset. This tracks what changed and updates the changelog. Probably you also want to select hardhat-arbitrum-stylus so that the dependency to your package change gets bumped
 
 ```bash
 pnpm changeset
 ```
 
-1. Select affected package(s)
-2. Choose bump type (patch/minor/major)
-3. Write description (goes in changelog)
-4. Commit the `.changeset/` file with your code
+You'll be prompted to:
 
-**Rules:**
+1. **Select packages** — Pick which package(s) your change affects
+2. **Choose version bump** — `patch` (bug fix), `minor` (new feature), or `major` (breaking change)
+3. **Write a summary** — This becomes the changelog entry
 
-- ✅ One changeset per PR
-- ❌ Don't run `changeset version`
-- ❌ Don't manually edit `package.json` versions
+This creates a file in `.changeset/`. Commit it with your code.
 
-For docs/tests only, add label: `no changeset needed`
+!!! note "When do I need a changeset?"
+    - ✅ Bug fixes, new features, breaking changes
+    - ❌ Documentation only, test changes, CI/tooling updates
 
-## Opening a PR
+    For changes that don't need a changeset, add the label `no changeset needed` to your PR.
 
-- Target `main`
-- CI checks: build, test, lint, changeset
-- PRs are squash-merged
+!!! warning "Don't do these"
+    - Don't run `pnpm changeset version` — CI handles this
+    - Don't manually edit version numbers in `package.json`
+
+### 5. Open a Pull Request
+
+1. Push your branch to GitHub
+2. Open a PR targeting `main`
+3. CI will automatically run: build, test, lint, changeset validation
+4. PRs are squash-merged when approved
+
+---
 
 ## How Releases Work
 
-1. Merge PR to `main` → CI detects changesets
-2. CI opens/updates **Release PR** with version bumps
-3. Merge Release PR → packages published to npm
+You don't publish packages manually. Here's how it works:
 
-Only merging the Release PR triggers publishing.
-
-## Running Tests
-
-```bash
-pnpm test              # All tests
-cd packages/hardhat-arb-node
-pnpm test              # Single package
+```
+Your PR → main → Release PR (auto-created) → npm publish
 ```
 
-## Quick Checklist
+1. **You merge your PR** — Your changes land in `main`
+2. **CI creates a Release PR** — Collects all changesets, bumps versions, updates changelogs
+3. **Maintainer merges Release PR** — Packages are published to npm
 
-- [ ] Branch from `main`
-- [ ] Tests pass (`pnpm test`)
-- [ ] Lint passes (`pnpm lint`)
-- [ ] Changeset created (if needed)
-- [ ] PR targets `main`
+Only merging the Release PR triggers publishing. Your individual PRs don't publish anything.
+
+---
+
+## Checklist
+
+Before opening your PR, make sure:
+
+- Branched from latest `main`
+- `pnpm build` passes
+- `pnpm test` passes
+- `pnpm lint` passes
+- `pnpm format:fix` passes
+- Changeset added (or labeled `no changeset needed`)
+- PR targets `main`
