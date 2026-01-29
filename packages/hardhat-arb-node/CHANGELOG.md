@@ -1,5 +1,11 @@
 # @cobuilders/hardhat-arb-node
 
+## 0.0.1-alpha.17
+
+### Patch Changes
+
+- 98085f4: fix: update log streaming to support tail option in logs task
+
 ## 0.0.1-alpha.16
 
 ### Patch Changes
