@@ -14,18 +14,34 @@
   --md-typeset-a-color: #f6c343;
 }
 
+/* Bigger base font */
+.md-typeset {
+  font-size: 0.85rem;
+  line-height: 1.7;
+}
+
 /* Logo and header styling */
 .md-header {
   background-color: var(--md-primary-fg-color);
 }
 
-/* Code block styling */
+/* Inline code styling - gray background */
 .md-typeset code {
-  background-color: rgba(246, 195, 67, 0.1);
+  background-color: rgba(128, 128, 128, 0.15);
+  color: inherit;
 }
 
 [data-md-color-scheme="slate"] .md-typeset code {
-  background-color: rgba(246, 195, 67, 0.15);
+  background-color: rgba(150, 150, 150, 0.2);
+}
+
+/* Code blocks - subtle gray */
+.md-typeset pre > code {
+  background-color: rgba(100, 100, 100, 0.1);
+}
+
+[data-md-color-scheme="slate"] .md-typeset pre > code {
+  background-color: rgba(40, 40, 40, 0.8);
 }
 
 /* Admonition styling */

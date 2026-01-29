@@ -45,7 +45,7 @@ pnpm test
 
 ### 4. Create a Changeset
 
-If your change affects any published package, you need a changeset. This tracks what changed and updates the changelog. Probably you also want to select hardhat-arbitrum-stylus so that the dependency to your package change gets bumped
+If your change affects any published package, you need a changeset. This tracks what changed and updates the changelog. You'll likely also want to select `hardhat-arbitrum-stylus` so that its dependency on your package gets bumped.
 
 ```bash
 pnpm changeset

@@ -87,4 +87,10 @@ nav:
   #     - Troubleshooting: guides/troubleshooting.md
   - Contributors:
       - Contributing: contributors/contributing.md
-      - Architecture: contributors/architecture.md
+      - Deep Dive:
+          - Overview: contributors/deep-dive/index.md
+          - Hardhat Plugins 101: contributors/deep-dive/hardhat-plugins.md
+          - Plugin Anatomy: contributors/deep-dive/plugin-anatomy.md
+          - Our Packages: contributors/deep-dive/packages.md
+          - Tasks: contributors/deep-dive/tasks.md
+          - Hooks: contributors/deep-dive/hooks.md
