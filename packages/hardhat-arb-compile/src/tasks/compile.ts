@@ -20,11 +20,16 @@ interface CompileTaskArgs {
  * Uses carriage return to overwrite the line for progress updates.
  */
 function writeProgress(line: string): void {
-  // Truncate long lines to fit terminal width (default 80 cols)
   const maxWidth = process.stdout.columns || 80;
+  // Truncate long lines to fit terminal width
+  const content = `    ${line}`;
   const truncated =
-    line.length > maxWidth - 4 ? line.slice(0, maxWidth - 7) + '...' : line;
-  process.stdout.write(`\r    ${truncated}`);
+    content.length > maxWidth
+      ? content.slice(0, maxWidth - 3) + '...'
+      : content;
+  // Pad with spaces to clear any previous longer content
+  const padded = truncated.padEnd(maxWidth, ' ');
+  process.stdout.write(`\r${padded}`);
 }
 
 /**
