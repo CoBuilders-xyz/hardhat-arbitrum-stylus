@@ -2,13 +2,49 @@ import path from 'node:path';
 
 import type { NewTaskActionFunction } from 'hardhat/types/tasks';
 import type { HardhatRuntimeEnvironment } from 'hardhat/types/hre';
+import { DockerClient } from '@cobuilders/hardhat-arb-utils';
 
 import { discoverStylusContracts } from '../utils/discovery/index.js';
 import { compileLocal } from '../utils/compiler/local.js';
 
+/** Default container name for the Arbitrum node */
+const CONTAINER_NAME = 'nitro-devnode';
+
 interface CompileTaskArgs {
   contracts: string;
   local: boolean;
+}
+
+/**
+ * Clear the current line and write new content.
+ * Uses carriage return to overwrite the line for progress updates.
+ */
+function writeProgress(line: string): void {
+  // Truncate long lines to fit terminal width (default 80 cols)
+  const maxWidth = process.stdout.columns || 80;
+  const truncated =
+    line.length > maxWidth - 4 ? line.slice(0, maxWidth - 7) + '...' : line;
+  process.stdout.write(`\r    ${truncated}`);
+}
+
+/**
+ * Clear the progress line.
+ */
+function clearProgress(): void {
+  const width = process.stdout.columns || 80;
+  process.stdout.write('\r' + ' '.repeat(width) + '\r');
+}
+
+/**
+ * Check if an Arbitrum node is running.
+ */
+async function isNodeRunning(): Promise<boolean> {
+  const client = new DockerClient();
+  const containerId = await client.findByName(CONTAINER_NAME);
+  if (!containerId) {
+    return false;
+  }
+  return client.isRunning(containerId);
 }
 
 const taskCompile: NewTaskActionFunction<CompileTaskArgs> = async (
@@ -50,25 +86,75 @@ const taskCompile: NewTaskActionFunction<CompileTaskArgs> = async (
     return;
   }
 
-  const results: { name: string; success: boolean; error?: string }[] = [];
+  // Check if node is running, start one if needed
+  let nodeStartedByUs = false;
+  const nodeRunning = await isNodeRunning();
 
-  for (const contract of discoveredContracts) {
-    console.log(`Compiling ${contract.name}...`);
-
+  if (!nodeRunning) {
+    console.log('Starting Arbitrum node for compilation...');
     try {
-      const result = await compileLocal(
-        contract.path,
-        contract.toolchain,
-        contract.name,
-      );
-      results.push({ name: contract.name, success: result.success });
-      console.log(`  ✓ ${contract.name} compiled successfully`);
-      console.log(`    WASM: ${result.wasmPath}`);
+      await hre.tasks.getTask(['arb:node', 'start']).run({
+        quiet: true,
+        detach: true,
+        stylusReady: false,
+        name: '',
+        httpPort: 0,
+        wsPort: 0,
+      });
+      nodeStartedByUs = true;
+      console.log('Node started.\n');
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      results.push({ name: contract.name, success: false, error: message });
-      console.log(`  ✗ ${contract.name} failed to compile`);
-      console.log(`    Error: ${message}`);
+      console.log(`Failed to start node: ${message}`);
+      console.log(
+        'cargo stylus check requires a running Arbitrum node. Please start one manually.',
+      );
+      process.exitCode = 1;
+      return;
+    }
+  }
+
+  const results: { name: string; success: boolean; error?: string }[] = [];
+
+  try {
+    for (const contract of discoveredContracts) {
+      console.log(`Compiling ${contract.name}...`);
+
+      try {
+        const result = await compileLocal(
+          contract.path,
+          contract.toolchain,
+          contract.name,
+          {
+            onProgress: (line) => {
+              writeProgress(line);
+            },
+          },
+        );
+        clearProgress();
+        results.push({ name: contract.name, success: result.success });
+        console.log(`  ✓ ${contract.name} compiled successfully`);
+        console.log(`    WASM: ${result.wasmPath}`);
+      } catch (error) {
+        clearProgress();
+        const message = error instanceof Error ? error.message : String(error);
+        results.push({ name: contract.name, success: false, error: message });
+        console.log(`  ✗ ${contract.name} failed to compile`);
+        console.log(`    Error: ${message}`);
+      }
+    }
+  } finally {
+    // Stop the node if we started it
+    if (nodeStartedByUs) {
+      console.log('\nStopping Arbitrum node...');
+      try {
+        await hre.tasks.getTask(['arb:node', 'stop']).run({
+          quiet: true,
+          name: '',
+        });
+      } catch {
+        // Ignore errors when stopping
+      }
     }
   }
 

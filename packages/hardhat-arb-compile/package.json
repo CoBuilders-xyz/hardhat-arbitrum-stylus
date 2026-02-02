@@ -48,11 +48,14 @@
     "smol-toml": "^1.3.0"
   },
   "peerDependencies": {
+    "@cobuilders/hardhat-arb-node": "workspace:^",
     "@cobuilders/hardhat-arb-utils": "workspace:^",
     "hardhat": "^3.0.0"
   },
   "devDependencies": {
+    "@cobuilders/hardhat-arb-node": "workspace:^",
     "@cobuilders/hardhat-arb-utils": "workspace:^",
+    "@cobuilders/hardhat-arbitrum-stylus": "workspace:^",
     "@types/node": "^22.0.0",
     "eslint": "^9.18.0",
     "hardhat": "^3.0.0",

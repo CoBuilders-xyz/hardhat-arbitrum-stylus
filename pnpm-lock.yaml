@@ -42,9 +42,15 @@ importers:
         specifier: ^1.3.0
         version: 1.6.0
     devDependencies:
+      '@cobuilders/hardhat-arb-node':
+        specifier: workspace:^
+        version: link:../hardhat-arb-node
       '@cobuilders/hardhat-arb-utils':
         specifier: workspace:^
         version: link:../hardhat-arb-utils
+      '@cobuilders/hardhat-arbitrum-stylus':
+        specifier: workspace:^
+        version: link:../hardhat-arbitrum-stylus
       '@types/node':
         specifier: ^22.0.0
         version: 22.19.3

@@ -10,7 +10,13 @@ export {
 } from './discovery/index.js';
 
 // Command execution
-export { execAsync, type ExecOptions, type ExecResult } from './exec.js';
+export {
+  execAsync,
+  execWithProgress,
+  type ExecOptions,
+  type ExecResult,
+  type ProgressCallback,
+} from './exec.js';
 
 // Toolchain validation
 export {
@@ -21,4 +27,8 @@ export {
 } from './toolchain/validator.js';
 
 // Local compilation
-export { compileLocal, type CompileResult } from './compiler/local.js';
+export {
+  compileLocal,
+  type CompileResult,
+  type CompileOptions,
+} from './compiler/local.js';

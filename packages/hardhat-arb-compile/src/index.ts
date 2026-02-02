@@ -8,6 +8,7 @@ import './type-extensions.js';
 const hardhatArbCompilePlugin: HardhatPlugin = {
   id: 'hardhat-arb-compile',
   npmPackage: '@cobuilders/hardhat-arb-compile',
+  dependencies: () => [import('@cobuilders/hardhat-arb-node')],
   hookHandlers: {
     config: () => import('./hook-handlers/config.js'),
   },

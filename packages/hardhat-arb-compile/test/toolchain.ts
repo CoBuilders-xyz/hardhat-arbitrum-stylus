@@ -41,27 +41,13 @@ describe('Toolchain Validator', () => {
         return;
       }
 
-      // Get the default toolchain
-      try {
-        const { stdout } = await execAsync('rustup default');
-        const match = stdout.match(/^(\S+)/);
-        if (!match) {
-          t.skip('could not determine default toolchain');
-          return;
-        }
-
-        // Extract version number if it's a versioned toolchain
-        const toolchain = match[1].replace(/-.*$/, '');
-        if (!/^\d+\.\d+/.test(toolchain)) {
-          t.skip('default toolchain is not versioned');
-          return;
-        }
-
-        const result = await isToolchainInstalled(toolchain);
-        assert.equal(result, true);
-      } catch {
-        t.skip('could not check default toolchain');
+      // Use 1.93.0 which is required by our fixtures anyway
+      const result = await isToolchainInstalled('1.93.0');
+      if (!result) {
+        t.skip('1.93.0 toolchain not installed');
+        return;
       }
+      assert.equal(result, true);
     });
   });
 

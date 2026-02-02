@@ -1,9 +1,9 @@
 import type { HardhatUserConfig } from 'hardhat/types/config';
 
-import HardhatArbCompilePlugin from '../../../src/index.js';
+import HardhatArbitrumStylusPlugin from '@cobuilders/hardhat-arbitrum-stylus';
 
 const config: HardhatUserConfig = {
-  plugins: [HardhatArbCompilePlugin],
+  plugins: [HardhatArbitrumStylusPlugin],
 };
 
 export default config;
