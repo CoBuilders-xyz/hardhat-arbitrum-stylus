@@ -47,9 +47,9 @@ export async function compileLocal(
     );
   }
 
-  // Run cargo stylus build --release
+  // Run cargo stylus build (always builds in release mode)
   try {
-    await execAsync(`cargo +${toolchain} stylus build --release`, {
+    await execAsync(`cargo +${toolchain} stylus build`, {
       cwd: contractPath,
     });
   } catch (error) {

@@ -1,6 +1,7 @@
 import type { HardhatPlugin } from 'hardhat/types/plugins';
 
 import { task } from 'hardhat/config';
+import { ArgumentType } from 'hardhat/types/arguments';
 
 import './type-extensions.js';
 
@@ -11,7 +12,17 @@ const hardhatArbCompilePlugin: HardhatPlugin = {
     config: () => import('./hook-handlers/config.js'),
   },
   tasks: [
-    task('arb:compile', 'Compile Solidity and Stylus contracts')
+    task('arb:compile', 'Compile Stylus contracts')
+      .addOption({
+        name: 'contracts',
+        type: ArgumentType.STRING,
+        defaultValue: '',
+        description: 'Comma-separated list of contract names to compile',
+      })
+      .addFlag({
+        name: 'local',
+        description: 'Use local Rust toolchain instead of Docker',
+      })
       .setAction(() => import('./tasks/compile.js'))
       .build(),
   ],
