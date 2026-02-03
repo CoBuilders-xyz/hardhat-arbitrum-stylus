@@ -15,6 +15,10 @@ default = ["mini-alloc"]
 export-abi = ["stylus-sdk/export-abi"]
 mini-alloc = ["stylus-sdk/mini-alloc"]
 
+[[bin]]
+name = "stylus-counter"
+path = "src/main.rs"
+
 [lib]
 crate-type = ["lib", "cdylib"]
 

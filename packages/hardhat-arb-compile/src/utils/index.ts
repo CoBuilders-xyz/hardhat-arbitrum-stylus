@@ -32,3 +32,13 @@ export {
   type CompileResult,
   type CompileOptions,
 } from './compiler/local.js';
+
+// ABI export
+export { exportStylusAbi, parseAbiFromSolidity } from './abi/export.js';
+
+// Artifact generation
+export {
+  generateStylusArtifact,
+  saveStylusArtifact,
+  type StylusArtifact,
+} from './artifacts/stylus-artifact.js';

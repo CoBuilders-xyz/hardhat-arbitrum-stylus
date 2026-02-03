@@ -26,3 +26,8 @@ impl Counter {
         self.count.set(count + U256::from(1));
     }
 }
+
+#[cfg(feature = "export-abi")]
+pub fn print_from_args() {
+    Counter::print_abi(&mut std::env::args());
+}

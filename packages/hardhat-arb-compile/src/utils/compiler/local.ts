@@ -4,6 +4,10 @@ import { createPluginError } from '@cobuilders/hardhat-arb-utils/errors';
 
 import { execWithProgress, type ProgressCallback } from '../exec.js';
 import { validateLocalToolchain } from '../toolchain/validator.js';
+import {
+  generateStylusArtifact,
+  saveStylusArtifact,
+} from '../artifacts/stylus-artifact.js';
 
 /**
  * Result of a local compilation.
@@ -13,6 +17,8 @@ export interface CompileResult {
   wasmPath: string;
   /** Whether compilation succeeded */
   success: boolean;
+  /** Path to the generated artifact JSON (if artifactsDir was provided) */
+  artifactPath?: string;
 }
 
 /**
@@ -21,6 +27,8 @@ export interface CompileResult {
 export interface CompileOptions {
   /** Callback for progress updates during compilation */
   onProgress?: ProgressCallback;
+  /** Directory to save artifacts to */
+  artifactsDir?: string;
 }
 
 /**
@@ -87,8 +95,33 @@ export async function compileLocal(
     `${wasmName}.wasm`,
   );
 
-  return {
+  const result: CompileResult = {
     wasmPath,
     success: true,
   };
+
+  // Generate and save artifact if artifactsDir is provided
+  if (options?.artifactsDir) {
+    try {
+      const artifact = await generateStylusArtifact(
+        contractPath,
+        packageName,
+        wasmPath,
+        toolchain,
+        options?.onProgress,
+      );
+      const artifactPath = await saveStylusArtifact(
+        options.artifactsDir,
+        artifact,
+      );
+      result.artifactPath = artifactPath;
+    } catch (error) {
+      // Don't fail the compilation if artifact generation fails
+      // Just log a warning
+      const message = error instanceof Error ? error.message : String(error);
+      console.warn(`Warning: Failed to generate artifact: ${message}`);
+    }
+  }
+
+  return result;
 }

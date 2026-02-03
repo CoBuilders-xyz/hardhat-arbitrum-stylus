@@ -25,3 +25,8 @@ impl Storage {
         self.value.set(new_value);
     }
 }
+
+#[cfg(feature = "export-abi")]
+pub fn print_from_args() {
+    Storage::print_abi(&mut std::env::args());
+}

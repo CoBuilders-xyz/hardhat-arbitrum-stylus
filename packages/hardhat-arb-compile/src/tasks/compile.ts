@@ -13,6 +13,8 @@ const CONTAINER_NAME = 'nitro-devnode';
 interface CompileTaskArgs {
   contracts: string;
   local: boolean;
+  sol: boolean;
+  stylus: boolean;
 }
 
 /**
@@ -52,20 +54,28 @@ async function isNodeRunning(): Promise<boolean> {
   return client.isRunning(containerId);
 }
 
-const taskCompile: NewTaskActionFunction<CompileTaskArgs> = async (
-  { contracts, local },
+/**
+ * Compile Solidity contracts using the default Hardhat compile task.
+ */
+async function compileSolidityContracts(
   hre: HardhatRuntimeEnvironment,
-) => {
-  const useLocalRust = local || hre.config.stylusCompile.useLocalRust;
+): Promise<void> {
+  console.log('\n--- Solidity Compilation ---\n');
+  await hre.tasks.getTask('compile').run({ quiet: false });
+}
 
-  // Parse contract names if provided
-  const contractFilter = contracts
-    ? contracts.split(',').map((c) => c.trim())
-    : undefined;
+/**
+ * Compile Stylus contracts.
+ */
+async function compileStylusContracts(
+  hre: HardhatRuntimeEnvironment,
+  contractFilter: string[] | undefined,
+  useLocalRust: boolean,
+): Promise<{ successful: number; failed: number }> {
+  console.log('\n--- Stylus Compilation ---\n');
 
-  // Discover contracts
   const contractsDir = path.join(hre.config.paths.root, 'contracts');
-  console.log(`\nDiscovering Stylus contracts in ${contractsDir}...`);
+  console.log(`Discovering Stylus contracts in ${contractsDir}...`);
 
   const discoveredContracts = await discoverStylusContracts(contractsDir, {
     contracts: contractFilter,
@@ -73,7 +83,7 @@ const taskCompile: NewTaskActionFunction<CompileTaskArgs> = async (
 
   if (discoveredContracts.length === 0) {
     console.log('No Stylus contracts found.');
-    return;
+    return { successful: 0, failed: 0 };
   }
 
   console.log(`Found ${discoveredContracts.length} Stylus contract(s):\n`);
@@ -81,14 +91,13 @@ const taskCompile: NewTaskActionFunction<CompileTaskArgs> = async (
     console.log(`  - ${contract.name} (toolchain: ${contract.toolchain})`);
   }
 
-  // Compile contracts
   console.log(
     `\nCompiling with ${useLocalRust ? 'local Rust' : 'Docker container'}...\n`,
   );
 
   if (!useLocalRust) {
     console.log('Container mode not yet implemented. Use --local flag.');
-    return;
+    return { successful: 0, failed: 0 };
   }
 
   // Check if node is running, start one if needed
@@ -114,12 +123,12 @@ const taskCompile: NewTaskActionFunction<CompileTaskArgs> = async (
       console.log(
         'cargo stylus check requires a running Arbitrum node. Please start one manually.',
       );
-      process.exitCode = 1;
-      return;
+      return { successful: 0, failed: discoveredContracts.length };
     }
   }
 
   const results: { name: string; success: boolean; error?: string }[] = [];
+  const artifactsDir = hre.config.paths.artifacts;
 
   try {
     for (const contract of discoveredContracts) {
@@ -134,12 +143,16 @@ const taskCompile: NewTaskActionFunction<CompileTaskArgs> = async (
             onProgress: (line) => {
               writeProgress(line);
             },
+            artifactsDir,
           },
         );
         clearProgress();
         results.push({ name: contract.name, success: result.success });
         console.log(`  ✓ ${contract.name} compiled successfully`);
         console.log(`    WASM: ${result.wasmPath}`);
+        if (result.artifactPath) {
+          console.log(`    Artifact: ${result.artifactPath}`);
+        }
       } catch (error) {
         clearProgress();
         const message = error instanceof Error ? error.message : String(error);
@@ -163,15 +176,70 @@ const taskCompile: NewTaskActionFunction<CompileTaskArgs> = async (
     }
   }
 
-  // Summary
   const successful = results.filter((r) => r.success).length;
   const failed = results.filter((r) => !r.success).length;
 
-  console.log(
-    `\nCompilation complete: ${successful} succeeded, ${failed} failed`,
-  );
+  return { successful, failed };
+}
 
-  if (failed > 0) {
+const taskCompile: NewTaskActionFunction<CompileTaskArgs> = async (
+  { contracts, local, sol, stylus },
+  hre: HardhatRuntimeEnvironment,
+) => {
+  const useLocalRust = local || hre.config.stylusCompile.useLocalRust;
+
+  // Parse contract names if provided (only applies to Stylus)
+  const contractFilter = contracts
+    ? contracts.split(',').map((c) => c.trim())
+    : undefined;
+
+  // Determine what to compile
+  // Default: compile both
+  // --sol: compile only Solidity
+  // --stylus: compile only Stylus
+  const shouldCompileSolidity = !stylus || sol;
+  const shouldCompileStylus = !sol || stylus;
+
+  let soliditySuccess = true;
+  let stylusSuccessful = 0;
+  let stylusFailed = 0;
+
+  // Compile Solidity contracts
+  if (shouldCompileSolidity) {
+    try {
+      await compileSolidityContracts(hre);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.log(`Solidity compilation failed: ${message}`);
+      soliditySuccess = false;
+    }
+  }
+
+  // Compile Stylus contracts
+  if (shouldCompileStylus) {
+    const result = await compileStylusContracts(
+      hre,
+      contractFilter,
+      useLocalRust,
+    );
+    stylusSuccessful = result.successful;
+    stylusFailed = result.failed;
+  }
+
+  // Summary
+  console.log('\n=== Compilation Summary ===\n');
+
+  if (shouldCompileSolidity) {
+    console.log(`Solidity: ${soliditySuccess ? 'Success' : 'Failed'}`);
+  }
+
+  if (shouldCompileStylus) {
+    console.log(
+      `Stylus: ${stylusSuccessful} succeeded, ${stylusFailed} failed`,
+    );
+  }
+
+  if (!soliditySuccess || stylusFailed > 0) {
     process.exitCode = 1;
   }
 };

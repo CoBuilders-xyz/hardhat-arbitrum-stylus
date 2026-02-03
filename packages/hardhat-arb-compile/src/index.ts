@@ -13,16 +13,24 @@ const hardhatArbCompilePlugin: HardhatPlugin = {
     config: () => import('./hook-handlers/config.js'),
   },
   tasks: [
-    task('arb:compile', 'Compile Stylus contracts')
+    task('arb:compile', 'Compile Solidity and Stylus contracts')
       .addOption({
         name: 'contracts',
         type: ArgumentType.STRING,
         defaultValue: '',
-        description: 'Comma-separated list of contract names to compile',
+        description: 'Comma-separated list of Stylus contract names to compile',
       })
       .addFlag({
         name: 'local',
         description: 'Use local Rust toolchain instead of Docker',
+      })
+      .addFlag({
+        name: 'sol',
+        description: 'Compile only Solidity contracts',
+      })
+      .addFlag({
+        name: 'stylus',
+        description: 'Compile only Stylus contracts',
       })
       .setAction(() => import('./tasks/compile.js'))
       .build(),
