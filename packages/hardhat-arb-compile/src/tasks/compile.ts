@@ -2,13 +2,14 @@ import path from 'node:path';
 
 import type { NewTaskActionFunction } from 'hardhat/types/tasks';
 import type { HardhatRuntimeEnvironment } from 'hardhat/types/hre';
-import { DockerClient } from '@cobuilders/hardhat-arb-utils';
+import {
+  generateTempContainerName,
+  registerTempContainer,
+  cleanupTempContainer,
+} from '@cobuilders/hardhat-arb-node';
 
 import { discoverStylusContracts } from '../utils/discovery/index.js';
 import { compileLocal } from '../utils/compiler/local.js';
-
-/** Default container name for the Arbitrum node */
-const CONTAINER_NAME = 'nitro-devnode';
 
 interface CompileTaskArgs {
   contracts: string;
@@ -40,18 +41,6 @@ function writeProgress(line: string): void {
 function clearProgress(): void {
   const width = process.stdout.columns || 80;
   process.stdout.write('\r' + ' '.repeat(width) + '\r');
-}
-
-/**
- * Check if an Arbitrum node is running.
- */
-async function isNodeRunning(): Promise<boolean> {
-  const client = new DockerClient();
-  const containerId = await client.findByName(CONTAINER_NAME);
-  if (!containerId) {
-    return false;
-  }
-  return client.isRunning(containerId);
 }
 
 /**
@@ -100,31 +89,30 @@ async function compileStylusContracts(
     return { successful: 0, failed: 0 };
   }
 
-  // Check if node is running, start one if needed
-  let nodeStartedByUs = false;
-  const nodeRunning = await isNodeRunning();
+  // Start a temporary node for compilation
+  let tempContainerName: string | null = null;
 
-  if (!nodeRunning) {
-    console.log('Starting Arbitrum node for compilation...');
-    try {
-      await hre.tasks.getTask(['arb:node', 'start']).run({
-        quiet: true,
-        detach: true,
-        stylusReady: false,
-        name: '',
-        httpPort: 0,
-        wsPort: 0,
-      });
-      nodeStartedByUs = true;
-      console.log('Node started.\n');
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      console.log(`Failed to start node: ${message}`);
-      console.log(
-        'cargo stylus check requires a running Arbitrum node. Please start one manually.',
-      );
-      return { successful: 0, failed: discoveredContracts.length };
-    }
+  console.log('Starting Arbitrum node for compilation...');
+  try {
+    tempContainerName = generateTempContainerName();
+    registerTempContainer(tempContainerName);
+
+    await hre.tasks.getTask(['arb:node', 'start']).run({
+      quiet: true,
+      detach: true,
+      stylusReady: false,
+      name: tempContainerName,
+      httpPort: 0,
+      wsPort: 0,
+    });
+    console.log('Node started.\n');
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.log(`Failed to start node: ${message}`);
+    console.log(
+      'cargo stylus check requires a running Arbitrum node. Please start one manually.',
+    );
+    return { successful: 0, failed: discoveredContracts.length };
   }
 
   const results: { name: string; success: boolean; error?: string }[] = [];
@@ -162,17 +150,10 @@ async function compileStylusContracts(
       }
     }
   } finally {
-    // Stop the node if we started it
-    if (nodeStartedByUs) {
+    // Cleanup the temporary node
+    if (tempContainerName) {
       console.log('\nStopping Arbitrum node...');
-      try {
-        await hre.tasks.getTask(['arb:node', 'stop']).run({
-          quiet: true,
-          name: '',
-        });
-      } catch {
-        // Ignore errors when stopping
-      }
+      await cleanupTempContainer(tempContainerName);
     }
   }
 
