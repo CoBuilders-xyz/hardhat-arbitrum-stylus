@@ -5,6 +5,15 @@ import { execAsync } from '../exec.js';
 const WASM_TARGET = 'wasm32-unknown-unknown';
 
 /**
+ * Toolchain validation result for a specific version.
+ */
+export interface ToolchainValidationResult {
+  version: string;
+  toolchainInstalled: boolean;
+  wasmTargetInstalled: boolean;
+}
+
+/**
  * Check if a specific Rust toolchain is installed.
  *
  * @param version - The toolchain version (e.g., "1.93.0")
@@ -51,10 +60,105 @@ export async function isCargoStylusInstalled(): Promise<boolean> {
 }
 
 /**
+ * Validate a single toolchain and return the result without throwing.
+ *
+ * @param version - The toolchain version (e.g., "1.93.0")
+ * @returns Validation result with status of toolchain and target
+ */
+export async function checkToolchain(
+  version: string,
+): Promise<ToolchainValidationResult> {
+  const toolchainInstalled = await isToolchainInstalled(version);
+  const wasmTargetInstalled = toolchainInstalled
+    ? await isWasmTargetInstalled(version)
+    : false;
+
+  return {
+    version,
+    toolchainInstalled,
+    wasmTargetInstalled,
+  };
+}
+
+/**
+ * Validate all required toolchains before compilation.
+ * Checks rustup, cargo-stylus, and all toolchains with their WASM targets.
+ *
+ * @param versions - Array of unique toolchain versions required
+ * @throws HardhatPluginError with instructions if any requirement is not met
+ */
+export async function validateAllToolchains(versions: string[]): Promise<void> {
+  // Check if rustup is available
+  try {
+    await execAsync('rustup --version');
+  } catch {
+    throw createPluginError(
+      'rustup is not installed. Please install rustup from https://rustup.rs/',
+    );
+  }
+
+  // Check if cargo-stylus is installed
+  const cargoStylusInstalled = await isCargoStylusInstalled();
+  if (!cargoStylusInstalled) {
+    throw createPluginError(
+      'cargo-stylus is not installed. Run: cargo install cargo-stylus',
+    );
+  }
+
+  // Check all toolchains in parallel
+  const results = await Promise.all(versions.map(checkToolchain));
+
+  // Collect missing toolchains and targets
+  const missingToolchains = results.filter((r) => !r.toolchainInstalled);
+  const missingTargets = results.filter(
+    (r) => r.toolchainInstalled && !r.wasmTargetInstalled,
+  );
+
+  if (missingToolchains.length === 0 && missingTargets.length === 0) {
+    return; // All good
+  }
+
+  // Build error message with install instructions
+  const lines: string[] = ['Missing Rust toolchain requirements:'];
+
+  if (missingToolchains.length > 0) {
+    lines.push('');
+    lines.push('The following toolchains are not installed:');
+    for (const { version } of missingToolchains) {
+      lines.push(`  - ${version}`);
+    }
+    lines.push('');
+    lines.push('Install toolchains and targets with:');
+    for (const { version } of missingToolchains) {
+      lines.push(`  rustup install ${version}`);
+      lines.push(`  rustup +${version} target add ${WASM_TARGET}`);
+    }
+  }
+
+  if (missingTargets.length > 0) {
+    lines.push('');
+    lines.push(
+      `The following toolchains are missing the ${WASM_TARGET} target:`,
+    );
+    for (const { version } of missingTargets) {
+      lines.push(`  - ${version}`);
+    }
+    lines.push('');
+    lines.push('Install targets with:');
+    for (const { version } of missingTargets) {
+      lines.push(`  rustup +${version} target add ${WASM_TARGET}`);
+    }
+  }
+
+  throw createPluginError(lines.join('\n'));
+}
+
+/**
  * Validate that all requirements for local Rust compilation are met.
  *
  * @param version - The toolchain version (e.g., "1.93.0")
  * @throws HardhatPluginError if any requirement is not met
+ * @deprecated Use validateAllToolchains for upfront validation of all contracts
  */
 export async function validateLocalToolchain(version: string): Promise<void> {
   // Check if rustup is available
@@ -70,7 +174,10 @@ export async function validateLocalToolchain(version: string): Promise<void> {
   const toolchainInstalled = await isToolchainInstalled(version);
   if (!toolchainInstalled) {
     throw createPluginError(
-      `Rust toolchain ${version} is not installed. Run: rustup install ${version}`,
+      `Rust toolchain ${version} is not installed.\n` +
+        `Install toolchain and target with:\n` +
+        `  rustup install ${version}\n` +
+        `  rustup +${version} target add ${WASM_TARGET}`,
     );
   }
 
@@ -78,8 +185,9 @@ export async function validateLocalToolchain(version: string): Promise<void> {
   const wasmInstalled = await isWasmTargetInstalled(version);
   if (!wasmInstalled) {
     throw createPluginError(
-      `${WASM_TARGET} target not installed for toolchain ${version}. ` +
-        `Run: rustup +${version} target add ${WASM_TARGET}`,
+      `${WASM_TARGET} target not installed for toolchain ${version}.\n` +
+        `Install target with:\n` +
+        `  rustup +${version} target add ${WASM_TARGET}`,
     );
   }
 

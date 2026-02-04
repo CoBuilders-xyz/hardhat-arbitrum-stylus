@@ -10,6 +10,7 @@ import {
 
 import { discoverStylusContracts } from '../utils/discovery/index.js';
 import { compileLocal } from '../utils/compiler/local.js';
+import { validateAllToolchains } from '../utils/toolchain/validator.js';
 
 interface CompileTaskArgs {
   contracts: string;
@@ -88,6 +89,14 @@ async function compileStylusContracts(
     console.log('Container mode not yet implemented. Use --local flag.');
     return { successful: 0, failed: 0 };
   }
+
+  // Validate all required toolchains before starting compilation
+  const uniqueToolchains = [
+    ...new Set(discoveredContracts.map((c) => c.toolchain)),
+  ];
+  console.log('Validating toolchain requirements...');
+  await validateAllToolchains(uniqueToolchains);
+  console.log('All toolchains ready.\n');
 
   // Start a temporary node for compilation
   let tempContainerName: string | null = null;

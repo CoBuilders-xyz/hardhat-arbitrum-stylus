@@ -3,7 +3,6 @@ import path from 'node:path';
 import { createPluginError } from '@cobuilders/hardhat-arb-utils/errors';
 
 import { execWithProgress, type ProgressCallback } from '../exec.js';
-import { validateLocalToolchain } from '../toolchain/validator.js';
 import {
   generateStylusArtifact,
   saveStylusArtifact,
@@ -34,6 +33,9 @@ export interface CompileOptions {
 /**
  * Compile a Stylus contract using the local Rust toolchain.
  *
+ * Note: Toolchain validation should be done upfront via validateAllToolchains()
+ * before calling this function.
+ *
  * @param contractPath - Absolute path to the contract directory
  * @param toolchain - The Rust toolchain version (e.g., "1.93.0")
  * @param packageName - The package name from Cargo.toml
@@ -47,9 +49,6 @@ export async function compileLocal(
   packageName: string,
   options?: CompileOptions,
 ): Promise<CompileResult> {
-  // Validate toolchain requirements
-  await validateLocalToolchain(toolchain);
-
   // Run cargo stylus check
   try {
     await execWithProgress(
