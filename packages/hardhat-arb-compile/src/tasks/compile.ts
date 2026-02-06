@@ -7,9 +7,12 @@ import {
   registerTempContainer,
   cleanupTempContainer,
 } from '@cobuilders/hardhat-arb-node';
+import { DockerClient } from '@cobuilders/hardhat-arb-utils';
 
 import { discoverStylusContracts } from '../utils/discovery/index.js';
 import { compileLocal } from '../utils/compiler/local.js';
+import { compileContainer } from '../utils/compiler/container.js';
+import { ensureCompileImages } from '../utils/compiler/image-builder.js';
 import { validateAllToolchains } from '../utils/toolchain/validator.js';
 
 interface CompileTaskArgs {
@@ -17,6 +20,17 @@ interface CompileTaskArgs {
   local: boolean;
   sol: boolean;
   stylus: boolean;
+}
+
+/** Prefix for compile networks */
+const COMPILE_NETWORK_PREFIX = 'stylus-compile-net-';
+
+/**
+ * Generate a random network name for compilation.
+ */
+function generateNetworkName(): string {
+  const randomId = Math.random().toString(36).substring(2, 10);
+  return `${COMPILE_NETWORK_PREFIX}${randomId}`;
 }
 
 /**
@@ -55,41 +69,12 @@ async function compileSolidityContracts(
 }
 
 /**
- * Compile Stylus contracts.
+ * Compile Stylus contracts using local Rust toolchain.
  */
-async function compileStylusContracts(
+async function compileStylusContractsLocal(
   hre: HardhatRuntimeEnvironment,
-  contractFilter: string[] | undefined,
-  useLocalRust: boolean,
+  discoveredContracts: Array<{ name: string; path: string; toolchain: string }>,
 ): Promise<{ successful: number; failed: number }> {
-  console.log('\n--- Stylus Compilation ---\n');
-
-  const contractsDir = path.join(hre.config.paths.root, 'contracts');
-  console.log(`Discovering Stylus contracts in ${contractsDir}...`);
-
-  const discoveredContracts = await discoverStylusContracts(contractsDir, {
-    contracts: contractFilter,
-  });
-
-  if (discoveredContracts.length === 0) {
-    console.log('No Stylus contracts found.');
-    return { successful: 0, failed: 0 };
-  }
-
-  console.log(`Found ${discoveredContracts.length} Stylus contract(s):\n`);
-  for (const contract of discoveredContracts) {
-    console.log(`  - ${contract.name} (toolchain: ${contract.toolchain})`);
-  }
-
-  console.log(
-    `\nCompiling with ${useLocalRust ? 'local Rust' : 'Docker container'}...\n`,
-  );
-
-  if (!useLocalRust) {
-    console.log('Container mode not yet implemented. Use --local flag.');
-    return { successful: 0, failed: 0 };
-  }
-
   // Validate all required toolchains before starting compilation
   const uniqueToolchains = [
     ...new Set(discoveredContracts.map((c) => c.toolchain)),
@@ -113,6 +98,7 @@ async function compileStylusContracts(
       name: tempContainerName,
       httpPort: 0,
       wsPort: 0,
+      dockerNetwork: '',
     });
     console.log('Node started.\n');
   } catch (error) {
@@ -170,6 +156,167 @@ async function compileStylusContracts(
   const failed = results.filter((r) => !r.success).length;
 
   return { successful, failed };
+}
+
+/**
+ * Compile Stylus contracts using Docker containers.
+ */
+async function compileStylusContractsContainer(
+  hre: HardhatRuntimeEnvironment,
+  discoveredContracts: Array<{ name: string; path: string; toolchain: string }>,
+): Promise<{ successful: number; failed: number }> {
+  const client = new DockerClient();
+
+  // Build compile images for required toolchains
+  const uniqueToolchains = [
+    ...new Set(discoveredContracts.map((c) => c.toolchain)),
+  ];
+  console.log('Preparing compile images for required toolchains...');
+  const imageResult = await ensureCompileImages(uniqueToolchains, (msg) => {
+    // Use progress line for build output to avoid flooding the console
+    writeProgress(msg);
+  });
+  clearProgress();
+  if (imageResult.built.length > 0) {
+    console.log(`  Built images for: ${imageResult.built.join(', ')}`);
+  }
+  if (imageResult.cached.length > 0) {
+    console.log(`  Using cached images for: ${imageResult.cached.join(', ')}`);
+  }
+  console.log('');
+
+  // Create a Docker network for compile-to-node communication
+  const networkName = generateNetworkName();
+  console.log(`Creating Docker network: ${networkName}...`);
+  await client.createNetwork(networkName);
+
+  // Start a temporary node for compilation
+  let tempContainerName: string | null = null;
+
+  console.log('Starting Arbitrum node for compilation...');
+  try {
+    tempContainerName = generateTempContainerName();
+    registerTempContainer(tempContainerName);
+
+    await hre.tasks.getTask(['arb:node', 'start']).run({
+      quiet: true,
+      detach: true,
+      stylusReady: false,
+      name: tempContainerName,
+      httpPort: 0,
+      wsPort: 0,
+      dockerNetwork: networkName,
+    });
+    console.log('Node started.\n');
+  } catch (error) {
+    // Cleanup network on failure
+    try {
+      await client.removeNetwork(networkName);
+    } catch {
+      // Ignore cleanup errors
+    }
+    const message = error instanceof Error ? error.message : String(error);
+    console.log(`Failed to start node: ${message}`);
+    console.log(
+      'cargo stylus check requires a running Arbitrum node. Please start one manually.',
+    );
+    return { successful: 0, failed: discoveredContracts.length };
+  }
+
+  const results: { name: string; success: boolean; error?: string }[] = [];
+  const artifactsDir = hre.config.paths.artifacts;
+
+  try {
+    for (const contract of discoveredContracts) {
+      console.log(`Compiling ${contract.name}...`);
+
+      try {
+        const result = await compileContainer(
+          contract.path,
+          contract.toolchain,
+          contract.name,
+          {
+            onProgress: (line) => {
+              writeProgress(line);
+            },
+            artifactsDir,
+            network: networkName,
+            nodeContainerName: tempContainerName,
+          },
+        );
+        clearProgress();
+        results.push({ name: contract.name, success: result.success });
+        console.log(`  ✓ ${contract.name} compiled successfully`);
+        console.log(`    WASM: ${result.wasmPath}`);
+        if (result.artifactPath) {
+          console.log(`    Artifact: ${result.artifactPath}`);
+        }
+      } catch (error) {
+        clearProgress();
+        const message = error instanceof Error ? error.message : String(error);
+        results.push({ name: contract.name, success: false, error: message });
+        console.log(`  ✗ ${contract.name} failed to compile`);
+        console.log(`    Error: ${message}`);
+      }
+    }
+  } finally {
+    // Cleanup the temporary node
+    if (tempContainerName) {
+      console.log('\nStopping Arbitrum node...');
+      await cleanupTempContainer(tempContainerName);
+    }
+
+    // Cleanup the Docker network
+    console.log('Removing Docker network...');
+    try {
+      await client.removeNetwork(networkName);
+    } catch {
+      // Ignore cleanup errors
+    }
+  }
+
+  const successful = results.filter((r) => r.success).length;
+  const failed = results.filter((r) => !r.success).length;
+
+  return { successful, failed };
+}
+
+/**
+ * Compile Stylus contracts.
+ */
+async function compileStylusContracts(
+  hre: HardhatRuntimeEnvironment,
+  contractFilter: string[] | undefined,
+  useLocalRust: boolean,
+): Promise<{ successful: number; failed: number }> {
+  console.log('\n--- Stylus Compilation ---\n');
+
+  const contractsDir = path.join(hre.config.paths.root, 'contracts');
+  console.log(`Discovering Stylus contracts in ${contractsDir}...`);
+
+  const discoveredContracts = await discoverStylusContracts(contractsDir, {
+    contracts: contractFilter,
+  });
+
+  if (discoveredContracts.length === 0) {
+    console.log('No Stylus contracts found.');
+    return { successful: 0, failed: 0 };
+  }
+
+  console.log(`Found ${discoveredContracts.length} Stylus contract(s):\n`);
+  for (const contract of discoveredContracts) {
+    console.log(`  - ${contract.name} (toolchain: ${contract.toolchain})`);
+  }
+
+  console.log(
+    `\nCompiling with ${useLocalRust ? 'local Rust' : 'Docker container'}...\n`,
+  );
+
+  if (useLocalRust) {
+    return compileStylusContractsLocal(hre, discoveredContracts);
+  } else {
+    return compileStylusContractsContainer(hre, discoveredContracts);
+  }
 }
 
 const taskCompile: NewTaskActionFunction<CompileTaskArgs> = async (

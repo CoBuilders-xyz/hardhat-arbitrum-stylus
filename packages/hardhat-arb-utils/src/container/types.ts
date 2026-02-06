@@ -74,6 +74,8 @@ export interface ContainerConfig {
   autoRemove?: boolean;
   /** Run container in detached mode (background) */
   detach?: boolean;
+  /** Docker network to connect the container to */
+  network?: string;
 }
 
 /**
