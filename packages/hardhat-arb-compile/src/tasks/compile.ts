@@ -12,7 +12,7 @@ import { DockerClient } from '@cobuilders/hardhat-arb-utils';
 import { discoverStylusContracts } from '../utils/discovery/index.js';
 import { compileLocal } from '../utils/compiler/local.js';
 import { compileContainer } from '../utils/compiler/container.js';
-import { ensureCompileImages } from '../utils/compiler/image-builder.js';
+import { ensureCompileImage } from '../utils/compiler/image-builder.js';
 import { validateAllToolchains } from '../utils/toolchain/validator.js';
 
 interface CompileTaskArgs {
@@ -167,21 +167,17 @@ async function compileStylusContractsContainer(
 ): Promise<{ successful: number; failed: number }> {
   const client = new DockerClient();
 
-  // Build compile images for required toolchains
-  const uniqueToolchains = [
-    ...new Set(discoveredContracts.map((c) => c.toolchain)),
-  ];
-  console.log('Preparing compile images for required toolchains...');
-  const imageResult = await ensureCompileImages(uniqueToolchains, (msg) => {
+  // Build the base compile image (if not already built)
+  console.log('Preparing compile image...');
+  const wasBuilt = await ensureCompileImage((msg) => {
     // Use progress line for build output to avoid flooding the console
     writeProgress(msg);
   });
   clearProgress();
-  if (imageResult.built.length > 0) {
-    console.log(`  Built images for: ${imageResult.built.join(', ')}`);
-  }
-  if (imageResult.cached.length > 0) {
-    console.log(`  Using cached images for: ${imageResult.cached.join(', ')}`);
+  if (wasBuilt) {
+    console.log('  Compile image built successfully.');
+  } else {
+    console.log('  Using cached compile image.');
   }
   console.log('');
 

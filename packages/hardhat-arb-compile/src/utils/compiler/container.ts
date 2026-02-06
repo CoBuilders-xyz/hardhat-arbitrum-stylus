@@ -37,7 +37,6 @@ export interface ContainerCompileOptions {
  */
 async function runInContainer(
   image: string,
-  tag: string,
   contractPath: string,
   command: string[],
   options: ContainerCompileOptions,
@@ -48,7 +47,6 @@ async function runInContainer(
   // Run container using docker run directly with proper output handling
   const result = await runContainerForeground(
     image,
-    tag,
     containerName,
     options.network,
     contractPath,
@@ -65,7 +63,6 @@ async function runInContainer(
  */
 async function runContainerForeground(
   image: string,
-  tag: string,
   containerName: string,
   network: string,
   contractPath: string,
@@ -86,7 +83,7 @@ async function runContainerForeground(
       `${contractPath}:/workspace:rw`,
       '-w',
       '/workspace',
-      `${image}:${tag}`,
+      image,
       ...command,
     ];
 
@@ -157,20 +154,59 @@ export async function compileContainer(
   packageName: string,
   options: ContainerCompileOptions,
 ): Promise<CompileResult> {
-  const imageName = 'stylus-compile';
+  // Import the image name from image-builder
+  const { getCompileImageName } = await import('./image-builder.js');
+  const imageName = getCompileImageName();
 
   // RPC endpoint uses the node container name as hostname via Docker network
   const rpcEndpoint = `http://${options.nodeContainerName}:8547`;
 
-  options.onProgress?.('Running cargo stylus check...');
-
-  // Run cargo stylus check with endpoint flag
+  // Install the specific toolchain and wasm32 target
+  options.onProgress?.(`Installing Rust toolchain ${toolchain}...`);
   try {
     await runInContainer(
       imageName,
-      toolchain,
       contractPath,
-      ['cargo', 'stylus', 'check', '--endpoint', rpcEndpoint],
+      ['rustup', 'toolchain', 'install', toolchain],
+      options,
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw createPluginError(
+      `Failed to install toolchain ${toolchain}:\n${message}`,
+    );
+  }
+
+  options.onProgress?.(`Adding wasm32 target for ${toolchain}...`);
+  try {
+    await runInContainer(
+      imageName,
+      contractPath,
+      [
+        'rustup',
+        'target',
+        'add',
+        'wasm32-unknown-unknown',
+        '--toolchain',
+        toolchain,
+      ],
+      options,
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw createPluginError(
+      `Failed to add wasm32 target for ${toolchain}:\n${message}`,
+    );
+  }
+
+  options.onProgress?.('Running cargo stylus check...');
+
+  // Run cargo stylus check with the specific toolchain and endpoint flag
+  try {
+    await runInContainer(
+      imageName,
+      contractPath,
+      ['cargo', `+${toolchain}`, 'stylus', 'check', '--endpoint', rpcEndpoint],
       options,
     );
   } catch (error) {
@@ -182,13 +218,12 @@ export async function compileContainer(
 
   options.onProgress?.('Running cargo stylus build...');
 
-  // Run cargo stylus build (doesn't need endpoint)
+  // Run cargo stylus build with the specific toolchain (doesn't need endpoint)
   try {
     await runInContainer(
       imageName,
-      toolchain,
       contractPath,
-      ['cargo', 'stylus', 'build'],
+      ['cargo', `+${toolchain}`, 'stylus', 'build'],
       options,
     );
   } catch (error) {
@@ -221,7 +256,7 @@ export async function compileContainer(
       options.onProgress?.('Exporting ABI...');
 
       const artifact = await generateStylusArtifactContainer(
-        imageName,
+        imageName, // Already includes tag (e.g., "stylus-compile:latest")
         toolchain,
         contractPath,
         packageName,
@@ -264,14 +299,13 @@ async function generateStylusArtifactContainer(
   linkReferences: Record<string, never>;
   deployedLinkReferences: Record<string, never>;
 }> {
-  // Export ABI from the contract using container
+  // Export ABI from the contract using container with the specific toolchain
   let solidityInterface = '';
   try {
     const result = await runInContainer(
       imageName,
-      toolchain,
       contractPath,
-      ['cargo', 'stylus', 'export-abi'],
+      ['cargo', `+${toolchain}`, 'stylus', 'export-abi'],
       options,
     );
     solidityInterface = result.stdout;

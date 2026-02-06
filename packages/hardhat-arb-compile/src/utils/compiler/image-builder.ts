@@ -3,12 +3,16 @@ import { DockerClient } from '@cobuilders/hardhat-arb-utils';
 /** Image name for Stylus compile containers */
 const COMPILE_IMAGE_NAME = 'stylus-compile';
 
+/** Tag for the base image (uses latest Rust) */
+const COMPILE_IMAGE_TAG = 'latest';
+
 /**
- * Generate a Dockerfile content for a specific Rust toolchain.
- * The image will have Rust, wasm32 target, and cargo-stylus installed.
+ * Generate a Dockerfile for the base compile image.
+ * Uses the latest Rust version to install cargo-stylus, then specific
+ * toolchains are installed at runtime for each contract.
  */
-function generateDockerfile(toolchain: string): string {
-  return `FROM rust:${toolchain}-slim
+function generateDockerfile(): string {
+  return `FROM rust:slim
 RUN apt-get update && apt-get install -y pkg-config libssl-dev && rm -rf /var/lib/apt/lists/*
 RUN rustup target add wasm32-unknown-unknown
 RUN cargo install cargo-stylus
@@ -17,73 +21,57 @@ WORKDIR /workspace
 }
 
 /**
- * Get the full image name for a toolchain.
+ * Get the full image name for the compile image.
  */
-export function getCompileImageName(toolchain: string): string {
-  return `${COMPILE_IMAGE_NAME}:${toolchain}`;
+export function getCompileImageName(): string {
+  return `${COMPILE_IMAGE_NAME}:${COMPILE_IMAGE_TAG}`;
 }
 
 /**
- * Check if a compile image exists for the given toolchain.
+ * Check if the base compile image exists.
  */
-export async function compileImageExists(toolchain: string): Promise<boolean> {
+export async function compileImageExists(): Promise<boolean> {
   const client = new DockerClient();
-  return client.imageExists(COMPILE_IMAGE_NAME, toolchain);
+  return client.imageExists(COMPILE_IMAGE_NAME, COMPILE_IMAGE_TAG);
 }
 
 /**
- * Build a compile image for the given toolchain if it doesn't exist.
+ * Build the base compile image if it doesn't exist.
  * Returns true if image was built, false if it already existed.
  */
 export async function ensureCompileImage(
-  toolchain: string,
   onProgress?: (message: string) => void,
 ): Promise<boolean> {
   const client = new DockerClient();
 
   // Check if image already exists
-  const exists = await client.imageExists(COMPILE_IMAGE_NAME, toolchain);
+  const exists = await client.imageExists(
+    COMPILE_IMAGE_NAME,
+    COMPILE_IMAGE_TAG,
+  );
   if (exists) {
+    onProgress?.(
+      `Using cached compile image ${COMPILE_IMAGE_NAME}:${COMPILE_IMAGE_TAG}`,
+    );
     return false;
   }
 
   onProgress?.(
-    `Building compile image for toolchain ${toolchain}... (this may take several minutes)`,
+    `Building compile image... (this may take several minutes on first run)`,
   );
 
   // Generate and build the Dockerfile
-  const dockerfile = generateDockerfile(toolchain);
+  const dockerfile = generateDockerfile();
   await client.buildImage(
     COMPILE_IMAGE_NAME,
-    toolchain,
+    COMPILE_IMAGE_TAG,
     dockerfile,
     onProgress,
   );
 
-  onProgress?.(`Compile image ${COMPILE_IMAGE_NAME}:${toolchain} ready.`);
+  onProgress?.(
+    `Compile image ${COMPILE_IMAGE_NAME}:${COMPILE_IMAGE_TAG} ready.`,
+  );
 
   return true;
-}
-
-/**
- * Build compile images for multiple toolchains.
- * Skips toolchains that already have images.
- */
-export async function ensureCompileImages(
-  toolchains: string[],
-  onProgress?: (message: string) => void,
-): Promise<{ built: string[]; cached: string[] }> {
-  const built: string[] = [];
-  const cached: string[] = [];
-
-  for (const toolchain of toolchains) {
-    const wasBuilt = await ensureCompileImage(toolchain, onProgress);
-    if (wasBuilt) {
-      built.push(toolchain);
-    } else {
-      cached.push(toolchain);
-    }
-  }
-
-  return { built, cached };
 }

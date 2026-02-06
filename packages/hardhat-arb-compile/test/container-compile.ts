@@ -29,24 +29,21 @@ describe('Container Compile', () => {
 
   describe('image-builder', () => {
     it('generates correct image name', () => {
-      const imageName = getCompileImageName('1.83.0');
-      assert.equal(imageName, 'stylus-compile:1.83.0');
+      // The base image uses 'latest' tag since toolchains are installed at runtime
+      const imageName = getCompileImageName();
+      assert.equal(imageName, 'stylus-compile:latest');
     });
 
-    it('generates correct image name for nightly', () => {
-      const imageName = getCompileImageName('nightly-2024-01-01');
-      assert.equal(imageName, 'stylus-compile:nightly-2024-01-01');
-    });
-
-    it('compileImageExists returns false for non-existent image', async (t) => {
+    it('compileImageExists checks for base image', async (t) => {
       if (!dockerAvailable) {
         t.skip('Docker not available');
         return;
       }
 
-      // Use a toolchain version that almost certainly doesn't exist
-      const exists = await compileImageExists('999.999.999');
-      assert.equal(exists, false);
+      // Check if the base compile image exists
+      // This will return false if not built yet, true if previously built
+      const exists = await compileImageExists();
+      assert.equal(typeof exists, 'boolean');
     });
   });
 
