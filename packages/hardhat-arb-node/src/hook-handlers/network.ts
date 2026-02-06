@@ -1,75 +1,22 @@
 import type { HookContext, NetworkHooks } from 'hardhat/types/hooks';
 import type { ChainType, NetworkConnection } from 'hardhat/types/network';
 
-import { DockerClient } from '@cobuilders/hardhat-arb-utils';
-
 import { getHre } from './hre.js';
 import { getHookHttpPort, getHookWsPort } from './hook-state.js';
-
-/** Prefix for temporary containers created by the hook */
-const TEMP_CONTAINER_PREFIX = 'nitro-devnode-tmp-';
+import {
+  generateTempContainerName,
+  registerTempContainer,
+  getActiveTempContainer,
+  setActiveTempContainer,
+  isTempContainerRunning,
+  cleanupTempContainer,
+} from '../temp-node.js';
 
 /** Track temporary containers per connection for cleanup */
 const tempContainersPerConnection = new WeakMap<
   NetworkConnection<ChainType | string>,
   string
 >();
-
-/** Track all temp containers globally for process exit cleanup */
-const allTempContainers = new Set<string>();
-
-/** Track if we have started a temp container for this process */
-let activeTempContainer: string | null = null;
-
-/** Register process exit handler once */
-let exitHandlerRegistered = false;
-
-function registerExitHandler(): void {
-  if (exitHandlerRegistered) return;
-  exitHandlerRegistered = true;
-
-  const cleanup = async () => {
-    if (allTempContainers.size === 0) return;
-
-    const client = new DockerClient();
-    for (const containerName of allTempContainers) {
-      try {
-        const containerId = await client.findByName(containerName);
-        if (containerId) {
-          await client.stop(containerId);
-          await client.remove(containerId, true);
-        }
-      } catch {
-        // Ignore cleanup errors during exit
-      }
-    }
-    allTempContainers.clear();
-    activeTempContainer = null;
-  };
-
-  // Handle graceful shutdown
-  process.on('beforeExit', () => void cleanup());
-  process.on('SIGINT', () => void cleanup().then(() => process.exit(130)));
-  process.on('SIGTERM', () => void cleanup().then(() => process.exit(143)));
-}
-
-/**
- * Generate a random container name for hook-started nodes
- */
-function generateTempContainerName(): string {
-  const randomId = Math.random().toString(36).substring(2, 10);
-  return `${TEMP_CONTAINER_PREFIX}${randomId}`;
-}
-
-/**
- * Check if our temp container is still running
- */
-async function isTempContainerRunning(containerName: string): Promise<boolean> {
-  const client = new DockerClient();
-  const containerId = await client.findByName(containerName);
-  if (!containerId) return false;
-  return client.isRunning(containerId);
-}
 
 /**
  * Check if the arb-node is running by trying to connect to it
@@ -121,16 +68,14 @@ export default async (): Promise<Partial<NetworkHooks>> => {
 
         // Check if this is a connection to our hook network (random port)
         if (normalizeUrl(networkUrl) === normalizeUrl(hookRpcUrl)) {
-          // Register exit handler for cleanup
-          registerExitHandler();
-
           // Check if we already have an active temp container
+          const activeContainer = getActiveTempContainer();
           if (
-            activeTempContainer &&
-            (await isTempContainerRunning(activeTempContainer))
+            activeContainer &&
+            (await isTempContainerRunning(activeContainer))
           ) {
             // Reuse existing temp container
-            tempContainerName = activeTempContainer;
+            tempContainerName = activeContainer;
           } else {
             // Check if our hook port has a node running (from previous run)
             const nodeRunning = await isNodeRunning(hookRpcUrl);
@@ -143,8 +88,8 @@ export default async (): Promise<Partial<NetworkHooks>> => {
                 tempContainerName = generateTempContainerName();
 
                 // Track for cleanup
-                allTempContainers.add(tempContainerName);
-                activeTempContainer = tempContainerName;
+                registerTempContainer(tempContainerName);
+                setActiveTempContainer(tempContainerName);
 
                 // Start the node on the random hook ports
                 await hre.tasks.getTask(['arb:node', 'start']).run({
@@ -184,25 +129,8 @@ export default async (): Promise<Partial<NetworkHooks>> => {
         tempContainersPerConnection.get(networkConnection);
 
       if (tempContainerName) {
-        const client = new DockerClient();
-        const containerId = await client.findByName(tempContainerName);
-
-        if (containerId) {
-          try {
-            await client.stop(containerId);
-            await client.remove(containerId, true);
-          } catch {
-            // Ignore cleanup errors
-          }
-        }
-
+        await cleanupTempContainer(tempContainerName);
         tempContainersPerConnection.delete(networkConnection);
-        allTempContainers.delete(tempContainerName);
-
-        // Clear active temp container if this was it
-        if (activeTempContainer === tempContainerName) {
-          activeTempContainer = null;
-        }
       }
 
       return next(context, networkConnection);

@@ -4,5 +4,6 @@
     {
       "path": "../hardhat-arb-node"
     }
-  ]
+  ],
+  "exclude": ["dist", "node_modules", "test/fixture-projects"]
 }

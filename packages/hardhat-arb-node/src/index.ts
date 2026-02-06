@@ -5,6 +5,19 @@ import { ArgumentType } from 'hardhat/types/arguments';
 
 import './type-extensions.js';
 
+// Export temp-node utilities for use by other plugins
+export {
+  generateTempContainerName,
+  registerTempContainer,
+  unregisterTempContainer,
+  getActiveTempContainer,
+  setActiveTempContainer,
+  isTempContainerRunning,
+  cleanupTempContainer,
+  cleanupAllTempContainers,
+  ensureExitHandlerRegistered,
+} from './temp-node.js';
+
 const hardhatArbNodePlugin: HardhatPlugin = {
   id: 'hardhat-arb-node',
   npmPackage: '@cobuilders/hardhat-arb-node',
