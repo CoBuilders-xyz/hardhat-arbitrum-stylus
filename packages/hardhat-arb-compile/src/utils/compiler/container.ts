@@ -9,7 +9,7 @@ import {
   buildStylusArtifact,
   saveStylusArtifact,
   type StylusArtifact,
-} from '../artifacts/stylus-artifact.js';
+} from '../stylus-artifacts/stylus-artifact.js';
 import { getCompileImageName } from './image-builder.js';
 
 import type { CompileResult } from './types.js';

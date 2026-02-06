@@ -6,7 +6,7 @@ import { execWithProgress, type ProgressCallback } from '../exec.js';
 import {
   generateStylusArtifact,
   saveStylusArtifact,
-} from '../artifacts/stylus-artifact.js';
+} from '../stylus-artifacts/stylus-artifact.js';
 import type { CompileResult } from './types.js';
 
 export type { CompileResult } from './types.js';

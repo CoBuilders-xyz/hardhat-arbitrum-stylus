@@ -22,4 +22,4 @@ export {
   generateStylusArtifact,
   saveStylusArtifact,
   type StylusArtifact,
-} from './artifacts/stylus-artifact.js';
+} from './stylus-artifacts/stylus-artifact.js';
