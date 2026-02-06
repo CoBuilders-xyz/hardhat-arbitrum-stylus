@@ -5,6 +5,12 @@ import { createPluginError } from '@cobuilders/hardhat-arb-utils/errors';
 import type { ProgressCallback } from '../exec.js';
 import { saveStylusArtifact } from '../artifacts/stylus-artifact.js';
 
+/** Docker volume name for persisting rustup toolchains between container runs */
+const RUSTUP_VOLUME_NAME = 'stylus-compile-rustup';
+
+/** Docker volume name for persisting cargo registry between container runs */
+const CARGO_VOLUME_NAME = 'stylus-compile-cargo';
+
 /**
  * Result of a container compilation.
  */
@@ -32,6 +38,29 @@ export interface ContainerCompileOptions {
 }
 
 /**
+ * Ensure the Docker volumes exist for caching.
+ */
+async function ensureVolumes(): Promise<void> {
+  const { execSync } = await import('node:child_process');
+
+  // Create rustup volume if it doesn't exist
+  try {
+    execSync(`docker volume inspect ${RUSTUP_VOLUME_NAME}`, {
+      stdio: 'ignore',
+    });
+  } catch {
+    execSync(`docker volume create ${RUSTUP_VOLUME_NAME}`, { stdio: 'ignore' });
+  }
+
+  // Create cargo volume if it doesn't exist
+  try {
+    execSync(`docker volume inspect ${CARGO_VOLUME_NAME}`, { stdio: 'ignore' });
+  } catch {
+    execSync(`docker volume create ${CARGO_VOLUME_NAME}`, { stdio: 'ignore' });
+  }
+}
+
+/**
  * Run a command inside a compile container.
  * Returns stdout/stderr on success, throws on failure.
  */
@@ -42,7 +71,7 @@ async function runInContainer(
   options: ContainerCompileOptions,
 ): Promise<{ stdout: string; stderr: string }> {
   // Generate a unique container name
-  const containerName = `stylus-compile-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const containerName = `stylus-compile-tmp-${Math.random().toString(36).slice(2, 8)}`;
 
   // Run container using docker run directly with proper output handling
   const result = await runContainerForeground(
@@ -60,6 +89,7 @@ async function runInContainer(
 /**
  * Run a container in foreground mode and capture output.
  * This handles the case where we need to see the output and wait for completion.
+ * Uses Docker volumes to persist rustup and cargo data between runs.
  */
 async function runContainerForeground(
   image: string,
@@ -71,7 +101,13 @@ async function runContainerForeground(
 ): Promise<{ stdout: string; stderr: string }> {
   const { spawn } = await import('node:child_process');
 
+  // Ensure the volumes exist
+  await ensureVolumes();
+
   return new Promise((resolve, reject) => {
+    // The official rust:slim image uses:
+    // - RUSTUP_HOME=/usr/local/rustup
+    // - CARGO_HOME=/usr/local/cargo
     const args = [
       'run',
       '--rm', // Auto-remove when done
@@ -81,6 +117,10 @@ async function runContainerForeground(
       network,
       '-v',
       `${contractPath}:/workspace:rw`,
+      '-v',
+      `${RUSTUP_VOLUME_NAME}:/usr/local/rustup:rw`, // Persist rustup toolchains
+      '-v',
+      `${CARGO_VOLUME_NAME}:/usr/local/cargo:rw`, // Persist cargo registry
       '-w',
       '/workspace',
       image,
@@ -162,7 +202,10 @@ export async function compileContainer(
   const rpcEndpoint = `http://${options.nodeContainerName}:8547`;
 
   // Install the specific toolchain and wasm32 target
-  options.onProgress?.(`Installing Rust toolchain ${toolchain}...`);
+  // These are cached in the Docker volume, so only slow on first use
+  options.onProgress?.(
+    `Preparing toolchain ${toolchain}... (cached after first use)`,
+  );
   try {
     await runInContainer(
       imageName,
@@ -199,7 +242,7 @@ export async function compileContainer(
     );
   }
 
-  options.onProgress?.('Running cargo stylus check...');
+  options.onProgress?.('Compiling contract...');
 
   // Run cargo stylus check with the specific toolchain and endpoint flag
   try {

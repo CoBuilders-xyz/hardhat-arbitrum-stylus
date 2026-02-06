@@ -176,6 +176,9 @@ async function compileStylusContractsContainer(
   clearProgress();
   if (wasBuilt) {
     console.log('  Compile image built successfully.');
+    console.log(
+      '  (This image is cached - subsequent compilations will be faster)',
+    );
   } else {
     console.log('  Using cached compile image.');
   }
