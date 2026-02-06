@@ -6,10 +6,10 @@ import type { ProgressCallback } from '../exec.js';
 import { saveStylusArtifact } from '../artifacts/stylus-artifact.js';
 
 /** Docker volume name for persisting rustup toolchains between container runs */
-const RUSTUP_VOLUME_NAME = 'stylus-compile-rustup';
+export const RUSTUP_VOLUME_NAME = 'stylus-compile-rustup';
 
 /** Docker volume name for persisting cargo registry between container runs */
-const CARGO_VOLUME_NAME = 'stylus-compile-cargo';
+export const CARGO_VOLUME_NAME = 'stylus-compile-cargo';
 
 /**
  * Result of a container compilation.
@@ -38,26 +38,65 @@ export interface ContainerCompileOptions {
 }
 
 /**
- * Ensure the Docker volumes exist for caching.
+ * Check if a Docker volume exists.
  */
-async function ensureVolumes(): Promise<void> {
+export async function volumeExists(volumeName: string): Promise<boolean> {
   const { execSync } = await import('node:child_process');
-
-  // Create rustup volume if it doesn't exist
   try {
-    execSync(`docker volume inspect ${RUSTUP_VOLUME_NAME}`, {
-      stdio: 'ignore',
-    });
+    execSync(`docker volume inspect ${volumeName}`, { stdio: 'ignore' });
+    return true;
   } catch {
-    execSync(`docker volume create ${RUSTUP_VOLUME_NAME}`, { stdio: 'ignore' });
+    return false;
+  }
+}
+
+/**
+ * Remove the cache volumes used for Stylus compilation.
+ * Returns true if any volumes were removed.
+ */
+export async function cleanCacheVolumes(): Promise<{
+  removed: string[];
+  notFound: string[];
+}> {
+  const { execSync } = await import('node:child_process');
+  const removed: string[] = [];
+  const notFound: string[] = [];
+
+  for (const volumeName of [RUSTUP_VOLUME_NAME, CARGO_VOLUME_NAME]) {
+    try {
+      execSync(`docker volume rm ${volumeName}`, { stdio: 'ignore' });
+      removed.push(volumeName);
+    } catch {
+      notFound.push(volumeName);
+    }
   }
 
-  // Create cargo volume if it doesn't exist
-  try {
-    execSync(`docker volume inspect ${CARGO_VOLUME_NAME}`, { stdio: 'ignore' });
-  } catch {
-    execSync(`docker volume create ${CARGO_VOLUME_NAME}`, { stdio: 'ignore' });
+  return { removed, notFound };
+}
+
+/**
+ * Ensure the Docker volumes exist for caching.
+ * Returns info about which volumes were created.
+ */
+export async function ensureVolumes(): Promise<{
+  created: string[];
+  existing: string[];
+}> {
+  const { execSync } = await import('node:child_process');
+  const created: string[] = [];
+  const existing: string[] = [];
+
+  for (const volumeName of [RUSTUP_VOLUME_NAME, CARGO_VOLUME_NAME]) {
+    const exists = await volumeExists(volumeName);
+    if (exists) {
+      existing.push(volumeName);
+    } else {
+      execSync(`docker volume create ${volumeName}`, { stdio: 'ignore' });
+      created.push(volumeName);
+    }
   }
+
+  return { created, existing };
 }
 
 /**
@@ -203,15 +242,36 @@ export async function compileContainer(
 
   // Install the specific toolchain and wasm32 target
   // These are cached in the Docker volume, so only slow on first use
-  options.onProgress?.(
-    `Preparing toolchain ${toolchain}... (cached after first use)`,
-  );
+  options.onProgress?.(`Preparing toolchain ${toolchain}...`);
+
+  // Track if we're downloading (first use) vs using cache
+  let downloadHintShown = false;
+  const toolchainProgress: ProgressCallback = (line) => {
+    // Detect download patterns from rustup output
+    if (
+      line.includes('downloading component') ||
+      line.includes('info: downloading')
+    ) {
+      if (!downloadHintShown) {
+        options.onProgress?.(
+          `Downloading toolchain ${toolchain}... (first use, will be cached)`,
+        );
+        downloadHintShown = true;
+      }
+    }
+    // Pass through to original progress handler
+    options.onProgress?.(line);
+  };
+
   try {
     await runInContainer(
       imageName,
       contractPath,
       ['rustup', 'toolchain', 'install', toolchain],
-      options,
+      {
+        ...options,
+        onProgress: toolchainProgress,
+      },
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

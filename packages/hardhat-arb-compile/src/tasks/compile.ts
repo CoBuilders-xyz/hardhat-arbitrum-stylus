@@ -11,7 +11,11 @@ import { DockerClient } from '@cobuilders/hardhat-arb-utils';
 
 import { discoverStylusContracts } from '../utils/discovery/index.js';
 import { compileLocal } from '../utils/compiler/local.js';
-import { compileContainer } from '../utils/compiler/container.js';
+import {
+  compileContainer,
+  ensureVolumes,
+  cleanCacheVolumes,
+} from '../utils/compiler/container.js';
 import { ensureCompileImage } from '../utils/compiler/image-builder.js';
 import { validateAllToolchains } from '../utils/toolchain/validator.js';
 
@@ -20,6 +24,7 @@ interface CompileTaskArgs {
   local: boolean;
   sol: boolean;
   stylus: boolean;
+  cleanCache: boolean;
 }
 
 /** Prefix for compile networks */
@@ -166,6 +171,17 @@ async function compileStylusContractsContainer(
   discoveredContracts: Array<{ name: string; path: string; toolchain: string }>,
 ): Promise<{ successful: number; failed: number }> {
   const client = new DockerClient();
+
+  // Ensure cache volumes exist
+  const volumeResult = await ensureVolumes();
+  if (volumeResult.created.length > 0) {
+    console.log('Creating cache volumes for faster compilations...');
+    console.log(`  Created: ${volumeResult.created.join(', ')}`);
+    console.log(
+      '  (These volumes cache Rust toolchains. Run --clean-cache to remove them)',
+    );
+    console.log('');
+  }
 
   // Build the base compile image (if not already built)
   console.log('Preparing compile image...');
@@ -319,9 +335,26 @@ async function compileStylusContracts(
 }
 
 const taskCompile: NewTaskActionFunction<CompileTaskArgs> = async (
-  { contracts, local, sol, stylus },
+  { contracts, local, sol, stylus, cleanCache },
   hre: HardhatRuntimeEnvironment,
 ) => {
+  // Handle --clean-cache flag
+  if (cleanCache) {
+    console.log('Cleaning Stylus compilation cache...');
+    const { removed, notFound } = await cleanCacheVolumes();
+    if (removed.length > 0) {
+      console.log(`  Removed: ${removed.join(', ')}`);
+    }
+    if (notFound.length > 0 && removed.length === 0) {
+      console.log('  No cache volumes found.');
+    }
+    console.log('Cache cleaned.\n');
+    // If only --clean-cache was provided, exit early
+    if (!contracts && !sol && !stylus) {
+      return;
+    }
+  }
+
   const useLocalRust = local || hre.config.stylusCompile.useLocalRust;
 
   // Parse contract names if provided (only applies to Stylus)
