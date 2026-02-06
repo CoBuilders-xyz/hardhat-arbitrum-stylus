@@ -76,23 +76,4 @@ describe('Container Compile', () => {
       );
     });
   });
-
-  describe('container config', () => {
-    it('network is passed to container config', async (t) => {
-      if (!dockerAvailable) {
-        t.skip('Docker not available');
-        return;
-      }
-
-      // This test verifies that the ContainerConfig type includes network
-      // by importing and checking the type at runtime
-      const config = {
-        image: 'test',
-        tag: 'latest',
-        network: 'test-network',
-      };
-
-      assert.equal(config.network, 'test-network');
-    });
-  });
 });

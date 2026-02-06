@@ -173,7 +173,7 @@ async function compileStylusContractsContainer(
   const client = new DockerClient();
 
   // Ensure cache volumes exist
-  const volumeResult = await ensureVolumes();
+  const volumeResult = ensureVolumes();
   if (volumeResult.created.length > 0) {
     console.log('Creating cache volumes for faster compilations...');
     console.log(`  Created: ${volumeResult.created.join(', ')}`);
@@ -341,7 +341,7 @@ const taskCompile: NewTaskActionFunction<CompileTaskArgs> = async (
   // Handle --clean-cache flag
   if (cleanCache) {
     console.log('Cleaning Stylus compilation cache...');
-    const { removed, notFound } = await cleanCacheVolumes();
+    const { removed, notFound } = cleanCacheVolumes();
     if (removed.length > 0) {
       console.log(`  Removed: ${removed.join(', ')}`);
     }

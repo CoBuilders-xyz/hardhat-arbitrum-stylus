@@ -1,43 +1,24 @@
 /**
- * Utility functions for hardhat-arb-compile.
+ * Public utilities for hardhat-arb-compile.
  */
 
-// Discovery utilities
+// Discovery
 export {
   discoverStylusContracts,
   type DiscoveryOptions,
   type StylusContractInfo,
 } from './discovery/index.js';
 
-// Command execution
-export {
-  execAsync,
-  execWithProgress,
-  type ExecOptions,
-  type ExecResult,
-  type ProgressCallback,
-} from './exec.js';
-
-// Toolchain validation
-export {
-  isToolchainInstalled,
-  isWasmTargetInstalled,
-  isCargoStylusInstalled,
-  validateLocalToolchain,
-} from './toolchain/validator.js';
-
-// Local compilation
-export {
-  compileLocal,
-  type CompileResult,
-  type CompileOptions,
-} from './compiler/local.js';
+// Compilation
+export { compileLocal, type CompileOptions } from './compiler/local.js';
+export type { CompileResult } from './compiler/types.js';
 
 // ABI export
-export { exportStylusAbi, parseAbiFromSolidity } from './abi/export.js';
+export { exportStylusAbi } from './abi/export.js';
 
 // Artifact generation
 export {
+  buildStylusArtifact,
   generateStylusArtifact,
   saveStylusArtifact,
   type StylusArtifact,

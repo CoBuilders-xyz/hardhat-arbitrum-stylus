@@ -1,27 +1,26 @@
+import { execSync, spawn } from 'node:child_process';
 import path from 'node:path';
 
 import { createPluginError } from '@cobuilders/hardhat-arb-utils/errors';
 
 import type { ProgressCallback } from '../exec.js';
-import { saveStylusArtifact } from '../artifacts/stylus-artifact.js';
+import { parseAbiFromSolidity } from '../abi/export.js';
+import {
+  buildStylusArtifact,
+  saveStylusArtifact,
+  type StylusArtifact,
+} from '../artifacts/stylus-artifact.js';
+import { getCompileImageName } from './image-builder.js';
+
+import type { CompileResult } from './types.js';
+
+export type { CompileResult } from './types.js';
 
 /** Docker volume name for persisting rustup toolchains between container runs */
 export const RUSTUP_VOLUME_NAME = 'stylus-compile-rustup';
 
 /** Docker volume name for persisting cargo registry between container runs */
 export const CARGO_VOLUME_NAME = 'stylus-compile-cargo';
-
-/**
- * Result of a container compilation.
- */
-export interface CompileResult {
-  /** Path to the compiled WASM file */
-  wasmPath: string;
-  /** Whether compilation succeeded */
-  success: boolean;
-  /** Path to the generated artifact JSON (if artifactsDir was provided) */
-  artifactPath?: string;
-}
 
 /**
  * Options for container compilation.
@@ -40,8 +39,7 @@ export interface ContainerCompileOptions {
 /**
  * Check if a Docker volume exists.
  */
-export async function volumeExists(volumeName: string): Promise<boolean> {
-  const { execSync } = await import('node:child_process');
+export function volumeExists(volumeName: string): boolean {
   try {
     execSync(`docker volume inspect ${volumeName}`, { stdio: 'ignore' });
     return true;
@@ -54,11 +52,10 @@ export async function volumeExists(volumeName: string): Promise<boolean> {
  * Remove the cache volumes used for Stylus compilation.
  * Returns true if any volumes were removed.
  */
-export async function cleanCacheVolumes(): Promise<{
+export function cleanCacheVolumes(): {
   removed: string[];
   notFound: string[];
-}> {
-  const { execSync } = await import('node:child_process');
+} {
   const removed: string[] = [];
   const notFound: string[] = [];
 
@@ -78,16 +75,15 @@ export async function cleanCacheVolumes(): Promise<{
  * Ensure the Docker volumes exist for caching.
  * Returns info about which volumes were created.
  */
-export async function ensureVolumes(): Promise<{
+export function ensureVolumes(): {
   created: string[];
   existing: string[];
-}> {
-  const { execSync } = await import('node:child_process');
+} {
   const created: string[] = [];
   const existing: string[] = [];
 
   for (const volumeName of [RUSTUP_VOLUME_NAME, CARGO_VOLUME_NAME]) {
-    const exists = await volumeExists(volumeName);
+    const exists = volumeExists(volumeName);
     if (exists) {
       existing.push(volumeName);
     } else {
@@ -100,8 +96,8 @@ export async function ensureVolumes(): Promise<{
 }
 
 /**
- * Run a command inside a compile container.
- * Returns stdout/stderr on success, throws on failure.
+ * Run a command inside a compile container and capture output.
+ * Uses Docker volumes to persist rustup and cargo data between runs.
  */
 async function runInContainer(
   image: string,
@@ -109,57 +105,22 @@ async function runInContainer(
   command: string[],
   options: ContainerCompileOptions,
 ): Promise<{ stdout: string; stderr: string }> {
-  // Generate a unique container name
   const containerName = `stylus-compile-tmp-${Math.random().toString(36).slice(2, 8)}`;
 
-  // Run container using docker run directly with proper output handling
-  const result = await runContainerForeground(
-    image,
-    containerName,
-    options.network,
-    contractPath,
-    command,
-    options.onProgress,
-  );
-
-  return result;
-}
-
-/**
- * Run a container in foreground mode and capture output.
- * This handles the case where we need to see the output and wait for completion.
- * Uses Docker volumes to persist rustup and cargo data between runs.
- */
-async function runContainerForeground(
-  image: string,
-  containerName: string,
-  network: string,
-  contractPath: string,
-  command: string[],
-  onProgress?: ProgressCallback,
-): Promise<{ stdout: string; stderr: string }> {
-  const { spawn } = await import('node:child_process');
-
-  // Ensure the volumes exist
-  await ensureVolumes();
-
   return new Promise((resolve, reject) => {
-    // The official rust:slim image uses:
-    // - RUSTUP_HOME=/usr/local/rustup
-    // - CARGO_HOME=/usr/local/cargo
     const args = [
       'run',
-      '--rm', // Auto-remove when done
+      '--rm',
       '--name',
       containerName,
       '--network',
-      network,
+      options.network,
       '-v',
       `${contractPath}:/workspace:rw`,
       '-v',
-      `${RUSTUP_VOLUME_NAME}:/usr/local/rustup:rw`, // Persist rustup toolchains
+      `${RUSTUP_VOLUME_NAME}:/usr/local/rustup:rw`,
       '-v',
-      `${CARGO_VOLUME_NAME}:/usr/local/cargo:rw`, // Persist cargo registry
+      `${CARGO_VOLUME_NAME}:/usr/local/cargo:rw`,
       '-w',
       '/workspace',
       image,
@@ -176,12 +137,11 @@ async function runContainerForeground(
     proc.stdout.on('data', (data: Buffer) => {
       const text = data.toString();
       stdout += text;
-      // Stream progress updates
       const lines = text.split('\n');
       for (const line of lines) {
         const trimmed = line.trim();
-        if (trimmed && onProgress) {
-          onProgress(trimmed);
+        if (trimmed && options.onProgress) {
+          options.onProgress(trimmed);
         }
       }
     });
@@ -189,12 +149,11 @@ async function runContainerForeground(
     proc.stderr.on('data', (data: Buffer) => {
       const text = data.toString();
       stderr += text;
-      // Cargo outputs to stderr
       const lines = text.split('\n');
       for (const line of lines) {
         const trimmed = line.trim();
-        if (trimmed && onProgress) {
-          onProgress(trimmed);
+        if (trimmed && options.onProgress) {
+          options.onProgress(trimmed);
         }
       }
     });
@@ -233,8 +192,6 @@ export async function compileContainer(
   packageName: string,
   options: ContainerCompileOptions,
 ): Promise<CompileResult> {
-  // Import the image name from image-builder
-  const { getCompileImageName } = await import('./image-builder.js');
   const imageName = getCompileImageName();
 
   // RPC endpoint uses the node container name as hostname via Docker network
@@ -392,16 +349,7 @@ async function generateStylusArtifactContainer(
   contractName: string,
   wasmPath: string,
   options: ContainerCompileOptions,
-): Promise<{
-  _format: 'hh3-stylus-artifact-1';
-  contractName: string;
-  sourceName: string;
-  abi: unknown[];
-  bytecode: string;
-  deployedBytecode: string;
-  linkReferences: Record<string, never>;
-  deployedLinkReferences: Record<string, never>;
-}> {
+): Promise<StylusArtifact> {
   // Export ABI from the contract using container with the specific toolchain
   let solidityInterface = '';
   try {
@@ -417,108 +365,7 @@ async function generateStylusArtifactContainer(
     solidityInterface = '';
   }
 
-  // Parse the Solidity interface to JSON ABI
   const abi = parseAbiFromSolidity(solidityInterface);
 
-  // Read the WASM file and convert to hex
-  const fs = await import('node:fs/promises');
-  const wasmBuffer = await fs.readFile(wasmPath);
-  const wasmHex = '0x' + wasmBuffer.toString('hex');
-
-  const sourceName = `contracts/${contractName}`;
-
-  return {
-    _format: 'hh3-stylus-artifact-1',
-    contractName,
-    sourceName,
-    abi,
-    bytecode: wasmHex,
-    deployedBytecode: wasmHex,
-    linkReferences: {},
-    deployedLinkReferences: {},
-  };
-}
-
-/**
- * Parse a Solidity interface string into JSON ABI format.
- * Simplified version that handles basic function and event signatures.
- */
-function parseAbiFromSolidity(solidityInterface: string): unknown[] {
-  if (!solidityInterface.trim()) {
-    return [];
-  }
-
-  const abi: unknown[] = [];
-  const lines = solidityInterface.split('\n');
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-
-    // Parse function declarations
-    const funcMatch = trimmed.match(
-      /function\s+(\w+)\s*\(([^)]*)\)\s*(?:external|public|view|pure|payable|\s)*(?:returns\s*\(([^)]*)\))?/,
-    );
-    if (funcMatch) {
-      const [, name, inputs, outputs] = funcMatch;
-      abi.push({
-        type: 'function',
-        name,
-        inputs: parseParams(inputs),
-        outputs: outputs ? parseParams(outputs) : [],
-        stateMutability: trimmed.includes('view')
-          ? 'view'
-          : trimmed.includes('pure')
-            ? 'pure'
-            : trimmed.includes('payable')
-              ? 'payable'
-              : 'nonpayable',
-      });
-    }
-
-    // Parse event declarations
-    const eventMatch = trimmed.match(/event\s+(\w+)\s*\(([^)]*)\)/);
-    if (eventMatch) {
-      const [, name, inputs] = eventMatch;
-      abi.push({
-        type: 'event',
-        name,
-        inputs: parseEventParams(inputs),
-        anonymous: false,
-      });
-    }
-  }
-
-  return abi;
-}
-
-/**
- * Parse function parameter string into ABI format.
- */
-function parseParams(params: string): Array<{ name: string; type: string }> {
-  if (!params.trim()) return [];
-
-  return params.split(',').map((param, index) => {
-    const parts = param.trim().split(/\s+/);
-    const type = parts[0] || 'uint256';
-    const name = parts[1] || `arg${index}`;
-    return { name, type };
-  });
-}
-
-/**
- * Parse event parameter string into ABI format.
- */
-function parseEventParams(
-  params: string,
-): Array<{ name: string; type: string; indexed: boolean }> {
-  if (!params.trim()) return [];
-
-  return params.split(',').map((param, index) => {
-    const trimmed = param.trim();
-    const indexed = trimmed.includes('indexed');
-    const parts = trimmed.replace('indexed', '').trim().split(/\s+/);
-    const type = parts[0] || 'uint256';
-    const name = parts[1] || `arg${index}`;
-    return { name, type, indexed };
-  });
+  return buildStylusArtifact(contractName, abi, wasmPath);
 }
