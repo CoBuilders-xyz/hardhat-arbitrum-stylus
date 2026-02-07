@@ -1,5 +1,15 @@
 # @cobuilders/hardhat-arb-compile
 
+## 0.0.1-alpha.14
+
+### Patch Changes
+
+- 8a7b4f7: Added Container Compile Feature
+- cd35110: implement contract discovery utilities for Stylus projects
+- Updated dependencies [8a7b4f7]
+  - @cobuilders/hardhat-arb-utils@0.0.1-alpha.16
+  - @cobuilders/hardhat-arb-node@0.0.1-alpha.18
+
 ## 0.0.1-alpha.13
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # @cobuilders/hardhat-arb-node
 
+## 0.0.1-alpha.18
+
+### Patch Changes
+
+- 8a7b4f7: Added Container Compile Feature
+- Updated dependencies [8a7b4f7]
+  - @cobuilders/hardhat-arb-utils@0.0.1-alpha.16
+
 ## 0.0.1-alpha.17
 
 ### Patch Changes
