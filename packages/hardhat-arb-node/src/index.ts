@@ -62,6 +62,12 @@ const hardhatArbNodePlugin: HardhatPlugin = {
         defaultValue: 0,
         description: 'Custom WebSocket port (default: from config)',
       })
+      .addOption({
+        name: 'dockerNetwork',
+        type: ArgumentType.STRING,
+        defaultValue: '',
+        description: 'Docker network to connect the container to',
+      })
       .setAction(() => import('./tasks/start.js'))
       .build(),
 

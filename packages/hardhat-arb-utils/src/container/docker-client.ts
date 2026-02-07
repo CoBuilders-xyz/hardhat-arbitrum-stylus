@@ -1,4 +1,7 @@
 import { spawn, type ChildProcess } from "node:child_process";
+import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 import type {
   ContainerConfig,
@@ -81,6 +84,99 @@ export class DockerClient {
         result.stderr,
       );
     }
+  }
+
+  /**
+   * Build a Docker image from a Dockerfile content string.
+   * Uses a temporary directory to write the Dockerfile.
+   * Streams build progress to the optional callback.
+   */
+  async buildImage(
+    imageName: string,
+    tag: string,
+    dockerfileContent: string,
+    onProgress?: (line: string) => void,
+  ): Promise<void> {
+    const fullImage = `${imageName}:${tag}`;
+
+    // Create a temporary directory and write the Dockerfile
+    const tempDir = mkdtempSync(join(tmpdir(), "docker-build-"));
+    const dockerfilePath = join(tempDir, "Dockerfile");
+    writeFileSync(dockerfilePath, dockerfileContent);
+
+    return new Promise((resolve, reject) => {
+      const proc = spawn(
+        this.dockerCommand,
+        ["build", "-t", fullImage, tempDir],
+        {
+          stdio: ["ignore", "pipe", "pipe"],
+        },
+      );
+
+      let stderr = "";
+
+      proc.stdout.on("data", (data: Buffer) => {
+        const lines = data.toString().split("\n");
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (trimmed && onProgress) {
+            onProgress(trimmed);
+          }
+        }
+      });
+
+      proc.stderr.on("data", (data: Buffer) => {
+        stderr += data.toString();
+        // Docker build outputs progress to stderr
+        const lines = data.toString().split("\n");
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (trimmed && onProgress) {
+            onProgress(trimmed);
+          }
+        }
+      });
+
+      proc.on("close", (code) => {
+        // Clean up temp directory
+        try {
+          rmSync(tempDir, { recursive: true, force: true });
+        } catch {
+          // Ignore cleanup errors
+        }
+
+        if (code === 0) {
+          resolve();
+        } else {
+          reject(
+            new DockerError(
+              `Failed to build image ${fullImage}: ${stderr}`,
+              `docker build -t ${fullImage}`,
+              code ?? 1,
+              stderr,
+            ),
+          );
+        }
+      });
+
+      proc.on("error", (err) => {
+        // Clean up temp directory
+        try {
+          rmSync(tempDir, { recursive: true, force: true });
+        } catch {
+          // Ignore cleanup errors
+        }
+
+        reject(
+          new DockerError(
+            `Failed to build image ${fullImage}: ${err.message}`,
+            `docker build -t ${fullImage}`,
+            1,
+            err.message,
+          ),
+        );
+      });
+    });
   }
 
   /**
@@ -296,6 +392,44 @@ export class DockerClient {
   }
 
   /**
+   * Create a Docker network.
+   */
+  async createNetwork(name: string): Promise<void> {
+    const result = await this.exec(["network", "create", name]);
+    if (result.exitCode !== 0) {
+      throw new DockerError(
+        `Failed to create network ${name}: ${result.stderr}`,
+        `docker network create ${name}`,
+        result.exitCode,
+        result.stderr,
+      );
+    }
+  }
+
+  /**
+   * Remove a Docker network.
+   */
+  async removeNetwork(name: string): Promise<void> {
+    const result = await this.exec(["network", "rm", name]);
+    if (result.exitCode !== 0) {
+      throw new DockerError(
+        `Failed to remove network ${name}: ${result.stderr}`,
+        `docker network rm ${name}`,
+        result.exitCode,
+        result.stderr,
+      );
+    }
+  }
+
+  /**
+   * Check if a Docker network exists.
+   */
+  async networkExists(name: string): Promise<boolean> {
+    const result = await this.exec(["network", "inspect", name]);
+    return result.exitCode === 0;
+  }
+
+  /**
    * Build docker run arguments from ContainerConfig.
    */
   private buildRunArgs(config: ContainerConfig): string[] {
@@ -314,6 +448,11 @@ export class DockerClient {
     // Container name
     if (config.name) {
       args.push("--name", config.name);
+    }
+
+    // Network
+    if (config.network) {
+      args.push("--network", config.network);
     }
 
     // Port mappings
@@ -355,22 +494,22 @@ export class DockerClient {
    */
   private exec(args: string[]): Promise<CommandResult> {
     return new Promise((resolve) => {
-      const process = spawn(this.dockerCommand, args, {
+      const proc = spawn(this.dockerCommand, args, {
         stdio: ["ignore", "pipe", "pipe"],
       });
 
       let stdout = "";
       let stderr = "";
 
-      process.stdout.on("data", (data: Buffer) => {
+      proc.stdout.on("data", (data: Buffer) => {
         stdout += data.toString();
       });
 
-      process.stderr.on("data", (data: Buffer) => {
+      proc.stderr.on("data", (data: Buffer) => {
         stderr += data.toString();
       });
 
-      process.on("close", (code) => {
+      proc.on("close", (code) => {
         resolve({
           stdout,
           stderr,
@@ -378,13 +517,55 @@ export class DockerClient {
         });
       });
 
-      process.on("error", () => {
+      proc.on("error", () => {
         resolve({
           stdout,
           stderr: stderr || "Failed to execute docker command",
           exitCode: 1,
         });
       });
+    });
+  }
+
+  /**
+   * Execute a Docker CLI command with stdin input.
+   */
+  private execWithStdin(args: string[], stdin: string): Promise<CommandResult> {
+    return new Promise((resolve) => {
+      const proc = spawn(this.dockerCommand, args, {
+        stdio: ["pipe", "pipe", "pipe"],
+      });
+
+      let stdout = "";
+      let stderr = "";
+
+      proc.stdout.on("data", (data: Buffer) => {
+        stdout += data.toString();
+      });
+
+      proc.stderr.on("data", (data: Buffer) => {
+        stderr += data.toString();
+      });
+
+      proc.on("close", (code) => {
+        resolve({
+          stdout,
+          stderr,
+          exitCode: code ?? 1,
+        });
+      });
+
+      proc.on("error", () => {
+        resolve({
+          stdout,
+          stderr: stderr || "Failed to execute docker command",
+          exitCode: 1,
+        });
+      });
+
+      // Write stdin and close
+      proc.stdin.write(stdin);
+      proc.stdin.end();
     });
   }
 

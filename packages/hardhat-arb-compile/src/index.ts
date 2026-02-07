@@ -32,6 +32,10 @@ const hardhatArbCompilePlugin: HardhatPlugin = {
         name: 'stylus',
         description: 'Compile only Stylus contracts',
       })
+      .addFlag({
+        name: 'cleanCache',
+        description: 'Remove cached Docker volumes for Stylus compilation',
+      })
       .setAction(() => import('./tasks/compile.js'))
       .build(),
   ],

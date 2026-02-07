@@ -4,7 +4,6 @@ import HardhatArbitrumStylusPlugin from '@cobuilders/hardhat-arbitrum-stylus';
 
 const config: HardhatUserConfig = {
   plugins: [HardhatArbitrumStylusPlugin],
-  solidity: '0.8.24',
   stylusCompile: {
     useLocalRust: true,
   },

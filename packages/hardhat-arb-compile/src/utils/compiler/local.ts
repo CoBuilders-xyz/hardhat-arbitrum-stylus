@@ -6,19 +6,10 @@ import { execWithProgress, type ProgressCallback } from '../exec.js';
 import {
   generateStylusArtifact,
   saveStylusArtifact,
-} from '../artifacts/stylus-artifact.js';
+} from '../stylus-artifacts/stylus-artifact.js';
+import type { CompileResult } from './types.js';
 
-/**
- * Result of a local compilation.
- */
-export interface CompileResult {
-  /** Path to the compiled WASM file */
-  wasmPath: string;
-  /** Whether compilation succeeded */
-  success: boolean;
-  /** Path to the generated artifact JSON (if artifactsDir was provided) */
-  artifactPath?: string;
-}
+export type { CompileResult } from './types.js';
 
 /**
  * Options for local compilation.

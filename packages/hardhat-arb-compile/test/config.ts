@@ -22,7 +22,7 @@ describe('Stylus Compile Config', () => {
   });
 
   describe('custom config', () => {
-    useFixtureProject('compile-local-rust');
+    useFixtureProject('compile-custom-config');
 
     it('resolves config with custom values', async () => {
       const hardhatConfig = await import(

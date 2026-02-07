@@ -1,11 +1,11 @@
-import fs from 'node:fs/promises';
 import path from 'node:path';
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
 
 import { exportStylusAbi, parseAbiFromSolidity } from '../abi/export.js';
 import type { ProgressCallback } from '../exec.js';
 
 /**
- * Stylus artifact format compatible with Hardhat's artifact system.
+ * Stylus artifact format, compatible with Hardhat artifacts.
  */
 export interface StylusArtifact {
   _format: 'hh3-stylus-artifact-1';
@@ -19,10 +19,38 @@ export interface StylusArtifact {
 }
 
 /**
- * Generate a Stylus artifact from compiled WASM and exported ABI.
+ * Build a Stylus artifact from a pre-parsed ABI and WASM file.
+ *
+ * @param contractName - The name of the contract
+ * @param abi - The parsed JSON ABI
+ * @param wasmPath - Path to the compiled WASM file
+ * @returns The generated artifact
+ */
+export async function buildStylusArtifact(
+  contractName: string,
+  abi: unknown[],
+  wasmPath: string,
+): Promise<StylusArtifact> {
+  const wasmBuffer = await readFile(wasmPath);
+  const wasmHex = '0x' + wasmBuffer.toString('hex');
+
+  return {
+    _format: 'hh3-stylus-artifact-1',
+    contractName,
+    sourceName: `contracts/${contractName}`,
+    abi,
+    bytecode: wasmHex,
+    deployedBytecode: wasmHex,
+    linkReferences: {},
+    deployedLinkReferences: {},
+  };
+}
+
+/**
+ * Generate a Stylus artifact from a compiled contract using local toolchain.
  *
  * @param contractPath - Absolute path to the contract directory
- * @param contractName - Name of the contract (from Cargo.toml)
+ * @param contractName - The name of the contract
  * @param wasmPath - Path to the compiled WASM file
  * @param toolchain - The Rust toolchain version
  * @param onProgress - Optional callback for progress updates
@@ -35,60 +63,41 @@ export async function generateStylusArtifact(
   toolchain: string,
   onProgress?: ProgressCallback,
 ): Promise<StylusArtifact> {
-  // Export ABI from the contract
+  onProgress?.('Exporting ABI...');
   const solidityInterface = await exportStylusAbi(
     contractPath,
     toolchain,
     onProgress,
   );
-
-  // Parse the Solidity interface to JSON ABI
   const abi = parseAbiFromSolidity(solidityInterface);
 
-  // Read the WASM file and convert to hex
-  const wasmBuffer = await fs.readFile(wasmPath);
-  const wasmHex = '0x' + wasmBuffer.toString('hex');
-
-  // Compute the source name (relative path from contracts dir)
-  // e.g., "contracts/stylus-counter" or just the contract name
-  const sourceName = `contracts/${contractName}`;
-
-  return {
-    _format: 'hh3-stylus-artifact-1',
-    contractName,
-    sourceName,
-    abi,
-    bytecode: wasmHex,
-    deployedBytecode: wasmHex, // For Stylus, these are the same
-    linkReferences: {},
-    deployedLinkReferences: {},
-  };
+  return buildStylusArtifact(contractName, abi, wasmPath);
 }
 
 /**
  * Save a Stylus artifact to the artifacts directory.
  *
- * Creates the directory structure: artifacts/contracts/{contractName}/{contractName}.json
- *
- * @param artifactsDir - The root artifacts directory
+ * @param artifactsDir - The artifacts directory path
  * @param artifact - The artifact to save
- * @returns The path where the artifact was saved
+ * @returns The path to the saved artifact file
  */
 export async function saveStylusArtifact(
   artifactsDir: string,
   artifact: StylusArtifact,
 ): Promise<string> {
-  // Create directory structure: artifacts/contracts/{contractName}/
+  // Create the artifact directory path: artifacts/contracts/{contractName}/{contractName}.json
   const contractDir = path.join(
     artifactsDir,
     'contracts',
     artifact.contractName,
   );
-  await fs.mkdir(contractDir, { recursive: true });
 
-  // Save artifact as {contractName}.json
+  // Ensure the directory exists
+  await mkdir(contractDir, { recursive: true });
+
+  // Write the artifact file
   const artifactPath = path.join(contractDir, `${artifact.contractName}.json`);
-  await fs.writeFile(artifactPath, JSON.stringify(artifact, null, 2));
+  await writeFile(artifactPath, JSON.stringify(artifact, null, 2));
 
   return artifactPath;
 }

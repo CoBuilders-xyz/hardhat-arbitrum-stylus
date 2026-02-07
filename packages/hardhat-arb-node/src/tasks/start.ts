@@ -38,6 +38,7 @@ interface TaskStartArguments {
   name: string;
   httpPort: number;
   wsPort: number;
+  dockerNetwork: string;
 }
 
 /**
@@ -287,6 +288,7 @@ const taskStart: NewTaskActionFunction<TaskStartArguments> = async (
     name,
     httpPort: customHttpPort,
     wsPort: customWsPort,
+    dockerNetwork,
   } = args;
   const config = hre.config.arbNode;
   const manager = new ContainerManager();
@@ -329,6 +331,7 @@ const taskStart: NewTaskActionFunction<TaskStartArguments> = async (
     image: config.image,
     tag: config.tag,
     name: containerName,
+    network: dockerNetwork || undefined,
     ports: [
       { host: httpPort, container: 8547 },
       { host: wsPort, container: 8548 },
