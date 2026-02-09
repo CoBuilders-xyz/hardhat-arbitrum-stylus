@@ -103,7 +103,8 @@ const connection = await hre.network.connect();
 This is the same pattern as Hardhat's built-in node: when you run `npx hardhat test`, Hardhat automatically creates a temporary node for the tests without you having to manually start one.
 
 !!! info "No conflicts with CLI nodes"
-Temporary nodes use random ports and unique container names, so they don't conflict with nodes started via `arb:node start`.
+
+    Temporary nodes use random ports and unique container names, so they don't conflict with nodes started via `arb:node start`.
 
 ### Example: Running Tests
 
@@ -132,7 +133,8 @@ npx hardhat run scripts/deploy.ts
 Use this flag when deploying Stylus (Rust/WASM) contracts. Not needed for EVM-only contracts.
 
 !!! warning "Work in Progress"
-The `--stylus-ready` flag is experimental. We're still working on Cache Manager support for nitro-devnode testing environments.
+
+    The `--stylus-ready` flag is experimental. We're still working on Cache Manager support for nitro-devnode testing environments.
 
 ---
 
@@ -190,4 +192,5 @@ Both CLI and HRE nodes come with 20 pre-funded Hardhat accounts (10 ETH each):
 Account #20 has ~800 ETH and is the L2 chain owner with ArbOwner privileges.
 
 !!! warning
-These are public keys. Never use on mainnet.
+
+    These are public keys. Never use on mainnet.

@@ -157,4 +157,5 @@ npx hardhat arb:node stop
 ```
 
 !!! note
-Temporary nodes from auto-start are cleaned up automatically. You only need to stop manually-started nodes.
+
+    Temporary nodes from auto-start are cleaned up automatically. You only need to stop manually-started nodes.

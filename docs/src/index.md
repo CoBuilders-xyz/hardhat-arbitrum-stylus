@@ -6,7 +6,8 @@
 Hardhat plugin suite for Arbitrum Stylus development.
 
 !!! tip "Beta Status"
-Some features are coming soon. See [Plugins](plugins/index.md) for current status.
+
+    Some features are coming soon. See [Plugins](plugins/index.md) for current status.
 
 ## What's Included
 
@@ -29,7 +30,8 @@ Some features are coming soon. See [Plugins](plugins/index.md) for current statu
 | pnpm/npm/yarn | Latest  | Package manager                                      |
 
 !!! warning "Hardhat 3 Required"
-This plugin uses Hardhat 3's plugin system. It is **not compatible** with Hardhat v2.
+
+    This plugin uses Hardhat 3's plugin system. It is **not compatible** with Hardhat v2.
 
 ## Installation
 
@@ -105,7 +107,8 @@ If you already have a Hardhat 3 project, skip to installing the plugin.
     ```
 
 !!! info "Init Script (Coming Soon)"
-We're working on `npx hardhat arb --init` to automate project setup and peer dependency installation.
+
+    We're working on `npx hardhat arb --init` to automate project setup and peer dependency installation.
 
 ### Configure Hardhat
 
