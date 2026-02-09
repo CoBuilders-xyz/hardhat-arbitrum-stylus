@@ -20,7 +20,7 @@ task(['arb:node', 'start'], 'Start the local Arbitrum node')
     description: 'Custom HTTP port',
   })
   .setAction(() => import('./tasks/start.js'))
-  .build()
+  .build();
 ```
 
 The array `['arb:node', 'start']` creates a subtask. In Hardhat 3, subtasks are the way to organize related commands under a parent.
@@ -35,7 +35,7 @@ Each task file exports an action function:
 // tasks/start.ts
 const startTask: NewTaskActionFunction<StartTaskArguments> = async (
   args,
-  hre
+  hre,
 ) => {
   const { detach, httpPort } = args;
   // Implementation...

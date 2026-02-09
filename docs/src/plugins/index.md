@@ -1,6 +1,6 @@
 # Plugins Overview
 
-<!-- 
+<!--
 CONTENT DESCRIPTION:
 Simple overview of all plugins with status. Merged with toolbox info.
 -->
@@ -59,12 +59,12 @@ npm install @cobuilders/hardhat-arb-node
 
 ## Available Plugins
 
-| Plugin | Package | Status | Links |
-|--------|---------|--------|-------|
-| [Node](node.md) | `@cobuilders/hardhat-arb-node` | ✅ Available | [:fontawesome-brands-github:](https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arb-node) [:fontawesome-brands-npm:](https://www.npmjs.com/package/@cobuilders/hardhat-arb-node) |
+| Plugin                | Package                           | Status         | Links                                                                                                                                                                                                                     |
+| --------------------- | --------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Node](node.md)       | `@cobuilders/hardhat-arb-node`    | ✅ Available   | [:fontawesome-brands-github:](https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arb-node) [:fontawesome-brands-npm:](https://www.npmjs.com/package/@cobuilders/hardhat-arb-node)       |
 | [Compile](compile.md) | `@cobuilders/hardhat-arb-compile` | 🔜 Coming Soon | [:fontawesome-brands-github:](https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arb-compile) [:fontawesome-brands-npm:](https://www.npmjs.com/package/@cobuilders/hardhat-arb-compile) |
-| [Deploy](deploy.md) | `@cobuilders/hardhat-arb-deploy` | 🔜 Coming Soon | [:fontawesome-brands-github:](https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arb-deploy) [:fontawesome-brands-npm:](https://www.npmjs.com/package/@cobuilders/hardhat-arb-deploy) |
-| [Test](test.md) | `@cobuilders/hardhat-arb-test` | 🔜 Coming Soon | [:fontawesome-brands-github:](https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arb-test) [:fontawesome-brands-npm:](https://www.npmjs.com/package/@cobuilders/hardhat-arb-test) |
+| [Deploy](deploy.md)   | `@cobuilders/hardhat-arb-deploy`  | 🔜 Coming Soon | [:fontawesome-brands-github:](https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arb-deploy) [:fontawesome-brands-npm:](https://www.npmjs.com/package/@cobuilders/hardhat-arb-deploy)   |
+| [Test](test.md)       | `@cobuilders/hardhat-arb-test`    | 🔜 Coming Soon | [:fontawesome-brands-github:](https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arb-test) [:fontawesome-brands-npm:](https://www.npmjs.com/package/@cobuilders/hardhat-arb-test)       |
 
 ## All Tasks
 

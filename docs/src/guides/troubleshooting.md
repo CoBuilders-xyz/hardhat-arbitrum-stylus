@@ -27,6 +27,7 @@ permission denied while trying to connect to the Docker daemon
 ```
 
 **Fix:**
+
 ```bash
 sudo usermod -aG docker $USER
 # Log out and back in
@@ -58,6 +59,7 @@ Node nitro-devnode is already running
 ```
 
 **Fix:**
+
 ```bash
 npx hardhat arb:node stop
 # Or use different name
@@ -131,6 +133,7 @@ cargo-stylus: command not found
 ```
 
 **Fix:**
+
 ```bash
 cargo install cargo-stylus
 ```
@@ -142,6 +145,7 @@ can't find crate for `core`
 ```
 
 **Fix:**
+
 ```bash
 rustup target add wasm32-unknown-unknown
 ```
@@ -178,6 +182,7 @@ npx hardhat arb:node start --stylus-ready
 ### Node Not Responding
 
 **Fix:**
+
 ```bash
 npx hardhat arb:node status
 # If not running:
@@ -212,6 +217,7 @@ Cannot find module '@cobuilders/hardhat-arbitrum-stylus'
 ```
 
 **Fix:**
+
 ```bash
 npm install @cobuilders/hardhat-arbitrum-stylus
 ```
