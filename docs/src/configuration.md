@@ -34,3 +34,28 @@ export default config;
 | `chainId`  | number | `412346`                  | Chain ID          |
 
 All options are optional. Default values are used if not specified.
+
+---
+
+## Compile Configuration
+
+```typescript
+import type { HardhatUserConfig } from 'hardhat/config';
+import hardhatArbitrumStylus from '@cobuilders/hardhat-arbitrum-stylus';
+
+const config: HardhatUserConfig = {
+  plugins: [hardhatArbitrumStylus],
+
+  stylusCompile: {
+    useLocalRust: false,
+  },
+};
+
+export default config;
+```
+
+| Option         | Type    | Default | Description                                |
+| -------------- | ------- | ------- | ------------------------------------------ |
+| `useLocalRust` | boolean | `false` | Use local Rust toolchain instead of Docker |
+
+The `--local` CLI flag overrides this for a single run. See [Compile Plugin](plugins/compile.md) for details.

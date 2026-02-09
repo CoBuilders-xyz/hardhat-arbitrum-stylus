@@ -16,7 +16,7 @@ Hardhat plugin suite for Arbitrum Stylus development.
 | Plugin                            | Description              | Status         |
 | --------------------------------- | ------------------------ | -------------- |
 | `@cobuilders/hardhat-arb-node`    | Run local Arbitrum node  | ✅ Available   |
-| `@cobuilders/hardhat-arb-compile` | Compile Stylus contracts | 🔜 Coming Soon |
+| `@cobuilders/hardhat-arb-compile` | Compile Stylus contracts | ✅ Available   |
 | `@cobuilders/hardhat-arb-deploy`  | Deploy contracts         | 🔜 Coming Soon |
 | `@cobuilders/hardhat-arb-test`    | Test runner              | 🔜 Coming Soon |
 

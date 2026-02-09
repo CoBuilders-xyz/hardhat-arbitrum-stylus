@@ -97,3 +97,4 @@ nav:
           - Our Packages: contributors/deep-dive/packages.md
           - Tasks: contributors/deep-dive/tasks.md
           - Hooks: contributors/deep-dive/hooks.md
+          - Compile Plugin: contributors/deep-dive/compile.md
