@@ -20,9 +20,9 @@ export default async (): Promise<Partial<ConfigHooks>> => {
     ): Promise<HardhatUserConfig> => {
       const extendedConfig = await next(config);
 
-      const arbNodeUserConfig = config.arbNode;
+      const nodeUserConfig = config.stylus?.node;
       const chainId =
-        arbNodeUserConfig?.chainId ?? DEFAULT_ARB_NODE_CONFIG.chainId;
+        nodeUserConfig?.chainId ?? DEFAULT_ARB_NODE_CONFIG.chainId;
 
       const networks: Record<string, NetworkUserConfig> =
         extendedConfig.networks ?? {};
@@ -59,7 +59,10 @@ export default async (): Promise<Partial<ConfigHooks>> => {
 
       return {
         ...resolvedConfig,
-        arbNode: resolveArbNodeConfig(userConfig.arbNode),
+        stylus: {
+          ...resolvedConfig.stylus,
+          node: resolveArbNodeConfig(userConfig.stylus?.node),
+        },
       };
     },
   };

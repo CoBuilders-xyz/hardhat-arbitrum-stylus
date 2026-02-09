@@ -17,7 +17,7 @@ describe('Stylus Compile Config', () => {
 
       const hre = await createHardhatRuntimeEnvironment(hardhatConfig.default);
 
-      assert.equal(hre.config.stylusCompile.useLocalRust, false);
+      assert.equal(hre.config.stylus.compile.useLocalRust, false);
     });
   });
 
@@ -31,7 +31,7 @@ describe('Stylus Compile Config', () => {
 
       const hre = await createHardhatRuntimeEnvironment(hardhatConfig.default);
 
-      assert.equal(hre.config.stylusCompile.useLocalRust, true);
+      assert.equal(hre.config.stylus.compile.useLocalRust, true);
     });
   });
 });

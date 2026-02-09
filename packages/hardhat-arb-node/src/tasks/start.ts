@@ -290,7 +290,7 @@ const taskStart: NewTaskActionFunction<TaskStartArguments> = async (
     wsPort: customWsPort,
     dockerNetwork,
   } = args;
-  const config = hre.config.arbNode;
+  const config = hre.config.stylus.node;
   const manager = new ContainerManager();
 
   // Use custom ports if provided, otherwise use config

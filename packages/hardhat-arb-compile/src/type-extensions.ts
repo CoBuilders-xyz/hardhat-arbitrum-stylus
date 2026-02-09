@@ -6,11 +6,11 @@ import type {
 } from './config/types.js';
 
 declare module 'hardhat/types/config' {
-  export interface HardhatUserConfig {
-    stylusCompile?: StylusCompileUserConfig;
+  export interface StylusUserConfig {
+    compile?: StylusCompileUserConfig;
   }
 
-  export interface HardhatConfig {
-    stylusCompile: StylusCompileConfig;
+  export interface StylusConfig {
+    compile: StylusCompileConfig;
   }
 }

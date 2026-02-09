@@ -51,7 +51,7 @@ describe(
         const hre = await createHardhatRuntimeEnvironment(
           hardhatConfig.default,
         );
-        const config = hre.config.arbNode;
+        const config = hre.config.stylus.node;
         const rpcUrl = `http://localhost:${config.httpPort}`;
 
         // Run start task with detach flag
@@ -96,7 +96,7 @@ describe(
         const hre = await createHardhatRuntimeEnvironment(
           hardhatConfig.default,
         );
-        const config = hre.config.arbNode;
+        const config = hre.config.stylus.node;
         const rpcUrl = `http://localhost:${config.httpPort}`;
 
         // Run start task with stylus-ready flag

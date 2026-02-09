@@ -4,9 +4,11 @@ import HardhatArbNodePlugin from '../../../src/index.js';
 
 const config: HardhatUserConfig = {
   plugins: [HardhatArbNodePlugin],
-  arbNode: {
-    httpPort: 9547,
-    wsPort: 9548,
+  stylus: {
+    node: {
+      httpPort: 9547,
+      wsPort: 9548,
+    },
   },
 };
 

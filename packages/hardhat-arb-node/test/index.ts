@@ -34,13 +34,13 @@ describe('@cobuilders/hardhat-arb-node', () => {
 
       const hre = await createHardhatRuntimeEnvironment(hardhatConfig.default);
 
-      assert.equal(hre.config.arbNode.image, 'offchainlabs/nitro-node');
-      assert.equal(hre.config.arbNode.tag, 'v3.7.1-926f1ab');
-      assert.equal(hre.config.arbNode.httpPort, 8547);
-      assert.equal(hre.config.arbNode.wsPort, 8548);
-      assert.equal(hre.config.arbNode.chainId, 412346);
+      assert.equal(hre.config.stylus.node.image, 'offchainlabs/nitro-node');
+      assert.equal(hre.config.stylus.node.tag, 'v3.7.1-926f1ab');
+      assert.equal(hre.config.stylus.node.httpPort, 8547);
+      assert.equal(hre.config.stylus.node.wsPort, 8548);
+      assert.equal(hre.config.stylus.node.chainId, 412346);
       assert.equal(
-        hre.config.arbNode.devAccount.address,
+        hre.config.stylus.node.devAccount.address,
         '0x3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E',
       );
     });
@@ -79,12 +79,12 @@ describe('@cobuilders/hardhat-arb-node', () => {
       const hre = await createHardhatRuntimeEnvironment(hardhatConfig.default);
 
       // Custom values should be used for task commands
-      assert.equal(hre.config.arbNode.httpPort, 9547);
-      assert.equal(hre.config.arbNode.wsPort, 9548);
+      assert.equal(hre.config.stylus.node.httpPort, 9547);
+      assert.equal(hre.config.stylus.node.wsPort, 9548);
 
       // Defaults should still apply for unspecified values
-      assert.equal(hre.config.arbNode.image, 'offchainlabs/nitro-node');
-      assert.equal(hre.config.arbNode.tag, 'v3.7.1-926f1ab');
+      assert.equal(hre.config.stylus.node.image, 'offchainlabs/nitro-node');
+      assert.equal(hre.config.stylus.node.tag, 'v3.7.1-926f1ab');
     });
 
     it('default network uses random hook port regardless of config', async () => {

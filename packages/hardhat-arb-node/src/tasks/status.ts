@@ -15,7 +15,7 @@ const taskStatus: NewTaskActionFunction<TaskStatusArguments> = async (
 ) => {
   const { name } = args;
   const containerName = name || CONTAINER_NAME;
-  const config = hre.config.arbNode;
+  const config = hre.config.stylus.node;
   const client = new DockerClient();
 
   const containerId = await client.findByName(containerName);

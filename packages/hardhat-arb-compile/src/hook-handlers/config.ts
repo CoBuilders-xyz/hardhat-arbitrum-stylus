@@ -16,7 +16,10 @@ export default async (): Promise<Partial<ConfigHooks>> => {
 
       return {
         ...resolvedConfig,
-        stylusCompile: resolveStylusCompileConfig(userConfig.stylusCompile),
+        stylus: {
+          ...resolvedConfig.stylus,
+          compile: resolveStylusCompileConfig(userConfig.stylus?.compile),
+        },
       };
     },
   };
