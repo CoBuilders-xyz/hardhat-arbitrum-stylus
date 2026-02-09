@@ -39,6 +39,7 @@ pnpm format:fix # Fix format
 ```
 
 Run the tests at the root level to guarantee everything works.
+
 ```bash
 pnpm test
 ```
@@ -59,15 +60,11 @@ You'll be prompted to:
 
 This creates a file in `.changeset/`. Commit it with your code.
 
-!!! note "When do I need a changeset?"
-    - ✅ Bug fixes, new features, breaking changes
-    - ❌ Documentation only, test changes, CI/tooling updates
+!!! note "When do I need a changeset?" - ✅ Bug fixes, new features, breaking changes - ❌ Documentation only, test changes, CI/tooling updates
 
     For changes that don't need a changeset, add the label `no changeset needed` to your PR.
 
-!!! warning "Don't do these"
-    - Don't run `pnpm changeset version` — CI handles this
-    - Don't manually edit version numbers in `package.json`
+!!! warning "Don't do these" - Don't run `pnpm changeset version` — CI handles this - Don't manually edit version numbers in `package.json`
 
 ### 5. Open a Pull Request
 

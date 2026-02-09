@@ -6,30 +6,30 @@
 Hardhat plugin suite for Arbitrum Stylus development.
 
 !!! tip "Beta Status"
-    Some features are coming soon. See [Plugins](plugins/index.md) for current status.
+Some features are coming soon. See [Plugins](plugins/index.md) for current status.
 
 ## What's Included
 
 `@cobuilders/hardhat-arbitrum-stylus` is a **plugin bundler** that includes all the individual plugins:
 
-| Plugin | Description | Status |
-|--------|-------------|--------|
-| `@cobuilders/hardhat-arb-node` | Run local Arbitrum node | ✅ Available |
+| Plugin                            | Description              | Status         |
+| --------------------------------- | ------------------------ | -------------- |
+| `@cobuilders/hardhat-arb-node`    | Run local Arbitrum node  | ✅ Available   |
 | `@cobuilders/hardhat-arb-compile` | Compile Stylus contracts | 🔜 Coming Soon |
-| `@cobuilders/hardhat-arb-deploy` | Deploy contracts | 🔜 Coming Soon |
-| `@cobuilders/hardhat-arb-test` | Test runner | 🔜 Coming Soon |
+| `@cobuilders/hardhat-arb-deploy`  | Deploy contracts         | 🔜 Coming Soon |
+| `@cobuilders/hardhat-arb-test`    | Test runner              | 🔜 Coming Soon |
 
 ## Prerequisites
 
-| Tool | Version | Installation |
-|------|---------|--------------|
-| **Hardhat** | **v3** | Required (v2 not supported) |
-| Node.js | v22+ | [nodejs.org](https://nodejs.org) or `nvm install 22` |
-| Docker | Latest | [docker.com](https://docker.com) |
-| pnpm/npm/yarn | Latest | Package manager |
+| Tool          | Version | Installation                                         |
+| ------------- | ------- | ---------------------------------------------------- |
+| **Hardhat**   | **v3**  | Required (v2 not supported)                          |
+| Node.js       | v22+    | [nodejs.org](https://nodejs.org) or `nvm install 22` |
+| Docker        | Latest  | [docker.com](https://docker.com)                     |
+| pnpm/npm/yarn | Latest  | Package manager                                      |
 
 !!! warning "Hardhat 3 Required"
-    This plugin uses Hardhat 3's plugin system. It is **not compatible** with Hardhat v2.
+This plugin uses Hardhat 3's plugin system. It is **not compatible** with Hardhat v2.
 
 ## Installation
 
@@ -80,7 +80,7 @@ If you already have a Hardhat 3 project, skip to installing the plugin.
     ```bash
     npm install @cobuilders/hardhat-arbitrum-stylus
     ```
-    
+
     npm automatically installs peer dependencies.
 
 === "yarn"
@@ -88,16 +88,16 @@ If you already have a Hardhat 3 project, skip to installing the plugin.
     ```bash
     yarn add @cobuilders/hardhat-arbitrum-stylus
     ```
-    
+
     yarn automatically installs peer dependencies.
 
 === "pnpm"
 
     ```bash
     pnpm add @cobuilders/hardhat-arbitrum-stylus
-    ```    
+    ```
     pnpm does not install peer dependencies automatically. You may need to install them manually:
-    
+
     ```bash
     pnpm add @cobuilders/hardhat-arb-node @cobuilders/hardhat-arb-compile \
              @cobuilders/hardhat-arb-deploy @cobuilders/hardhat-arb-test \
@@ -105,7 +105,7 @@ If you already have a Hardhat 3 project, skip to installing the plugin.
     ```
 
 !!! info "Init Script (Coming Soon)"
-    We're working on `npx hardhat arb --init` to automate project setup and peer dependency installation.
+We're working on `npx hardhat arb --init` to automate project setup and peer dependency installation.
 
 ### Configure Hardhat
 

@@ -17,10 +17,10 @@ Hooks run at specific points in Hardhat's lifecycle. We use three hooks in `hard
 ```typescript
 extendUserConfig: async (config, next) => {
   const extendedConfig = await next(config);
-  
+
   // Random port for hook-started nodes
   const hookHttpPort = getHookHttpPort();
-  
+
   const arbNodeNetwork: HttpNetworkUserConfig = {
     type: 'http',
     url: `http://127.0.0.1:${hookHttpPort}`,
@@ -84,7 +84,7 @@ async newConnection(context, next) {
       const hre = getHre();  // ← From hre hook
       if (hre) {
         const tempContainerName = generateTempContainerName();
-        
+
         await hre.tasks.getTask(['arb:node', 'start']).run({
           quiet: true,
           detach: true,

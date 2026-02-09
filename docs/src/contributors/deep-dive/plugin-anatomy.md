@@ -61,7 +61,7 @@ Now `hardhat.config.ts` is fully typed:
 ```typescript
 export default {
   arbNode: {
-    httpPort: 8547,      // ✓ Valid
+    httpPort: 8547, // ✓ Valid
     invalidOption: true, // ✗ TypeScript error
   },
 };

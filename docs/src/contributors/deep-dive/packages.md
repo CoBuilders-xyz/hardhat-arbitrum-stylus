@@ -19,14 +19,14 @@ graph TD
 
 ## Package Overview
 
-| Package | Purpose |
-|---------|---------|
+| Package                   | Purpose                          |
+| ------------------------- | -------------------------------- |
 | `hardhat-arbitrum-stylus` | Toolbox — users install this one |
-| `hardhat-arb-node` | Local node management |
-| `hardhat-arb-compile` | Contract compilation |
-| `hardhat-arb-deploy` | Deployment |
-| `hardhat-arb-test` | Test runner |
-| `hardhat-arb-utils` | Shared utilities |
+| `hardhat-arb-node`        | Local node management            |
+| `hardhat-arb-compile`     | Contract compilation             |
+| `hardhat-arb-deploy`      | Deployment                       |
+| `hardhat-arb-test`        | Test runner                      |
+| `hardhat-arb-utils`       | Shared utilities                 |
 
 ---
 

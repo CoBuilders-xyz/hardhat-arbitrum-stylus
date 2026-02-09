@@ -1,6 +1,6 @@
 # Tutorial: Your First Stylus Contract
 
-<!-- 
+<!--
 CONTENT DESCRIPTION:
 End-to-end tutorial building a Counter contract. Complete walkthrough from setup to deployment.
 -->

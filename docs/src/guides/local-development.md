@@ -74,25 +74,25 @@ npx hardhat test
 ```
 
 !!! info "Temporary Containers"
-    Auto-started nodes use random ports and are cleaned up automatically when the test process exits.
+Auto-started nodes use random ports and are cleaned up automatically when the test process exits.
 
 ### When to Use Manual vs Auto-Start
 
-| Scenario | Approach |
-|----------|----------|
-| Running tests | Auto-start (just `npx hardhat test`) |
-| Quick script execution | Auto-start |
-| Stylus contract deployment | Manual with `--stylus-ready` |
-| Interactive development | Manual for persistence |
-| Debugging with logs | Manual for log access |
+| Scenario                   | Approach                             |
+| -------------------------- | ------------------------------------ |
+| Running tests              | Auto-start (just `npx hardhat test`) |
+| Quick script execution     | Auto-start                           |
+| Stylus contract deployment | Manual with `--stylus-ready`         |
+| Interactive development    | Manual for persistence               |
+| Debugging with logs        | Manual for log access                |
 
 ## When to Use --stylus-ready
 
-| Contract Type | `--stylus-ready` Needed? |
-|---------------|--------------------------|
-| Stylus (Rust/WASM) | Yes |
-| Solidity (EVM) | No |
-| Mixed project | Yes (for Stylus contracts) |
+| Contract Type      | `--stylus-ready` Needed?   |
+| ------------------ | -------------------------- |
+| Stylus (Rust/WASM) | Yes                        |
+| Solidity (EVM)     | No                         |
+| Mixed project      | Yes (for Stylus contracts) |
 
 The `--stylus-ready` flag deploys infrastructure needed for Stylus contracts:
 
@@ -130,10 +130,12 @@ Each restart resets state. Keep the node running during development.
 
 ```typescript
 // Account #0 - use for deployments
-const DEPLOYER = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
+const DEPLOYER =
+  '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
 
 // Account #1 - use for user interactions
-const USER = '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d';
+const USER =
+  '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d';
 ```
 
 ### Monitor Logs
@@ -155,4 +157,4 @@ npx hardhat arb:node stop
 ```
 
 !!! note
-    Temporary nodes from auto-start are cleaned up automatically. You only need to stop manually-started nodes.
+Temporary nodes from auto-start are cleaned up automatically. You only need to stop manually-started nodes.
