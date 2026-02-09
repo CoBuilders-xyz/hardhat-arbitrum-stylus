@@ -62,4 +62,20 @@ describe('Arb-node default network', () => {
     const balanceBigInt = BigInt(balance);
     assert.ok(balanceBigInt > 0n, 'Account should have balance');
   });
+
+  it('should report hardhat_getAutomine as true', async () => {
+    const hardhatConfig = await import(
+      pathToFileURL(path.join(process.cwd(), 'hardhat.config.js')).href
+    );
+    const hre = await createHardhatRuntimeEnvironment(hardhatConfig.default);
+    const connection = await hre.network.connect();
+
+    // The onRequest hook intercepts hardhat_getAutomine and returns true.
+    // This makes tools like Ignition treat the devnode as automined
+    // so they use 1 confirmation instead of 5.
+    const result = await connection.provider.request({
+      method: 'hardhat_getAutomine',
+    });
+    assert.equal(result, true);
+  });
 });

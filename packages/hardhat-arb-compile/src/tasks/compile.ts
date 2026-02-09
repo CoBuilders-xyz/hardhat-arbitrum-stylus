@@ -355,7 +355,7 @@ const taskCompile: NewTaskActionFunction<CompileTaskArgs> = async (
     }
   }
 
-  const useLocalRust = local || hre.config.stylusCompile.useLocalRust;
+  const useLocalRust = local || hre.config.stylus.compile.useLocalRust;
 
   // Parse contract names if provided (only applies to Stylus)
   const contractFilter = contracts

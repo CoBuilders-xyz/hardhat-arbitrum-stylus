@@ -1,5 +1,6 @@
 import type { HookContext, NetworkHooks } from 'hardhat/types/hooks';
 import type { ChainType, NetworkConnection } from 'hardhat/types/network';
+import type { JsonRpcRequest, JsonRpcResponse } from 'hardhat/types/providers';
 
 import { getHre } from './hre.js';
 import { getHookHttpPort, getHookWsPort } from './hook-state.js';
@@ -134,6 +135,30 @@ export default async (): Promise<Partial<NetworkHooks>> => {
       }
 
       return next(context, networkConnection);
+    },
+
+    async onRequest<ChainTypeT extends ChainType | string>(
+      context: HookContext,
+      networkConnection: NetworkConnection<ChainTypeT>,
+      jsonRpcRequest: JsonRpcRequest,
+      next: (
+        nextContext: HookContext,
+        nextNetworkConnection: NetworkConnection<ChainTypeT>,
+        nextJsonRpcRequest: JsonRpcRequest,
+      ) => Promise<JsonRpcResponse>,
+    ): Promise<JsonRpcResponse> {
+      // The nitro-devnode mines one block per transaction on demand.
+      // Report it as automined so tools like Ignition use 1 confirmation
+      // instead of the default 5 (which would hang forever).
+      if (jsonRpcRequest.method === 'hardhat_getAutomine') {
+        return {
+          jsonrpc: '2.0',
+          id: jsonRpcRequest.id,
+          result: true,
+        };
+      }
+
+      return next(context, networkConnection, jsonRpcRequest);
     },
   };
 
