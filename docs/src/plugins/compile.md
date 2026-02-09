@@ -1,33 +1,281 @@
 # Compile Plugin
 
-# <!--
-
-# CONTENT DESCRIPTION FOR DOCUMENTATION AGENT
-
-Placeholder page for the compile plugin.
-
-WHAT TO WRITE:
-
-- Status: Coming Soon
-- Brief description of planned features
-- Keep it minimal
-
-=============================================================================
--->
-
 **Package:** `@cobuilders/hardhat-arb-compile`
 
-**Status:** 🔜 Coming Soon
+**Status:** ✅ Available
 
 [:fontawesome-brands-github: Source](https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arb-compile){ .md-button }
 [:fontawesome-brands-npm: npm](https://www.npmjs.com/package/@cobuilders/hardhat-arb-compile){ .md-button }
 
-!!! warning "Coming Soon"
-This plugin is under development.
+Compiles Solidity and Stylus (Rust) contracts. Auto-discovers Stylus projects in your `contracts/` directory, compiles them via `cargo-stylus`, and generates Hardhat-compatible artifacts.
 
-## Planned Features
+## Two Compilation Modes
 
-- Compile Stylus contracts via `cargo-stylus`
-- Compile Solidity contracts
-- Unified artifact generation
-- TypeScript type generation
+The plugin supports two ways to compile Stylus contracts:
+
+| Mode                 | Use Case                         | Requirements                         |
+| -------------------- | -------------------------------- | ------------------------------------ |
+| **Docker** (default) | Zero-setup, isolated builds      | Docker only                          |
+| **Local**            | Faster if Rust already installed | `rustup`, `cargo-stylus`, toolchains |
+
+Docker mode runs everything inside containers with cached volumes, so you don't need Rust installed locally. Local mode uses your system's Rust toolchain directly — faster when you already have the tools.
+
+---
+
+## Command Reference
+
+```bash
+npx hardhat arb:compile [options]
+```
+
+By default, this compiles **both** Solidity and Stylus contracts.
+
+| Option         | Description                                   | Default        |
+| -------------- | --------------------------------------------- | -------------- |
+| `--contracts`  | Comma-separated list of Stylus contract names | all discovered |
+| `--local`      | Use local Rust toolchain instead of Docker    | `false`        |
+| `--sol`        | Compile only Solidity contracts               | `false`        |
+| `--stylus`     | Compile only Stylus contracts                 | `false`        |
+| `--cleanCache` | Remove cached Docker volumes                  | `false`        |
+
+**Examples:**
+
+```bash
+npx hardhat arb:compile                           # Compile everything
+npx hardhat arb:compile --stylus                  # Stylus contracts only
+npx hardhat arb:compile --sol                     # Solidity contracts only
+npx hardhat arb:compile --contracts my-counter    # Single Stylus contract
+npx hardhat arb:compile --contracts counter,nft   # Multiple Stylus contracts
+npx hardhat arb:compile --local                   # Use local Rust toolchain
+npx hardhat arb:compile --cleanCache              # Clear Docker cache, then exit
+npx hardhat arb:compile --cleanCache --stylus     # Clear cache, then compile
+```
+
+---
+
+## What Happens When You Compile
+
+1. **Discovery** — Scans `contracts/` for directories containing `Cargo.toml` with `stylus-sdk` as a dependency
+2. **Validation** — Checks that each contract has a `rust-toolchain.toml` specifying its toolchain version
+3. **Node** — Starts a temporary Arbitrum node (needed by `cargo stylus check`)
+4. **Check** — Runs `cargo stylus check` against the node to validate the contract
+5. **Build** — Runs `cargo stylus build` to compile to WASM
+6. **Artifacts** — Exports the ABI and generates a Hardhat-compatible artifact
+7. **Cleanup** — Stops the temporary node and removes temporary resources
+
+!!! info "Temporary Node"
+
+    The plugin automatically starts and stops a temporary Arbitrum node for each compilation run. `cargo stylus check` requires a running node to validate contracts. You don't need to manage this yourself.
+
+---
+
+## Contract Project Structure
+
+Each Stylus contract must be a Rust project inside `contracts/` with the following structure:
+
+```
+my-hardhat-project/
+├── contracts/
+│   ├── my-counter/              # Stylus contract
+│   │   ├── Cargo.toml           # Must depend on stylus-sdk
+│   │   ├── Stylus.toml          # Required by cargo-stylus
+│   │   ├── rust-toolchain.toml  # Required — specifies Rust version
+│   │   └── src/
+│   │       ├── lib.rs           # Contract code
+│   │       └── main.rs          # Entry point (for ABI export)
+│   ├── my-nft/                  # Another Stylus contract
+│   │   ├── Cargo.toml
+│   │   ├── Stylus.toml
+│   │   ├── rust-toolchain.toml
+│   │   └── src/
+│   │       ├── lib.rs
+│   │       └── main.rs
+│   └── MyToken.sol              # Solidity contracts work alongside
+├── artifacts/                   # Generated by compilation
+├── hardhat.config.ts
+└── package.json
+```
+
+!!! tip "Quick Start with Example Contract"
+
+    Don't have a Stylus contract yet? Copy the example counter from the plugin's test fixtures:
+
+    [Stylus Counter Example](https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arb-compile/test/fixture-projects/compile-container-rust/contracts/stylus-counter){target="_blank"}
+
+    Copy the `stylus-counter` directory into your project's `contracts/` folder and compile. It's a minimal, working Stylus contract.
+
+    Below a snippet for copying the folder using git. Make sure to run it in contracts folder of your project
+
+    ```bash
+      # Clones the repo, copies the contract and deletes the repo
+      git clone https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus.git
+      cp -r hardhat-arbitrum-stylus/packages/hardhat-arb-compile/test/fixture-projects/compile-container-rust/contracts/stylus-counter .
+      rm -rf hardhat-arbitrum-stylus
+    ```
+
+**`Cargo.toml`** — Must include `stylus-sdk` as a dependency. Non-Stylus Rust projects are automatically ignored.
+
+```toml
+[package]
+name = "my-counter"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+alloy-primitives = "=0.8.20"
+alloy-sol-types = "=0.8.20"
+stylus-sdk = "=0.9.0"
+
+[features]
+default = ["mini-alloc"]
+export-abi = ["stylus-sdk/export-abi"]
+mini-alloc = ["stylus-sdk/mini-alloc"]
+
+[[bin]]
+name = "my-counter"
+path = "src/main.rs"
+
+[lib]
+crate-type = ["lib", "cdylib"]
+
+[profile.release]
+codegen-units = 1
+strip = true
+lto = true
+panic = "abort"
+opt-level = 3
+```
+
+The `export-abi` feature and `[[bin]]` section are needed for ABI export. The `cdylib` crate type is needed for WASM compilation.
+
+**`Stylus.toml`** — Required by `cargo-stylus`. Can be minimal:
+
+```toml
+[workspace]
+
+[workspace.networks]
+
+[contract]
+```
+
+**`rust-toolchain.toml`** — Required for each contract. Specifies the exact Rust toolchain version to use.
+
+```toml
+[toolchain]
+channel = "1.93.0"
+```
+
+!!! warning "rust-toolchain.toml is required"
+
+    Every Stylus contract must have a `rust-toolchain.toml` file. Different contracts can use different toolchain versions — the plugin handles this automatically.
+
+---
+
+## Artifacts
+
+After compilation, each Stylus contract gets an artifact at:
+
+```
+artifacts/contracts/{contractName}/{contractName}.json
+```
+
+The artifact is Hardhat-compatible and contains:
+
+| Field              | Description                                      |
+| ------------------ | ------------------------------------------------ |
+| `_format`          | `hh3-stylus-artifact-1`                          |
+| `contractName`     | Name from `Cargo.toml`                           |
+| `abi`              | JSON ABI (parsed from `cargo stylus export-abi`) |
+| `bytecode`         | Compiled WASM as hex                             |
+| `deployedBytecode` | Same as bytecode                                 |
+
+The ABI is extracted by running `cargo stylus export-abi`, which outputs a Solidity interface. The plugin parses this into standard JSON ABI format.
+
+!!! tip "ABI export is best-effort"
+
+    If ABI export fails (e.g., the contract doesn't support `export-abi`), the artifact is still generated with an empty ABI. Compilation does not fail.
+
+---
+
+## Docker Mode (Default)
+
+Docker mode compiles contracts inside containers. This is the default and requires no local Rust installation.
+
+**How it works:**
+
+1. Builds a base compile image (`stylus-compile:latest`) from `rust:slim` with `cargo-stylus` pre-installed
+2. Creates Docker volumes for caching Rust toolchains and Cargo registry
+3. Installs the contract-specific toolchain inside the container (cached after first use)
+4. Runs compilation commands in the container
+5. Creates a Docker network so the compile container can reach the temporary Arbitrum node
+
+**Caching:**
+
+The plugin uses two Docker volumes for persistent caching:
+
+| Volume                  | Contents                  |
+| ----------------------- | ------------------------- |
+| `stylus-compile-rustup` | Rust toolchains           |
+| `stylus-compile-cargo`  | Cargo registry and crates |
+
+First compilation downloads toolchains and dependencies — subsequent compilations reuse the cache and are much faster.
+
+```bash
+# Remove cache volumes if something goes wrong
+npx hardhat arb:compile --cleanCache
+```
+
+---
+
+## Local Mode
+
+Use `--local` or set `useLocalRust: true` in config to compile with your system's Rust toolchain.
+
+```bash
+npx hardhat arb:compile --local
+```
+
+The plugin validates all requirements before starting:
+
+1. `rustup` is installed
+2. `cargo-stylus` is installed
+3. Each required toolchain version is installed
+4. The `wasm32-unknown-unknown` target is installed for each toolchain
+
+If anything is missing, you'll get clear instructions on what to install.
+
+!!! note "Local Mode Prerequisites"
+
+    Install the required tools before using local mode:
+
+    ```bash
+    # Install rustup (if not already installed)
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+    # Install cargo-stylus
+    cargo install cargo-stylus
+
+    # For each toolchain version your contracts use:
+    rustup install 1.93.0
+    rustup +1.93.0 target add wasm32-unknown-unknown
+    ```
+
+---
+
+## Configuration
+
+```typescript
+export default {
+  stylusCompile: {
+    useLocalRust: false, // Set to true to always use local Rust
+  },
+};
+```
+
+| Option         | Type    | Default | Description                                |
+| -------------- | ------- | ------- | ------------------------------------------ |
+| `useLocalRust` | boolean | `false` | Use local Rust toolchain instead of Docker |
+
+The `--local` CLI flag overrides this setting for a single run.
+
+See [Configuration](../configuration.md) for all options.

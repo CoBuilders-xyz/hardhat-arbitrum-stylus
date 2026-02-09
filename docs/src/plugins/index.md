@@ -62,7 +62,7 @@ npm install @cobuilders/hardhat-arb-node
 | Plugin                | Package                           | Status         | Links                                                                                                                                                                                                                     |
 | --------------------- | --------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [Node](node.md)       | `@cobuilders/hardhat-arb-node`    | ✅ Available   | [:fontawesome-brands-github:](https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arb-node) [:fontawesome-brands-npm:](https://www.npmjs.com/package/@cobuilders/hardhat-arb-node)       |
-| [Compile](compile.md) | `@cobuilders/hardhat-arb-compile` | 🔜 Coming Soon | [:fontawesome-brands-github:](https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arb-compile) [:fontawesome-brands-npm:](https://www.npmjs.com/package/@cobuilders/hardhat-arb-compile) |
+| [Compile](compile.md) | `@cobuilders/hardhat-arb-compile` | ✅ Available   | [:fontawesome-brands-github:](https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arb-compile) [:fontawesome-brands-npm:](https://www.npmjs.com/package/@cobuilders/hardhat-arb-compile) |
 | [Deploy](deploy.md)   | `@cobuilders/hardhat-arb-deploy`  | 🔜 Coming Soon | [:fontawesome-brands-github:](https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arb-deploy) [:fontawesome-brands-npm:](https://www.npmjs.com/package/@cobuilders/hardhat-arb-deploy)   |
 | [Test](test.md)       | `@cobuilders/hardhat-arb-test`    | 🔜 Coming Soon | [:fontawesome-brands-github:](https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arb-test) [:fontawesome-brands-npm:](https://www.npmjs.com/package/@cobuilders/hardhat-arb-test)       |
 
@@ -73,7 +73,7 @@ npx hardhat arb:node start    # Start local Arbitrum node
 npx hardhat arb:node stop     # Stop the node
 npx hardhat arb:node status   # Check node status
 npx hardhat arb:node logs     # View node logs
-npx hardhat arb:compile       # Compile Stylus contracts (coming soon)
+npx hardhat arb:compile       # Compile Stylus contracts
 npx hardhat arb:deploy        # Deploy contracts (coming soon)
 npx hardhat arb:test          # Run tests (coming soon)
 ```
