@@ -3,7 +3,7 @@ import path from 'node:path';
 
 import { parse } from 'smol-toml';
 
-import { createPluginError } from '@cobuilders/hardhat-arb-utils/errors';
+import { createPluginError } from '../../errors/index.js';
 
 /**
  * Parse a rust-toolchain.toml file and extract the toolchain channel.

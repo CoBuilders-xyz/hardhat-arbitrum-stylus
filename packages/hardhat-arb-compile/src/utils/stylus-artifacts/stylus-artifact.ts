@@ -2,7 +2,7 @@ import path from 'node:path';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 
 import { exportStylusAbi, parseAbiFromSolidity } from '../abi/export.js';
-import type { ProgressCallback } from '../exec.js';
+import type { ProgressCallback } from '@cobuilders/hardhat-arb-utils/stylus';
 
 /**
  * Stylus artifact format, compatible with Hardhat artifacts.

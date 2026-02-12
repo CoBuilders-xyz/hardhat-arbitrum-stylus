@@ -156,11 +156,11 @@ rustup target add wasm32-unknown-unknown
 cargo stylus check failed
 ```
 
-**Fix:** Ensure node is running with Stylus support:
+**Fix:** Ensure node is running (Stylus infrastructure is deployed automatically):
 
 ```bash
 npx hardhat arb:node stop
-npx hardhat arb:node start --stylus-ready
+npx hardhat arb:node start
 ```
 
 ### Stylus Deploy Fails
@@ -169,11 +169,11 @@ npx hardhat arb:node start --stylus-ready
 program not activated
 ```
 
-**Fix:** The node wasn't started with `--stylus-ready`:
+**Fix:** Restart the node (Stylus infrastructure is deployed automatically on start):
 
 ```bash
 npx hardhat arb:node stop
-npx hardhat arb:node start --stylus-ready
+npx hardhat arb:node start
 # Redeploy your contract
 ```
 

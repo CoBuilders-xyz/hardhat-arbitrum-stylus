@@ -3,8 +3,8 @@
  * All fields are optional and will use defaults if not provided.
  */
 export interface StylusCompileUserConfig {
-  /** Use local Rust toolchain instead of Docker container (default: false) */
-  useLocalRust?: boolean;
+  /** Use host Rust toolchain instead of Docker container (default: false) */
+  useHostToolchain?: boolean;
 }
 
 /**
@@ -12,6 +12,6 @@ export interface StylusCompileUserConfig {
  * All fields are required after resolution.
  */
 export interface StylusCompileConfig {
-  /** Use local Rust toolchain instead of Docker container */
-  useLocalRust: boolean;
+  /** Use host Rust toolchain instead of Docker container */
+  useHostToolchain: boolean;
 }

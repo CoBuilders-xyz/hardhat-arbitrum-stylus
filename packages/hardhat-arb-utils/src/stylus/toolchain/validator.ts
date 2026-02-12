@@ -1,4 +1,4 @@
-import { createPluginError } from '@cobuilders/hardhat-arb-utils/errors';
+import { createPluginError } from '../../errors/index.js';
 
 import { execAsync } from '../exec.js';
 

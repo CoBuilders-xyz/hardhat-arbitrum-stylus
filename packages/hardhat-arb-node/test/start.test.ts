@@ -58,7 +58,6 @@ describe(
         await hre.tasks.getTask(['arb:node', 'start']).run({
           quiet: false,
           detach: true,
-          stylusReady: false,
         });
 
         // Verify node is running by making an RPC call
@@ -85,7 +84,7 @@ describe(
         assert.ok(arbDebugCode !== '0x', 'ArbDebug precompile should exist');
       });
 
-      it('starts the node with --stylus-ready flag', async () => {
+      it('deploys Stylus infrastructure by default', async () => {
         // Clean up any existing container first
         await cleanupContainer();
 
@@ -99,18 +98,17 @@ describe(
         const config = hre.config.stylus.node;
         const rpcUrl = `http://localhost:${config.httpPort}`;
 
-        // Run start task with stylus-ready flag
+        // Run start task (Stylus infra is always deployed)
         await hre.tasks.getTask(['arb:node', 'start']).run({
           quiet: false,
           detach: true,
-          stylusReady: true,
         });
 
         // Verify CREATE2 factory is deployed
         const create2Code = await getCode(rpcUrl, CREATE2_FACTORY.ADDRESS);
         assert.ok(
           create2Code !== '0x',
-          'CREATE2 factory should be deployed with --stylus-ready',
+          'CREATE2 factory should be deployed by default',
         );
       });
     });
@@ -134,7 +132,6 @@ describe(
           await hre.tasks.getTask(['arb:node', 'start']).run({
             quiet: true,
             detach: true,
-            stylusReady: false,
           });
         }
 
@@ -174,7 +171,6 @@ describe(
         await hre.tasks.getTask(['arb:node', 'start']).run({
           quiet: true,
           detach: true,
-          stylusReady: false,
         });
 
         // Status should report running

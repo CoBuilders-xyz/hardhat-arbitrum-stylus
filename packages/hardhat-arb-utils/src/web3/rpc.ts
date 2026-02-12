@@ -2,9 +2,9 @@
  * Low-level JSON-RPC utilities for web3 interactions.
  */
 
-import { keccak256, type Hex } from "viem";
+import { keccak256, type Hex } from 'viem';
 
-import { createPluginError } from "../errors/index.js";
+import { createPluginError } from '../errors/index.js';
 
 /**
  * Send a raw signed transaction via JSON-RPC.
@@ -14,11 +14,11 @@ export async function sendRawTransaction(
   signedTx: Hex,
 ): Promise<Hex> {
   const response = await fetch(rpcUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      jsonrpc: "2.0",
-      method: "eth_sendRawTransaction",
+      jsonrpc: '2.0',
+      method: 'eth_sendRawTransaction',
       params: [signedTx],
       id: 1,
     }),
@@ -39,12 +39,12 @@ export async function sendRawTransaction(
  */
 export async function getCode(rpcUrl: string, address: Hex): Promise<Hex> {
   const response = await fetch(rpcUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      jsonrpc: "2.0",
-      method: "eth_getCode",
-      params: [address, "latest"],
+      jsonrpc: '2.0',
+      method: 'eth_getCode',
+      params: [address, 'latest'],
       id: 1,
     }),
   });
@@ -61,11 +61,11 @@ export async function getTransactionReceipt(
   txHash: Hex,
 ): Promise<{ status: Hex; contractAddress?: Hex } | null> {
   const response = await fetch(rpcUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      jsonrpc: "2.0",
-      method: "eth_getTransactionReceipt",
+      jsonrpc: '2.0',
+      method: 'eth_getTransactionReceipt',
       params: [txHash],
       id: 1,
     }),
@@ -92,7 +92,7 @@ export async function waitForReceipt(
     const receipt = await getTransactionReceipt(rpcUrl, txHash);
 
     if (receipt) {
-      return receipt.status === "0x1";
+      return receipt.status === '0x1';
     }
 
     await new Promise((resolve) => setTimeout(resolve, 500));
@@ -110,10 +110,10 @@ export function computeCreate2Address(
   initCode: Hex,
 ): Hex {
   const initCodeHash = keccak256(initCode);
-  const data = ("0xff" +
+  const data = ('0xff' +
     factory.slice(2) +
     salt.slice(2) +
     initCodeHash.slice(2)) as Hex;
   const hash = keccak256(data);
-  return ("0x" + hash.slice(-40)) as Hex;
+  return ('0x' + hash.slice(-40)) as Hex;
 }

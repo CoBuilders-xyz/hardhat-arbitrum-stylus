@@ -8,7 +8,7 @@ import { DockerClient } from '@cobuilders/hardhat-arb-utils';
 import { useFixtureProject } from '@cobuilders/hardhat-arb-utils/testing';
 import { createHardhatRuntimeEnvironment } from 'hardhat/hre';
 
-import { getCompileImageName } from '../src/utils/compiler/image-builder.js';
+import { getCompileImageName } from '@cobuilders/hardhat-arb-utils/stylus';
 
 async function hasDocker(): Promise<boolean> {
   try {

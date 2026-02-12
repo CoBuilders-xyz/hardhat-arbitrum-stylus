@@ -2,9 +2,9 @@
  * Web3 types - Re-exports from viem for convenience.
  */
 
-export type { Hex, Chain, WalletClient, HttpTransport } from "viem";
+export type { Hex, Chain, WalletClient, HttpTransport } from 'viem';
 
-export type { PrivateKeyAccount } from "viem/accounts";
+export type { PrivateKeyAccount } from 'viem/accounts';
 
 /**
  * Chain configuration options.

@@ -78,7 +78,7 @@ impl Counter {
 Open a new terminal at project root:
 
 ```bash
-npx hardhat arb:node start --stylus-ready
+npx hardhat arb:node start
 ```
 
 Wait for "Listening for transactions..."

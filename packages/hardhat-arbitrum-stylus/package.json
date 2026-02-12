@@ -13,7 +13,10 @@
   "type": "module",
   "types": "./dist/src/index.d.ts",
   "exports": {
-    ".": "./dist/src/index.js"
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    }
   },
   "keywords": [
     "arbitrum",
@@ -27,7 +30,8 @@
     "build": "tsc --build .",
     "clean": "rimraf dist",
     "prepublishOnly": "pnpm build",
-    "test": "node --import tsx/esm --test --test-reporter=spec \"test/!(*.integration).ts\"",
+    "test": "node --import tsx/esm --test --test-reporter=spec \"test/*.test.ts\"",
+    "pretest": "pnpm build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --check .",
@@ -52,9 +56,9 @@
     "eslint": "^9.18.0",
     "hardhat": "^3.0.0",
     "prettier": "^3.4.0",
-    "rimraf": "^5.0.5",
+    "rimraf": "^6.0.0",
     "tsx": "^4.19.3",
-    "viem": "^2.0.0"
+    "viem": "^2.30.0"
   },
   "peerDependencies": {
     "@cobuilders/hardhat-arb-node": "workspace:^",

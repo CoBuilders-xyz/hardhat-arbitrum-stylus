@@ -32,21 +32,19 @@ Use CLI commands to create an **isolated, persistent node** for manual testing a
 npx hardhat arb:node start [options]
 ```
 
-| Option           | Description                  | Default         |
-| ---------------- | ---------------------------- | --------------- |
-| `--quiet`        | Suppress output              | false           |
-| `--detach`, `-d` | Run in background            | false           |
-| `--stylus-ready` | Deploy Stylus infrastructure | false           |
-| `--name`         | Container name               | `nitro-devnode` |
-| `--http-port`    | HTTP port                    | `8547`          |
-| `--ws-port`      | WebSocket port               | `8548`          |
+| Option           | Description       | Default         |
+| ---------------- | ----------------- | --------------- |
+| `--quiet`        | Suppress output   | false           |
+| `--detach`, `-d` | Run in background | false           |
+| `--name`         | Container name    | `nitro-devnode` |
+| `--http-port`    | HTTP port         | `8547`          |
+| `--ws-port`      | WebSocket port    | `8548`          |
 
 **Examples:**
 
 ```bash
 npx hardhat arb:node start                    # Foreground
 npx hardhat arb:node start --detach           # Background
-npx hardhat arb:node start --stylus-ready     # With Stylus support
 npx hardhat arb:node start --http-port 9545   # Custom port
 npx hardhat arb:node start --quiet --detach   # Silent background
 ```
@@ -122,19 +120,15 @@ npx hardhat run scripts/deploy.ts
 
 ---
 
-## Stylus-Ready Mode
+## Stylus Infrastructure
 
-`--stylus-ready` deploys the infrastructure needed for Stylus contracts:
+Every node start automatically deploys the infrastructure needed for Stylus contracts:
 
-- **CREATE2 Factory** (`0x4e59b44847b379578588920ca78fbf26c0b4956c`) — Deterministic deployment
-- **Cache Manager** — WASM caching for Stylus contracts
-- **StylusDeployer** — Deployment helper contract
+- **CREATE2 Factory** (`0x4e59b44847b379578588920ca78fbf26c0b4956c`) - Deterministic deployment
+- **Cache Manager** - WASM caching for Stylus contracts
+- **StylusDeployer** - Deployment helper contract
 
-Use this flag when deploying Stylus (Rust/WASM) contracts. Not needed for EVM-only contracts.
-
-!!! warning "Work in Progress"
-
-    The `--stylus-ready` flag is experimental. We're still working on Cache Manager support for nitro-devnode testing environments.
+This means every node is ready for both Solidity and Stylus contract deployment out of the box.
 
 ---
 
@@ -142,12 +136,14 @@ Use this flag when deploying Stylus (Rust/WASM) contracts. Not needed for EVM-on
 
 ```typescript
 export default {
-  arbNode: {
-    image: 'offchainlabs/nitro-node',
-    tag: 'v3.7.1-926f1ab',
-    httpPort: 8547,
-    wsPort: 8548,
-    chainId: 412346,
+  stylus: {
+    node: {
+      image: 'offchainlabs/nitro-node',
+      tag: 'v3.7.1-926f1ab',
+      httpPort: 8547,
+      wsPort: 8548,
+      chainId: 412346,
+    },
   },
 };
 ```

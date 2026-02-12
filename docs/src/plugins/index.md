@@ -22,9 +22,9 @@ The `@cobuilders/hardhat-arbitrum-stylus` package is a **bundler** that re-expor
 
 **Why use the bundler?**
 
-- **Single install** — One package instead of multiple
-- **Synchronized versions** — All plugins are tested together
-- **Simpler config** — One import in your hardhat config
+- **Single install** - One package instead of multiple
+- **Synchronized versions** - All plugins are tested together
+- **Simpler config** - One import in your hardhat config
 
 **Installation:**
 
@@ -63,7 +63,7 @@ npm install @cobuilders/hardhat-arb-node
 | --------------------- | --------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [Node](node.md)       | `@cobuilders/hardhat-arb-node`    | ✅ Available   | [:fontawesome-brands-github:](https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arb-node) [:fontawesome-brands-npm:](https://www.npmjs.com/package/@cobuilders/hardhat-arb-node)       |
 | [Compile](compile.md) | `@cobuilders/hardhat-arb-compile` | ✅ Available   | [:fontawesome-brands-github:](https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arb-compile) [:fontawesome-brands-npm:](https://www.npmjs.com/package/@cobuilders/hardhat-arb-compile) |
-| [Deploy](deploy.md)   | `@cobuilders/hardhat-arb-deploy`  | 🔜 Coming Soon | [:fontawesome-brands-github:](https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arb-deploy) [:fontawesome-brands-npm:](https://www.npmjs.com/package/@cobuilders/hardhat-arb-deploy)   |
+| [Deploy](deploy.md)   | `@cobuilders/hardhat-arb-deploy`  | ✅ Available   | [:fontawesome-brands-github:](https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arb-deploy) [:fontawesome-brands-npm:](https://www.npmjs.com/package/@cobuilders/hardhat-arb-deploy)   |
 | [Test](test.md)       | `@cobuilders/hardhat-arb-test`    | 🔜 Coming Soon | [:fontawesome-brands-github:](https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arb-test) [:fontawesome-brands-npm:](https://www.npmjs.com/package/@cobuilders/hardhat-arb-test)       |
 
 ## All Tasks
@@ -74,6 +74,6 @@ npx hardhat arb:node stop     # Stop the node
 npx hardhat arb:node status   # Check node status
 npx hardhat arb:node logs     # View node logs
 npx hardhat arb:compile       # Compile Stylus contracts
-npx hardhat arb:deploy        # Deploy contracts (coming soon)
+npx hardhat arb:deploy        # Deploy Solidity or Stylus contracts
 npx hardhat arb:test          # Run tests (coming soon)
 ```

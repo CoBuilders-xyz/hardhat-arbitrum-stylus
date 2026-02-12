@@ -21,7 +21,7 @@ my-stylus-project/
 ### 1. Start Node (Background)
 
 ```bash
-npx hardhat arb:node start --detach --stylus-ready
+npx hardhat arb:node start --detach
 ```
 
 ### 2. Develop
@@ -82,41 +82,25 @@ Auto-started nodes use random ports and are cleaned up automatically when the te
 | -------------------------- | ------------------------------------ |
 | Running tests              | Auto-start (just `npx hardhat test`) |
 | Quick script execution     | Auto-start                           |
-| Stylus contract deployment | Manual with `--stylus-ready`         |
+| Stylus contract deployment | Manual                               |
 | Interactive development    | Manual for persistence               |
 | Debugging with logs        | Manual for log access                |
 
-## When to Use --stylus-ready
+!!! info "Stylus-Ready by Default"
 
-| Contract Type      | `--stylus-ready` Needed?   |
-| ------------------ | -------------------------- |
-| Stylus (Rust/WASM) | Yes                        |
-| Solidity (EVM)     | No                         |
-| Mixed project      | Yes (for Stylus contracts) |
-
-The `--stylus-ready` flag deploys infrastructure needed for Stylus contracts:
-
-- CREATE2 Factory for deterministic addresses
-- Cache Manager for WASM caching
-- StylusDeployer helper contract
-
-For EVM-only contracts, skip this flag for faster startup:
-
-```bash
-npx hardhat arb:node start --detach  # Faster, no Stylus infra
-```
+    Every node start automatically deploys the Stylus infrastructure (CREATE2 Factory, Cache Manager, StylusDeployer). Both Solidity and Stylus contracts work out of the box.
 
 ## Terminal Setup
 
 **Option A: Two terminals**
 
-- Terminal 1: `npx hardhat arb:node start --stylus-ready` (foreground, shows logs)
+- Terminal 1: `npx hardhat arb:node start` (foreground, shows logs)
 - Terminal 2: Development commands
 
 **Option B: Background mode**
 
 ```bash
-npx hardhat arb:node start --detach --stylus-ready
+npx hardhat arb:node start --detach
 npx hardhat arb:node logs --follow  # When you need logs
 ```
 

@@ -6,22 +6,34 @@ import {
   generateTempContainerName,
   registerTempContainer,
   cleanupTempContainer,
+  generateRandomPort,
 } from '@cobuilders/hardhat-arb-node';
-import { DockerClient } from '@cobuilders/hardhat-arb-utils';
-
-import { discoverStylusContracts } from '../utils/discovery/index.js';
-import { compileLocal } from '../utils/compiler/local.js';
 import {
-  compileContainer,
+  DockerClient,
+  isLocalhostUrl,
+  toDockerHostUrl,
+} from '@cobuilders/hardhat-arb-utils';
+import {
+  resolveExternalRpcUrl,
+  writeProgress,
+  clearProgress,
+  generateNetworkName,
+} from '@cobuilders/hardhat-arb-utils/task-helpers';
+
+import {
+  discoverStylusContracts,
   ensureVolumes,
   cleanCacheVolumes,
-} from '../utils/compiler/container.js';
-import { ensureCompileImage } from '../utils/compiler/image-builder.js';
-import { validateAllToolchains } from '../utils/toolchain/validator.js';
+  ensureCompileImage,
+  validateAllToolchains,
+} from '@cobuilders/hardhat-arb-utils/stylus';
+
+import { compileHost } from '../utils/compiler/host.js';
+import { compileContainer } from '../utils/compiler/container.js';
 
 interface CompileTaskArgs {
   contracts: string;
-  local: boolean;
+  host: boolean;
   sol: boolean;
   stylus: boolean;
   cleanCache: boolean;
@@ -29,39 +41,6 @@ interface CompileTaskArgs {
 
 /** Prefix for compile networks */
 const COMPILE_NETWORK_PREFIX = 'stylus-compile-net-';
-
-/**
- * Generate a random network name for compilation.
- */
-function generateNetworkName(): string {
-  const randomId = Math.random().toString(36).substring(2, 10);
-  return `${COMPILE_NETWORK_PREFIX}${randomId}`;
-}
-
-/**
- * Clear the current line and write new content.
- * Uses carriage return to overwrite the line for progress updates.
- */
-function writeProgress(line: string): void {
-  const maxWidth = process.stdout.columns || 80;
-  // Truncate long lines to fit terminal width
-  const content = `    ${line}`;
-  const truncated =
-    content.length > maxWidth
-      ? content.slice(0, maxWidth - 3) + '...'
-      : content;
-  // Pad with spaces to clear any previous longer content
-  const padded = truncated.padEnd(maxWidth, ' ');
-  process.stdout.write(`\r${padded}`);
-}
-
-/**
- * Clear the progress line.
- */
-function clearProgress(): void {
-  const width = process.stdout.columns || 80;
-  process.stdout.write('\r' + ' '.repeat(width) + '\r');
-}
 
 /**
  * Compile Solidity contracts using the default Hardhat compile task.
@@ -74,11 +53,12 @@ async function compileSolidityContracts(
 }
 
 /**
- * Compile Stylus contracts using local Rust toolchain.
+ * Compile Stylus contracts using host Rust toolchain.
  */
-async function compileStylusContractsLocal(
+async function compileStylusContractsHost(
   hre: HardhatRuntimeEnvironment,
   discoveredContracts: Array<{ name: string; path: string; toolchain: string }>,
+  externalRpcUrl: string | null,
 ): Promise<{ successful: number; failed: number }> {
   // Validate all required toolchains before starting compilation
   const uniqueToolchains = [
@@ -88,31 +68,42 @@ async function compileStylusContractsLocal(
   await validateAllToolchains(uniqueToolchains);
   console.log('All toolchains ready.\n');
 
-  // Start a temporary node for compilation
+  // Resolve the RPC endpoint
+  let endpoint: string;
   let tempContainerName: string | null = null;
 
-  console.log('Starting Arbitrum node for compilation...');
-  try {
-    tempContainerName = generateTempContainerName();
-    registerTempContainer(tempContainerName);
+  if (externalRpcUrl) {
+    // Use external network - no ephemeral node needed
+    endpoint = externalRpcUrl;
+    console.log(`Using external network: ${endpoint}\n`);
+  } else {
+    // Start a temporary node for compilation on random ports
+    const httpPort = generateRandomPort();
+    const wsPort = httpPort + 1;
+    endpoint = `http://localhost:${httpPort}`;
 
-    await hre.tasks.getTask(['arb:node', 'start']).run({
-      quiet: true,
-      detach: true,
-      stylusReady: false,
-      name: tempContainerName,
-      httpPort: 0,
-      wsPort: 0,
-      dockerNetwork: '',
-    });
-    console.log('Node started.\n');
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.log(`Failed to start node: ${message}`);
-    console.log(
-      'cargo stylus check requires a running Arbitrum node. Please start one manually.',
-    );
-    return { successful: 0, failed: discoveredContracts.length };
+    console.log('Starting Arbitrum node for compilation...');
+    try {
+      tempContainerName = generateTempContainerName();
+      registerTempContainer(tempContainerName);
+
+      await hre.tasks.getTask(['arb:node', 'start']).run({
+        quiet: true,
+        detach: true,
+        name: tempContainerName,
+        httpPort,
+        wsPort,
+        dockerNetwork: '',
+      });
+      console.log('Node started.\n');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.log(`Failed to start node: ${message}`);
+      console.log(
+        'cargo stylus check requires a running Arbitrum node. Please start one manually.',
+      );
+      return { successful: 0, failed: discoveredContracts.length };
+    }
   }
 
   const results: { name: string; success: boolean; error?: string }[] = [];
@@ -123,15 +114,16 @@ async function compileStylusContractsLocal(
       console.log(`Compiling ${contract.name}...`);
 
       try {
-        const result = await compileLocal(
+        const result = await compileHost(
           contract.path,
           contract.toolchain,
           contract.name,
           {
-            onProgress: (line) => {
+            onProgress: (line: string) => {
               writeProgress(line);
             },
             artifactsDir,
+            endpoint,
           },
         );
         clearProgress();
@@ -150,7 +142,7 @@ async function compileStylusContractsLocal(
       }
     }
   } finally {
-    // Cleanup the temporary node
+    // Cleanup the temporary node (only if we started one)
     if (tempContainerName) {
       console.log('\nStopping Arbitrum node...');
       await cleanupTempContainer(tempContainerName);
@@ -169,11 +161,12 @@ async function compileStylusContractsLocal(
 async function compileStylusContractsContainer(
   hre: HardhatRuntimeEnvironment,
   discoveredContracts: Array<{ name: string; path: string; toolchain: string }>,
+  externalRpcUrl: string | null,
 ): Promise<{ successful: number; failed: number }> {
   const client = new DockerClient();
 
   // Ensure cache volumes exist
-  const volumeResult = ensureVolumes();
+  const volumeResult = await ensureVolumes(client);
   if (volumeResult.created.length > 0) {
     console.log('Creating cache volumes for faster compilations...');
     console.log(`  Created: ${volumeResult.created.join(', ')}`);
@@ -185,7 +178,7 @@ async function compileStylusContractsContainer(
 
   // Build the base compile image (if not already built)
   console.log('Preparing compile image...');
-  const wasBuilt = await ensureCompileImage((msg) => {
+  const wasBuilt = await ensureCompileImage((msg: string) => {
     // Use progress line for build output to avoid flooding the console
     writeProgress(msg);
   });
@@ -200,42 +193,64 @@ async function compileStylusContractsContainer(
   }
   console.log('');
 
-  // Create a Docker network for compile-to-node communication
-  const networkName = generateNetworkName();
-  console.log(`Creating Docker network: ${networkName}...`);
-  await client.createNetwork(networkName);
-
-  // Start a temporary node for compilation
+  // Determine container compile options based on network mode
+  let networkName: string | null = null;
   let tempContainerName: string | null = null;
+  let containerRpcEndpoint: string | undefined;
+  let useHostGateway = false;
 
-  console.log('Starting Arbitrum node for compilation...');
-  try {
-    tempContainerName = generateTempContainerName();
-    registerTempContainer(tempContainerName);
+  if (externalRpcUrl) {
+    // External network - no ephemeral node or Docker network needed
+    console.log(`Using external network: ${externalRpcUrl}`);
 
-    await hre.tasks.getTask(['arb:node', 'start']).run({
-      quiet: true,
-      detach: true,
-      stylusReady: false,
-      name: tempContainerName,
-      httpPort: 0,
-      wsPort: 0,
-      dockerNetwork: networkName,
-    });
-    console.log('Node started.\n');
-  } catch (error) {
-    // Cleanup network on failure
-    try {
-      await client.removeNetwork(networkName);
-    } catch {
-      // Ignore cleanup errors
+    if (isLocalhostUrl(externalRpcUrl)) {
+      // Localhost URL: container can't reach host's localhost directly
+      containerRpcEndpoint = toDockerHostUrl(externalRpcUrl);
+      useHostGateway = true;
+      console.log(
+        `  Mapping to ${containerRpcEndpoint} (via host.docker.internal)\n`,
+      );
+    } else {
+      containerRpcEndpoint = externalRpcUrl;
+      console.log('');
     }
-    const message = error instanceof Error ? error.message : String(error);
-    console.log(`Failed to start node: ${message}`);
-    console.log(
-      'cargo stylus check requires a running Arbitrum node. Please start one manually.',
-    );
-    return { successful: 0, failed: discoveredContracts.length };
+  } else {
+    // Ephemeral node mode - create Docker network and start node
+    networkName = generateNetworkName(COMPILE_NETWORK_PREFIX);
+    console.log(`Creating Docker network: ${networkName}...`);
+    await client.createNetwork(networkName);
+
+    const httpPort = generateRandomPort();
+    const wsPort = httpPort + 1;
+
+    console.log('Starting Arbitrum node for compilation...');
+    try {
+      tempContainerName = generateTempContainerName();
+      registerTempContainer(tempContainerName);
+
+      await hre.tasks.getTask(['arb:node', 'start']).run({
+        quiet: true,
+        detach: true,
+        name: tempContainerName,
+        httpPort,
+        wsPort,
+        dockerNetwork: networkName,
+      });
+      console.log('Node started.\n');
+    } catch (error) {
+      // Cleanup network on failure
+      try {
+        await client.removeNetwork(networkName);
+      } catch {
+        // Ignore cleanup errors
+      }
+      const message = error instanceof Error ? error.message : String(error);
+      console.log(`Failed to start node: ${message}`);
+      console.log(
+        'cargo stylus check requires a running Arbitrum node. Please start one manually.',
+      );
+      return { successful: 0, failed: discoveredContracts.length };
+    }
   }
 
   const results: { name: string; success: boolean; error?: string }[] = [];
@@ -251,12 +266,14 @@ async function compileStylusContractsContainer(
           contract.toolchain,
           contract.name,
           {
-            onProgress: (line) => {
+            onProgress: (line: string) => {
               writeProgress(line);
             },
             artifactsDir,
-            network: networkName,
-            nodeContainerName: tempContainerName,
+            network: networkName ?? undefined,
+            nodeContainerName: tempContainerName ?? undefined,
+            rpcEndpoint: containerRpcEndpoint,
+            useHostGateway,
           },
         );
         clearProgress();
@@ -275,18 +292,20 @@ async function compileStylusContractsContainer(
       }
     }
   } finally {
-    // Cleanup the temporary node
+    // Cleanup the temporary node (only if we started one)
     if (tempContainerName) {
       console.log('\nStopping Arbitrum node...');
       await cleanupTempContainer(tempContainerName);
     }
 
-    // Cleanup the Docker network
-    console.log('Removing Docker network...');
-    try {
-      await client.removeNetwork(networkName);
-    } catch {
-      // Ignore cleanup errors
+    // Cleanup the Docker network (only if we created one)
+    if (networkName) {
+      console.log('Removing Docker network...');
+      try {
+        await client.removeNetwork(networkName);
+      } catch {
+        // Ignore cleanup errors
+      }
     }
   }
 
@@ -302,7 +321,8 @@ async function compileStylusContractsContainer(
 async function compileStylusContracts(
   hre: HardhatRuntimeEnvironment,
   contractFilter: string[] | undefined,
-  useLocalRust: boolean,
+  useHostToolchain: boolean,
+  externalRpcUrl: string | null,
 ): Promise<{ successful: number; failed: number }> {
   console.log('\n--- Stylus Compilation ---\n');
 
@@ -324,24 +344,28 @@ async function compileStylusContracts(
   }
 
   console.log(
-    `\nCompiling with ${useLocalRust ? 'local Rust' : 'Docker container'}...\n`,
+    `\nCompiling with ${useHostToolchain ? 'host toolchain' : 'Docker container'}...\n`,
   );
 
-  if (useLocalRust) {
-    return compileStylusContractsLocal(hre, discoveredContracts);
+  if (useHostToolchain) {
+    return compileStylusContractsHost(hre, discoveredContracts, externalRpcUrl);
   } else {
-    return compileStylusContractsContainer(hre, discoveredContracts);
+    return compileStylusContractsContainer(
+      hre,
+      discoveredContracts,
+      externalRpcUrl,
+    );
   }
 }
 
 const taskCompile: NewTaskActionFunction<CompileTaskArgs> = async (
-  { contracts, local, sol, stylus, cleanCache },
+  { contracts, host, sol, stylus, cleanCache },
   hre: HardhatRuntimeEnvironment,
 ) => {
   // Handle --clean-cache flag
   if (cleanCache) {
     console.log('Cleaning Stylus compilation cache...');
-    const { removed, notFound } = cleanCacheVolumes();
+    const { removed, notFound } = await cleanCacheVolumes();
     if (removed.length > 0) {
       console.log(`  Removed: ${removed.join(', ')}`);
     }
@@ -355,12 +379,15 @@ const taskCompile: NewTaskActionFunction<CompileTaskArgs> = async (
     }
   }
 
-  const useLocalRust = local || hre.config.stylus.compile.useLocalRust;
+  const useHostToolchain = host || hre.config.stylus.compile.useHostToolchain;
 
   // Parse contract names if provided (only applies to Stylus)
   const contractFilter = contracts
     ? contracts.split(',').map((c) => c.trim())
     : undefined;
+
+  // Resolve external RPC URL if --network flag is set
+  const externalRpcUrl = await resolveExternalRpcUrl(hre, 'compilation');
 
   // Determine what to compile
   // Default: compile both
@@ -389,7 +416,8 @@ const taskCompile: NewTaskActionFunction<CompileTaskArgs> = async (
     const result = await compileStylusContracts(
       hre,
       contractFilter,
-      useLocalRust,
+      useHostToolchain,
+      externalRpcUrl,
     );
     stylusSuccessful = result.successful;
     stylusFailed = result.failed;

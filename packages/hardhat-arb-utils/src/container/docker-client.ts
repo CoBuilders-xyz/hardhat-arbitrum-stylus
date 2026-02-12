@@ -1,14 +1,14 @@
-import { spawn, type ChildProcess } from "node:child_process";
-import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { spawn, type ChildProcess } from 'node:child_process';
+import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 import type {
   ContainerConfig,
   ContainerInfo,
   ContainerStatus,
   ExecResult,
-} from "./types.js";
+} from './types.js';
 
 /**
  * Error thrown when Docker operations fail.
@@ -21,7 +21,7 @@ export class DockerError extends Error {
     public readonly stderr?: string,
   ) {
     super(message);
-    this.name = "DockerError";
+    this.name = 'DockerError';
   }
 }
 
@@ -41,7 +41,7 @@ interface CommandResult {
 export class DockerClient {
   private readonly dockerCommand: string;
 
-  constructor(dockerCommand: string = "docker") {
+  constructor(dockerCommand: string = 'docker') {
     this.dockerCommand = dockerCommand;
   }
 
@@ -51,9 +51,9 @@ export class DockerClient {
   async isAvailable(): Promise<boolean> {
     try {
       const result = await this.exec([
-        "info",
-        "--format",
-        "{{.ServerVersion}}",
+        'info',
+        '--format',
+        '{{.ServerVersion}}',
       ]);
       return result.exitCode === 0 && result.stdout.trim().length > 0;
     } catch {
@@ -66,7 +66,7 @@ export class DockerClient {
    */
   async imageExists(image: string, tag: string): Promise<boolean> {
     const fullImage = `${image}:${tag}`;
-    const result = await this.exec(["image", "inspect", fullImage]);
+    const result = await this.exec(['image', 'inspect', fullImage]);
     return result.exitCode === 0;
   }
 
@@ -75,7 +75,7 @@ export class DockerClient {
    */
   async pullImage(image: string, tag: string): Promise<void> {
     const fullImage = `${image}:${tag}`;
-    const result = await this.exec(["pull", fullImage]);
+    const result = await this.exec(['pull', fullImage]);
     if (result.exitCode !== 0) {
       throw new DockerError(
         `Failed to pull image ${fullImage}: ${result.stderr}`,
@@ -100,23 +100,23 @@ export class DockerClient {
     const fullImage = `${imageName}:${tag}`;
 
     // Create a temporary directory and write the Dockerfile
-    const tempDir = mkdtempSync(join(tmpdir(), "docker-build-"));
-    const dockerfilePath = join(tempDir, "Dockerfile");
+    const tempDir = mkdtempSync(join(tmpdir(), 'docker-build-'));
+    const dockerfilePath = join(tempDir, 'Dockerfile');
     writeFileSync(dockerfilePath, dockerfileContent);
 
     return new Promise((resolve, reject) => {
       const proc = spawn(
         this.dockerCommand,
-        ["build", "-t", fullImage, tempDir],
+        ['build', '-t', fullImage, tempDir],
         {
-          stdio: ["ignore", "pipe", "pipe"],
+          stdio: ['ignore', 'pipe', 'pipe'],
         },
       );
 
-      let stderr = "";
+      let stderr = '';
 
-      proc.stdout.on("data", (data: Buffer) => {
-        const lines = data.toString().split("\n");
+      proc.stdout.on('data', (data: Buffer) => {
+        const lines = data.toString().split('\n');
         for (const line of lines) {
           const trimmed = line.trim();
           if (trimmed && onProgress) {
@@ -125,10 +125,10 @@ export class DockerClient {
         }
       });
 
-      proc.stderr.on("data", (data: Buffer) => {
+      proc.stderr.on('data', (data: Buffer) => {
         stderr += data.toString();
         // Docker build outputs progress to stderr
-        const lines = data.toString().split("\n");
+        const lines = data.toString().split('\n');
         for (const line of lines) {
           const trimmed = line.trim();
           if (trimmed && onProgress) {
@@ -137,7 +137,7 @@ export class DockerClient {
         }
       });
 
-      proc.on("close", (code) => {
+      proc.on('close', (code) => {
         // Clean up temp directory
         try {
           rmSync(tempDir, { recursive: true, force: true });
@@ -159,7 +159,7 @@ export class DockerClient {
         }
       });
 
-      proc.on("error", (err) => {
+      proc.on('error', (err) => {
         // Clean up temp directory
         try {
           rmSync(tempDir, { recursive: true, force: true });
@@ -190,7 +190,7 @@ export class DockerClient {
     if (result.exitCode !== 0) {
       throw new DockerError(
         `Failed to start container: ${result.stderr}`,
-        `docker ${args.join(" ")}`,
+        `docker ${args.join(' ')}`,
         result.exitCode,
         result.stderr,
       );
@@ -204,8 +204,8 @@ export class DockerClient {
    */
   async stop(containerId: string, timeout: number = 10): Promise<void> {
     const result = await this.exec([
-      "stop",
-      "-t",
+      'stop',
+      '-t',
       timeout.toString(),
       containerId,
     ]);
@@ -223,7 +223,7 @@ export class DockerClient {
    * Start a stopped container.
    */
   async startContainer(containerId: string): Promise<void> {
-    const result = await this.exec(["start", containerId]);
+    const result = await this.exec(['start', containerId]);
     if (result.exitCode !== 0) {
       throw new DockerError(
         `Failed to start container ${containerId}: ${result.stderr}`,
@@ -238,9 +238,9 @@ export class DockerClient {
    * Remove a container.
    */
   async remove(containerId: string, force: boolean = false): Promise<void> {
-    const args = ["rm"];
+    const args = ['rm'];
     if (force) {
-      args.push("-f");
+      args.push('-f');
     }
     args.push(containerId);
 
@@ -248,7 +248,7 @@ export class DockerClient {
     if (result.exitCode !== 0) {
       throw new DockerError(
         `Failed to remove container ${containerId}: ${result.stderr}`,
-        `docker ${args.join(" ")}`,
+        `docker ${args.join(' ')}`,
         result.exitCode,
         result.stderr,
       );
@@ -260,9 +260,9 @@ export class DockerClient {
    */
   async inspect(containerId: string): Promise<ContainerInfo | null> {
     const result = await this.exec([
-      "inspect",
-      "--format",
-      "{{json .}}",
+      'inspect',
+      '--format',
+      '{{json .}}',
       containerId,
     ]);
 
@@ -283,26 +283,26 @@ export class DockerClient {
    */
   async getStatus(containerId: string): Promise<ContainerStatus> {
     const result = await this.exec([
-      "inspect",
-      "--format",
-      "{{.State.Status}}",
+      'inspect',
+      '--format',
+      '{{.State.Status}}',
       containerId,
     ]);
 
     if (result.exitCode !== 0) {
-      return "unknown";
+      return 'unknown';
     }
 
     const status = result.stdout.trim().toLowerCase();
     if (
-      status === "running" ||
-      status === "stopped" ||
-      status === "exited" ||
-      status === "created"
+      status === 'running' ||
+      status === 'stopped' ||
+      status === 'exited' ||
+      status === 'created'
     ) {
       return status;
     }
-    return "unknown";
+    return 'unknown';
   }
 
   /**
@@ -310,7 +310,7 @@ export class DockerClient {
    */
   async isRunning(containerId: string): Promise<boolean> {
     const status = await this.getStatus(containerId);
-    return status === "running";
+    return status === 'running';
   }
 
   /**
@@ -320,7 +320,7 @@ export class DockerClient {
     containerId: string,
     command: string[],
   ): Promise<ExecResult> {
-    const args = ["exec", containerId, ...command];
+    const args = ['exec', containerId, ...command];
     const result = await this.exec(args);
 
     return {
@@ -337,10 +337,10 @@ export class DockerClient {
     containerId: string,
     options?: { tail?: number; follow?: boolean },
   ): Promise<string> {
-    const args = ["logs"];
+    const args = ['logs'];
 
     if (options?.tail !== undefined) {
-      args.push("--tail", options.tail.toString());
+      args.push('--tail', options.tail.toString());
     }
 
     args.push(containerId);
@@ -357,16 +357,16 @@ export class DockerClient {
    * @param options.tail - Number of lines to show from the end (0 = only new logs)
    */
   streamLogs(containerId: string, options?: { tail?: number }): ChildProcess {
-    const args = ["logs", "-f"];
+    const args = ['logs', '-f'];
 
     if (options?.tail !== undefined) {
-      args.push("--tail", options.tail.toString());
+      args.push('--tail', options.tail.toString());
     }
 
     args.push(containerId);
 
     return spawn(this.dockerCommand, args, {
-      stdio: ["ignore", "pipe", "pipe"],
+      stdio: ['ignore', 'pipe', 'pipe'],
     });
   }
 
@@ -375,12 +375,12 @@ export class DockerClient {
    */
   async findByName(name: string): Promise<string | null> {
     const result = await this.exec([
-      "ps",
-      "-a",
-      "--filter",
+      'ps',
+      '-a',
+      '--filter',
       `name=^${name}$`,
-      "--format",
-      "{{.ID}}",
+      '--format',
+      '{{.ID}}',
     ]);
 
     if (result.exitCode !== 0) {
@@ -395,7 +395,7 @@ export class DockerClient {
    * Create a Docker network.
    */
   async createNetwork(name: string): Promise<void> {
-    const result = await this.exec(["network", "create", name]);
+    const result = await this.exec(['network', 'create', name]);
     if (result.exitCode !== 0) {
       throw new DockerError(
         `Failed to create network ${name}: ${result.stderr}`,
@@ -410,7 +410,7 @@ export class DockerClient {
    * Remove a Docker network.
    */
   async removeNetwork(name: string): Promise<void> {
-    const result = await this.exec(["network", "rm", name]);
+    const result = await this.exec(['network', 'rm', name]);
     if (result.exitCode !== 0) {
       throw new DockerError(
         `Failed to remove network ${name}: ${result.stderr}`,
@@ -425,56 +425,94 @@ export class DockerClient {
    * Check if a Docker network exists.
    */
   async networkExists(name: string): Promise<boolean> {
-    const result = await this.exec(["network", "inspect", name]);
+    const result = await this.exec(['network', 'inspect', name]);
     return result.exitCode === 0;
+  }
+
+  /**
+   * Check if a Docker volume exists.
+   */
+  async volumeExists(name: string): Promise<boolean> {
+    const result = await this.exec(['volume', 'inspect', name]);
+    return result.exitCode === 0;
+  }
+
+  /**
+   * Create a Docker volume.
+   */
+  async createVolume(name: string): Promise<void> {
+    const result = await this.exec(['volume', 'create', name]);
+    if (result.exitCode !== 0) {
+      throw new DockerError(
+        `Failed to create volume ${name}: ${result.stderr}`,
+        `docker volume create ${name}`,
+        result.exitCode,
+        result.stderr,
+      );
+    }
+  }
+
+  /**
+   * Remove a Docker volume.
+   */
+  async removeVolume(name: string): Promise<void> {
+    const result = await this.exec(['volume', 'rm', name]);
+    if (result.exitCode !== 0) {
+      throw new DockerError(
+        `Failed to remove volume ${name}: ${result.stderr}`,
+        `docker volume rm ${name}`,
+        result.exitCode,
+        result.stderr,
+      );
+    }
   }
 
   /**
    * Build docker run arguments from ContainerConfig.
    */
   private buildRunArgs(config: ContainerConfig): string[] {
-    const args = ["run"];
+    const args = ['run'];
 
     // Detached mode
     if (config.detach !== false) {
-      args.push("-d");
+      args.push('-d');
     }
 
     // Auto-remove
     if (config.autoRemove) {
-      args.push("--rm");
+      args.push('--rm');
     }
 
     // Container name
     if (config.name) {
-      args.push("--name", config.name);
+      args.push('--name', config.name);
     }
 
     // Network
     if (config.network) {
-      args.push("--network", config.network);
+      args.push('--network', config.network);
     }
 
     // Port mappings
     if (config.ports) {
       for (const port of config.ports) {
-        const protocol = port.protocol ?? "tcp";
-        args.push("-p", `${port.host}:${port.container}/${protocol}`);
+        const protocol = port.protocol ?? 'tcp';
+        args.push('-p', `${port.host}:${port.container}/${protocol}`);
       }
     }
 
     // Environment variables
     if (config.env) {
       for (const [key, value] of Object.entries(config.env)) {
-        args.push("-e", `${key}=${value}`);
+        args.push('-e', `${key}=${value}`);
       }
     }
 
     // Volume mappings
     if (config.volumes) {
       for (const volume of config.volumes) {
-        const mode = volume.readonly ? "ro" : "rw";
-        args.push("-v", `${volume.host}:${volume.container}:${mode}`);
+        const mode = volume.readonly ? 'ro' : 'rw';
+        args.push('-v', `${volume.host}:${volume.container}:${mode}`);
       }
     }
 
@@ -495,21 +533,21 @@ export class DockerClient {
   private exec(args: string[]): Promise<CommandResult> {
     return new Promise((resolve) => {
       const proc = spawn(this.dockerCommand, args, {
-        stdio: ["ignore", "pipe", "pipe"],
+        stdio: ['ignore', 'pipe', 'pipe'],
       });
 
-      let stdout = "";
-      let stderr = "";
+      let stdout = '';
+      let stderr = '';
 
-      proc.stdout.on("data", (data: Buffer) => {
+      proc.stdout.on('data', (data: Buffer) => {
         stdout += data.toString();
       });
 
-      proc.stderr.on("data", (data: Buffer) => {
+      proc.stderr.on('data', (data: Buffer) => {
         stderr += data.toString();
       });
 
-      proc.on("close", (code) => {
+      proc.on('close', (code) => {
         resolve({
           stdout,
           stderr,
@@ -517,10 +555,10 @@ export class DockerClient {
         });
       });
 
-      proc.on("error", () => {
+      proc.on('error', () => {
         resolve({
           stdout,
-          stderr: stderr || "Failed to execute docker command",
+          stderr: stderr || 'Failed to execute docker command',
           exitCode: 1,
         });
       });
@@ -533,21 +571,21 @@ export class DockerClient {
   private execWithStdin(args: string[], stdin: string): Promise<CommandResult> {
     return new Promise((resolve) => {
       const proc = spawn(this.dockerCommand, args, {
-        stdio: ["pipe", "pipe", "pipe"],
+        stdio: ['pipe', 'pipe', 'pipe'],
       });
 
-      let stdout = "";
-      let stderr = "";
+      let stdout = '';
+      let stderr = '';
 
-      proc.stdout.on("data", (data: Buffer) => {
+      proc.stdout.on('data', (data: Buffer) => {
         stdout += data.toString();
       });
 
-      proc.stderr.on("data", (data: Buffer) => {
+      proc.stderr.on('data', (data: Buffer) => {
         stderr += data.toString();
       });
 
-      proc.on("close", (code) => {
+      proc.on('close', (code) => {
         resolve({
           stdout,
           stderr,
@@ -555,10 +593,10 @@ export class DockerClient {
         });
       });
 
-      proc.on("error", () => {
+      proc.on('error', () => {
         resolve({
           stdout,
-          stderr: stderr || "Failed to execute docker command",
+          stderr: stderr || 'Failed to execute docker command',
           exitCode: 1,
         });
       });
@@ -573,40 +611,40 @@ export class DockerClient {
    * Parse Docker inspect result into ContainerInfo.
    */
   private parseInspectResult(data: DockerInspectResult): ContainerInfo {
-    const ports: ContainerInfo["ports"] = [];
+    const ports: ContainerInfo['ports'] = [];
 
     if (data.NetworkSettings?.Ports) {
       for (const [containerPort, bindings] of Object.entries(
         data.NetworkSettings.Ports,
       )) {
         if (bindings && bindings.length > 0) {
-          const [port, protocol] = containerPort.split("/");
+          const [port, protocol] = containerPort.split('/');
           ports.push({
             container: parseInt(port, 10),
             host: parseInt(bindings[0].HostPort, 10),
-            protocol: protocol as "tcp" | "udp",
+            protocol: protocol as 'tcp' | 'udp',
           });
         }
       }
     }
 
     // Parse image and tag from Config.Image
-    const [image, tag] = (data.Config?.Image ?? ":").split(":");
+    const [image, tag] = (data.Config?.Image ?? ':').split(':');
 
-    let status: ContainerStatus = "unknown";
+    let status: ContainerStatus = 'unknown';
     const stateStatus = data.State?.Status?.toLowerCase();
     if (
-      stateStatus === "running" ||
-      stateStatus === "stopped" ||
-      stateStatus === "exited" ||
-      stateStatus === "created"
+      stateStatus === 'running' ||
+      stateStatus === 'stopped' ||
+      stateStatus === 'exited' ||
+      stateStatus === 'created'
     ) {
       status = stateStatus;
     }
 
     return {
       id: data.Id,
-      name: data.Name?.replace(/^\//, "") ?? "",
+      name: data.Name?.replace(/^\//, '') ?? '',
       ports,
       status,
       image,

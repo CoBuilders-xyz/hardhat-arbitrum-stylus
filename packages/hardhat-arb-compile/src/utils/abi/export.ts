@@ -1,4 +1,7 @@
-import { execWithProgress, type ProgressCallback } from '../exec.js';
+import {
+  execWithProgress,
+  type ProgressCallback,
+} from '@cobuilders/hardhat-arb-utils/stylus';
 
 /**
  * Export ABI from a Stylus contract using cargo stylus export-abi.

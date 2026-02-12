@@ -54,9 +54,9 @@ pnpm changeset
 
 You'll be prompted to:
 
-1. **Select packages** — Pick which package(s) your change affects
-2. **Choose version bump** — `patch` (bug fix), `minor` (new feature), or `major` (breaking change)
-3. **Write a summary** — This becomes the changelog entry
+1. **Select packages** - Pick which package(s) your change affects
+2. **Choose version bump** - `patch` (bug fix), `minor` (new feature), or `major` (breaking change)
+3. **Write a summary** - This becomes the changelog entry
 
 This creates a file in `.changeset/`. Commit it with your code.
 
@@ -68,7 +68,7 @@ This creates a file in `.changeset/`. Commit it with your code.
 
 !!! warning "Don't do these"
 
-    - Don't run `pnpm changeset version` — CI handles this
+    - Don't run `pnpm changeset version` - CI handles this
     - Don't manually edit version numbers in `package.json`
 
 ### 5. Open a Pull Request
@@ -88,9 +88,9 @@ You don't publish packages manually. Here's how it works:
 Your PR → main → Release PR (auto-created) → npm publish
 ```
 
-1. **You merge your PR** — Your changes land in `main`
-2. **CI creates a Release PR** — Collects all changesets, bumps versions, updates changelogs
-3. **Maintainer merges Release PR** — Packages are published to npm
+1. **You merge your PR** - Your changes land in `main`
+2. **CI creates a Release PR** - Collects all changesets, bumps versions, updates changelogs
+3. **Maintainer merges Release PR** - Packages are published to npm
 
 Only merging the Release PR triggers publishing. Your individual PRs don't publish anything.
 

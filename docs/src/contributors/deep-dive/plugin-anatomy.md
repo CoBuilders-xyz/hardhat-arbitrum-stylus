@@ -42,16 +42,25 @@ export default hardhatArbNodePlugin;
 
 Extends Hardhat's TypeScript types. This enables:
 
-- **Type checking** — Invalid config options cause compile errors
-- **Autocomplete** — IDEs suggest valid options
+- **Type checking** - Invalid config options cause compile errors
+- **Autocomplete** - IDEs suggest valid options
 
 ```typescript
 declare module 'hardhat/types/config' {
-  interface HardhatUserConfig {
-    arbNode?: ArbNodeUserConfig;
+  interface StylusUserConfig {
+    node?: ArbNodeUserConfig;
   }
+
+  interface StylusConfig {
+    node: ArbNodeConfig;
+  }
+
+  interface HardhatUserConfig {
+    stylus?: StylusUserConfig;
+  }
+
   interface HardhatConfig {
-    arbNode: ArbNodeConfig;
+    stylus: StylusConfig;
   }
 }
 ```
@@ -60,9 +69,11 @@ Now `hardhat.config.ts` is fully typed:
 
 ```typescript
 export default {
-  arbNode: {
-    httpPort: 8547, // ✓ Valid
-    invalidOption: true, // ✗ TypeScript error
+  stylus: {
+    node: {
+      httpPort: 8547, // ✓ Valid
+      invalidOption: true, // ✗ TypeScript error
+    },
   },
 };
 ```

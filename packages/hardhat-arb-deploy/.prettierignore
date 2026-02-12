@@ -1,3 +1,5 @@
 /node_modules
 /dist
 CHANGELOG.md
+test/fixture-projects/**/cache
+test/fixture-projects/**/target

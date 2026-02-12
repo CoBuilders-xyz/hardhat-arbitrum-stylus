@@ -2,7 +2,7 @@
 
 Configure the Hardhat Arbitrum Stylus plugin via your `hardhat.config.ts` file. This configuration is used by both CLI commands and the Hardhat Runtime Environment (HRE).
 
-## Plugin Configuration
+## Node Configuration
 
 ```typescript
 import type { HardhatUserConfig } from 'hardhat/config';
@@ -11,12 +11,14 @@ import hardhatArbitrumStylus from '@cobuilders/hardhat-arbitrum-stylus';
 const config: HardhatUserConfig = {
   plugins: [hardhatArbitrumStylus],
 
-  arbNode: {
-    image: 'offchainlabs/nitro-node',
-    tag: 'v3.7.1-926f1ab',
-    httpPort: 8547,
-    wsPort: 8548,
-    chainId: 412346,
+  stylus: {
+    node: {
+      image: 'offchainlabs/nitro-node',
+      tag: 'v3.7.1-926f1ab',
+      httpPort: 8547,
+      wsPort: 8548,
+      chainId: 412346,
+    },
   },
 };
 
@@ -46,16 +48,45 @@ import hardhatArbitrumStylus from '@cobuilders/hardhat-arbitrum-stylus';
 const config: HardhatUserConfig = {
   plugins: [hardhatArbitrumStylus],
 
-  stylusCompile: {
-    useLocalRust: false,
+  stylus: {
+    compile: {
+      useHostToolchain: false,
+    },
   },
 };
 
 export default config;
 ```
 
-| Option         | Type    | Default | Description                                |
-| -------------- | ------- | ------- | ------------------------------------------ |
-| `useLocalRust` | boolean | `false` | Use local Rust toolchain instead of Docker |
+| Option             | Type    | Default | Description                               |
+| ------------------ | ------- | ------- | ----------------------------------------- |
+| `useHostToolchain` | boolean | `false` | Use host Rust toolchain instead of Docker |
 
-The `--local` CLI flag overrides this for a single run. See [Compile Plugin](plugins/compile.md) for details.
+The `--host` CLI flag overrides this for a single run. See [Compile Plugin](plugins/compile.md) for details.
+
+---
+
+## Deploy Configuration
+
+```typescript
+import type { HardhatUserConfig } from 'hardhat/config';
+import hardhatArbitrumStylus from '@cobuilders/hardhat-arbitrum-stylus';
+
+const config: HardhatUserConfig = {
+  plugins: [hardhatArbitrumStylus],
+
+  stylus: {
+    deploy: {
+      useHostToolchain: false,
+    },
+  },
+};
+
+export default config;
+```
+
+| Option             | Type    | Default | Description                               |
+| ------------------ | ------- | ------- | ----------------------------------------- |
+| `useHostToolchain` | boolean | `false` | Use host Rust toolchain instead of Docker |
+
+The `--host` CLI flag overrides this for a single run. See [Deploy Plugin](plugins/deploy.md) for details.

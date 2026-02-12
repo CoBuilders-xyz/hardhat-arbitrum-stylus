@@ -22,7 +22,10 @@
   "type": "module",
   "types": "./dist/src/index.d.ts",
   "exports": {
-    ".": "./dist/src/index.js"
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    }
   },
   "scripts": {
     "build": "tsc --build .",
@@ -31,7 +34,9 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --check .",
-    "format:fix": "prettier --write ."
+    "format:fix": "prettier --write .",
+    "test": "node --import tsx/esm --test --test-reporter=spec \"test/*.test.ts\"",
+    "pretest": "pnpm build"
   },
   "files": [
     "dist/src/",
@@ -41,13 +46,19 @@
     "CHANGELOG.md"
   ],
   "peerDependencies": {
+    "@cobuilders/hardhat-arb-node": "workspace:^",
+    "@cobuilders/hardhat-arb-utils": "workspace:^",
     "hardhat": "^3.0.0"
   },
   "devDependencies": {
+    "@cobuilders/hardhat-arb-node": "workspace:^",
+    "@cobuilders/hardhat-arb-utils": "workspace:^",
     "@types/node": "^22.0.0",
     "eslint": "^9.18.0",
     "hardhat": "^3.0.0",
-    "prettier": "^3.4.0"
+    "prettier": "^3.4.0",
+    "rimraf": "^6.0.0",
+    "tsx": "^4.19.3"
   },
   "publishConfig": {
     "access": "public"

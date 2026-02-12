@@ -21,7 +21,7 @@ graph TD
 
 | Package                   | Purpose                          |
 | ------------------------- | -------------------------------- |
-| `hardhat-arbitrum-stylus` | Toolbox — users install this one |
+| `hardhat-arbitrum-stylus` | Toolbox - users install this one |
 | `hardhat-arb-node`        | Local node management            |
 | `hardhat-arb-compile`     | Contract compilation             |
 | `hardhat-arb-deploy`      | Deployment                       |
@@ -55,6 +55,6 @@ Users install one package, get everything.
 
 `hardhat-arb-utils` provides common code:
 
-- **Container** — Docker client and lifecycle management
-- **Errors** — Standardized `HardhatPluginError` creation
-- **Web3** — RPC helpers and viem client
+- **Container** - Docker client and lifecycle management
+- **Errors** - Standardized `HardhatPluginError` creation
+- **Web3** - RPC helpers and viem client

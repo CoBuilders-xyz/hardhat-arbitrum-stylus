@@ -1,26 +1,25 @@
-import { execSync, spawn } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import path from 'node:path';
 
 import { createPluginError } from '@cobuilders/hardhat-arb-utils/errors';
 
-import type { ProgressCallback } from '../exec.js';
+import {
+  type ProgressCallback,
+  getCompileImageName,
+  RUSTUP_VOLUME_NAME,
+  CARGO_VOLUME_NAME,
+} from '@cobuilders/hardhat-arb-utils/stylus';
+
 import { parseAbiFromSolidity } from '../abi/export.js';
 import {
   buildStylusArtifact,
   saveStylusArtifact,
   type StylusArtifact,
 } from '../stylus-artifacts/stylus-artifact.js';
-import { getCompileImageName } from './image-builder.js';
 
 import type { CompileResult } from './types.js';
 
 export type { CompileResult } from './types.js';
-
-/** Docker volume name for persisting rustup toolchains between container runs */
-export const RUSTUP_VOLUME_NAME = 'stylus-compile-rustup';
-
-/** Docker volume name for persisting cargo registry between container runs */
-export const CARGO_VOLUME_NAME = 'stylus-compile-cargo';
 
 /**
  * Options for container compilation.
@@ -30,69 +29,14 @@ export interface ContainerCompileOptions {
   onProgress?: ProgressCallback;
   /** Directory to save artifacts to */
   artifactsDir?: string;
-  /** Docker network name for node communication */
-  network: string;
-  /** Node container name (used as hostname for RPC) */
-  nodeContainerName: string;
-}
-
-/**
- * Check if a Docker volume exists.
- */
-export function volumeExists(volumeName: string): boolean {
-  try {
-    execSync(`docker volume inspect ${volumeName}`, { stdio: 'ignore' });
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Remove the cache volumes used for Stylus compilation.
- * Returns true if any volumes were removed.
- */
-export function cleanCacheVolumes(): {
-  removed: string[];
-  notFound: string[];
-} {
-  const removed: string[] = [];
-  const notFound: string[] = [];
-
-  for (const volumeName of [RUSTUP_VOLUME_NAME, CARGO_VOLUME_NAME]) {
-    try {
-      execSync(`docker volume rm ${volumeName}`, { stdio: 'ignore' });
-      removed.push(volumeName);
-    } catch {
-      notFound.push(volumeName);
-    }
-  }
-
-  return { removed, notFound };
-}
-
-/**
- * Ensure the Docker volumes exist for caching.
- * Returns info about which volumes were created.
- */
-export function ensureVolumes(): {
-  created: string[];
-  existing: string[];
-} {
-  const created: string[] = [];
-  const existing: string[] = [];
-
-  for (const volumeName of [RUSTUP_VOLUME_NAME, CARGO_VOLUME_NAME]) {
-    const exists = volumeExists(volumeName);
-    if (exists) {
-      existing.push(volumeName);
-    } else {
-      execSync(`docker volume create ${volumeName}`, { stdio: 'ignore' });
-      created.push(volumeName);
-    }
-  }
-
-  return { created, existing };
+  /** Docker network name for node communication (ephemeral node mode) */
+  network?: string;
+  /** Node container name (used as hostname for RPC in ephemeral node mode) */
+  nodeContainerName?: string;
+  /** Explicit RPC endpoint for external network mode */
+  rpcEndpoint?: string;
+  /** Add --add-host=host.docker.internal:host-gateway for localhost access */
+  useHostGateway?: boolean;
 }
 
 /**
@@ -108,13 +52,17 @@ async function runInContainer(
   const containerName = `stylus-compile-tmp-${Math.random().toString(36).slice(2, 8)}`;
 
   return new Promise((resolve, reject) => {
-    const args = [
-      'run',
-      '--rm',
-      '--name',
-      containerName,
-      '--network',
-      options.network,
+    const args = ['run', '--rm', '--name', containerName];
+
+    if (options.network) {
+      args.push('--network', options.network);
+    }
+
+    if (options.useHostGateway) {
+      args.push('--add-host=host.docker.internal:host-gateway');
+    }
+
+    args.push(
       '-v',
       `${contractPath}:/workspace:rw`,
       '-v',
@@ -125,7 +73,7 @@ async function runInContainer(
       '/workspace',
       image,
       ...command,
-    ];
+    );
 
     const proc = spawn('docker', args, {
       stdio: ['ignore', 'pipe', 'pipe'],
@@ -194,8 +142,9 @@ export async function compileContainer(
 ): Promise<CompileResult> {
   const imageName = getCompileImageName();
 
-  // RPC endpoint uses the node container name as hostname via Docker network
-  const rpcEndpoint = `http://${options.nodeContainerName}:8547`;
+  // RPC endpoint: use explicit endpoint if provided, otherwise derive from container name
+  const rpcEndpoint =
+    options.rpcEndpoint ?? `http://${options.nodeContainerName}:8547`;
 
   // Install the specific toolchain and wasm32 target
   // These are cached in the Docker volume, so only slow on first use

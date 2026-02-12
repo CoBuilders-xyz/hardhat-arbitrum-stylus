@@ -49,10 +49,10 @@ export default startTask;
 ## Our Subtasks
 
 ```
-arb:node start   — Start the node
-arb:node stop    — Stop the node
-arb:node status  — Check status
-arb:node logs    — View logs
+arb:node start   - Start the node
+arb:node stop    - Stop the node
+arb:node status  - Check status
+arb:node logs    - View logs
 ```
 
 ---
