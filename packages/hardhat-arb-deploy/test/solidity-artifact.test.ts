@@ -1,17 +1,21 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import path from 'node:path';
-
-import { useFixtureProject } from '@cobuilders/hardhat-arb-utils/testing';
+import { fileURLToPath } from 'node:url';
 
 import { findSolidityArtifact } from '../src/utils/deployer/solidity.js';
 
-describe('findSolidityArtifact', () => {
-  useFixtureProject('deploy-default');
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const FIXTURE_ARTIFACTS = path.join(
+  __dirname,
+  'fixture-projects',
+  'deploy-default',
+  'artifacts',
+);
 
+describe('findSolidityArtifact', () => {
   it('finds an artifact by contract name', () => {
-    const artifactsDir = path.join(process.cwd(), 'artifacts');
-    const result = findSolidityArtifact(artifactsDir, 'SolidityCounter');
+    const result = findSolidityArtifact(FIXTURE_ARTIFACTS, 'SolidityCounter');
 
     assert.ok(result, 'Should find the artifact');
     assert.strictEqual(result.contractName, 'SolidityCounter');
@@ -20,8 +24,7 @@ describe('findSolidityArtifact', () => {
   });
 
   it('returns null for nonexistent contract name', () => {
-    const artifactsDir = path.join(process.cwd(), 'artifacts');
-    const result = findSolidityArtifact(artifactsDir, 'DoesNotExist');
+    const result = findSolidityArtifact(FIXTURE_ARTIFACTS, 'DoesNotExist');
 
     assert.strictEqual(result, null);
   });
@@ -32,9 +35,8 @@ describe('findSolidityArtifact', () => {
   });
 
   it('skips .dbg. files', () => {
-    const artifactsDir = path.join(process.cwd(), 'artifacts');
     // The .dbg.json file exists but should not be picked up
-    const result = findSolidityArtifact(artifactsDir, 'SolidityCounter');
+    const result = findSolidityArtifact(FIXTURE_ARTIFACTS, 'SolidityCounter');
 
     assert.ok(result, 'Should still find the real artifact');
     assert.strictEqual(result.contractName, 'SolidityCounter');
