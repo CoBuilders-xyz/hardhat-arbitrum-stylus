@@ -11,7 +11,7 @@ export interface PortMapping {
   /** Port inside the container */
   container: number;
   /** Protocol (tcp or udp), defaults to tcp */
-  protocol?: "tcp" | "udp";
+  protocol?: 'tcp' | 'udp';
 }
 
 /**
@@ -36,7 +36,7 @@ export interface ReadinessCheck {
    * - tcp: Check if TCP port is open
    * - exec: Run command inside container
    */
-  type: "http" | "tcp" | "exec";
+  type: 'http' | 'tcp' | 'exec';
   /**
    * Target for the check:
    * - For http: full URL (e.g., "http://localhost:8547")
@@ -82,11 +82,11 @@ export interface ContainerConfig {
  * Container status.
  */
 export type ContainerStatus =
-  | "running"
-  | "stopped"
-  | "exited"
-  | "created"
-  | "unknown";
+  | 'running'
+  | 'stopped'
+  | 'exited'
+  | 'created'
+  | 'unknown';
 
 /**
  * Information about a running container.

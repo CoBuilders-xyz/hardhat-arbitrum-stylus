@@ -3,9 +3,9 @@
  *
  * Uses HardhatPluginError as recommended by Hardhat for community plugins.
  */
-import { HardhatPluginError } from "hardhat/plugins";
+import { HardhatPluginError } from 'hardhat/plugins';
 
-const PLUGIN_ID = "@cobuilders/hardhat-arbitrum-stylus";
+const PLUGIN_ID = '@cobuilders/hardhat-arbitrum-stylus';
 
 /**
  * Creates a HardhatPluginError with the plugin ID pre-configured.

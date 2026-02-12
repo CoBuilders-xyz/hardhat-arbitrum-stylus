@@ -23,8 +23,14 @@
   "type": "module",
   "types": "./dist/src/index.d.ts",
   "exports": {
-    ".": "./dist/src/index.js",
-    "./utils": "./dist/src/utils/index.js"
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    },
+    "./utils": {
+      "types": "./dist/src/utils/index.d.ts",
+      "default": "./dist/src/utils/index.js"
+    }
   },
   "scripts": {
     "build": "tsc --build .",
@@ -34,7 +40,7 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
-    "test": "node --import tsx/esm --test --test-reporter=spec \"test/*.ts\"",
+    "test": "node --import tsx/esm --test --test-reporter=spec \"test/*.test.ts\"",
     "pretest": "pnpm build"
   },
   "files": [
@@ -44,9 +50,6 @@
     "LICENSE",
     "CHANGELOG.md"
   ],
-  "dependencies": {
-    "smol-toml": "^1.3.0"
-  },
   "peerDependencies": {
     "@cobuilders/hardhat-arb-node": "workspace:^",
     "@cobuilders/hardhat-arb-utils": "workspace:^",
@@ -55,11 +58,11 @@
   "devDependencies": {
     "@cobuilders/hardhat-arb-node": "workspace:^",
     "@cobuilders/hardhat-arb-utils": "workspace:^",
-    "@cobuilders/hardhat-arbitrum-stylus": "workspace:^",
     "@types/node": "^22.0.0",
     "eslint": "^9.18.0",
     "hardhat": "^3.0.0",
     "prettier": "^3.4.0",
+    "rimraf": "^6.0.0",
     "tsx": "^4.19.3"
   },
   "publishConfig": {

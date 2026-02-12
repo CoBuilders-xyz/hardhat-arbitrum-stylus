@@ -1,11 +1,11 @@
-import assert from "node:assert/strict";
-import fs from "node:fs/promises";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-import { after, before, describe, it } from "node:test";
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { after, before, describe, it } from 'node:test';
 
-import { DockerClient } from "../src/container/docker-client.js";
-import { ContainerManager } from "../src/container/container-manager.js";
+import { DockerClient } from '../src/container/docker-client.js';
+import { ContainerManager } from '../src/container/container-manager.js';
 
 // Get the directory of the current module (for creating temp dirs within the package)
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -27,7 +27,7 @@ async function cleanupContainer(
   }
 }
 
-describe("Docker Container Utilities", () => {
+describe('Docker Container Utilities', () => {
   let client: DockerClient;
   let manager: ContainerManager;
 
@@ -36,28 +36,28 @@ describe("Docker Container Utilities", () => {
     manager = new ContainerManager(client);
   });
 
-  describe("DockerClient", () => {
-    it("should check if image exists", async () => {
+  describe('DockerClient', () => {
+    it('should check if image exists', async () => {
       // hello-world is a very small image, check if it exists
-      const exists = await client.imageExists("hello-world", "latest");
-      assert.equal(typeof exists, "boolean");
+      const exists = await client.imageExists('hello-world', 'latest');
+      assert.equal(typeof exists, 'boolean');
     });
   });
 
-  describe("ContainerManager - Run with command", () => {
-    it("should run hello-world container with default command", async () => {
-      const containerName = "hardhat-arb-utils-test-hello";
+  describe('ContainerManager - Run with command', () => {
+    it('should run hello-world container with default command', async () => {
+      const containerName = 'hardhat-arb-utils-test-hello';
       await cleanupContainer(client, containerName);
 
       const info = await manager.start({
-        image: "hello-world",
-        tag: "latest",
+        image: 'hello-world',
+        tag: 'latest',
         name: containerName,
         autoRemove: true,
       });
 
-      assert.ok(info.id, "Container should have an ID");
-      assert.equal(info.image, "hello-world");
+      assert.ok(info.id, 'Container should have an ID');
+      assert.equal(info.image, 'hello-world');
 
       // Wait a moment for the container to finish (hello-world exits immediately)
       await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -70,23 +70,23 @@ describe("Docker Container Utilities", () => {
       }
     });
 
-    it("should run alpine container with custom echo command", async () => {
-      const containerName = "hardhat-arb-utils-test-alpine";
+    it('should run alpine container with custom echo command', async () => {
+      const containerName = 'hardhat-arb-utils-test-alpine';
       await cleanupContainer(client, containerName);
 
-      const testMessage = "Hello from hardhat-arb-utils test!";
+      const testMessage = 'Hello from hardhat-arb-utils test!';
 
       // Run alpine with a custom command (detached mode for reliable container ID)
       const containerId = await client.run({
-        image: "alpine",
-        tag: "latest",
+        image: 'alpine',
+        tag: 'latest',
         name: containerName,
-        command: ["echo", testMessage],
+        command: ['echo', testMessage],
         detach: true,
         autoRemove: false,
       });
 
-      assert.ok(containerId, "Should return container ID");
+      assert.ok(containerId, 'Should return container ID');
 
       // Wait for container to finish
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -103,12 +103,44 @@ describe("Docker Container Utilities", () => {
     });
   });
 
-  describe("ContainerManager - Run with volume", () => {
+  describe('DockerClient - Volume operations', () => {
+    const testVolumeName = 'hardhat-arb-utils-test-volume';
+
+    it('should report false for a non-existent volume', async () => {
+      const exists = await client.volumeExists('non-existent-volume-abc123xyz');
+      assert.strictEqual(exists, false);
+    });
+
+    it('should create, check, and remove a volume', async () => {
+      // Cleanup in case of leftover from previous test run
+      try {
+        await client.removeVolume(testVolumeName);
+      } catch {
+        // Ignore if it doesn't exist
+      }
+
+      // Create
+      await client.createVolume(testVolumeName);
+
+      // Check existence
+      const exists = await client.volumeExists(testVolumeName);
+      assert.strictEqual(exists, true);
+
+      // Remove
+      await client.removeVolume(testVolumeName);
+
+      // Verify removal
+      const existsAfter = await client.volumeExists(testVolumeName);
+      assert.strictEqual(existsAfter, false);
+    });
+  });
+
+  describe('ContainerManager - Run with volume', () => {
     let tempDir: string;
 
     before(async () => {
       // Create a temporary directory within the package directory (Docker has access to workspace paths)
-      tempDir = path.join(__dirname, ".tmp-volume-test");
+      tempDir = path.join(__dirname, '.tmp-volume-test');
       await fs.mkdir(tempDir, { recursive: true });
     });
 
@@ -121,27 +153,27 @@ describe("Docker Container Utilities", () => {
       }
     });
 
-    it("should run container with volume and write output to host", async () => {
-      const containerName = "hardhat-arb-utils-test-volume";
+    it('should run container with volume and write output to host', async () => {
+      const containerName = 'hardhat-arb-utils-test-volume';
       await cleanupContainer(client, containerName);
 
-      const outputFileName = "result.txt";
-      const outputContent = "Output from container volume test";
+      const outputFileName = 'result.txt';
+      const outputContent = 'Output from container volume test';
 
       // Run alpine container that writes to mounted volume (detached mode for reliable container ID)
       const containerId = await client.run({
-        image: "alpine",
-        tag: "latest",
+        image: 'alpine',
+        tag: 'latest',
         name: containerName,
         command: [
-          "sh",
-          "-c",
+          'sh',
+          '-c',
           `echo "${outputContent}" > /output/${outputFileName}`,
         ],
         volumes: [
           {
             host: tempDir,
-            container: "/output",
+            container: '/output',
             readonly: false,
           },
         ],
@@ -149,14 +181,14 @@ describe("Docker Container Utilities", () => {
         autoRemove: false,
       });
 
-      assert.ok(containerId, "Should return container ID");
+      assert.ok(containerId, 'Should return container ID');
 
       // Wait for container to finish writing
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Verify the file was written to the host filesystem
       const outputPath = path.join(tempDir, outputFileName);
-      const fileContent = await fs.readFile(outputPath, "utf-8");
+      const fileContent = await fs.readFile(outputPath, 'utf-8');
       assert.ok(
         fileContent.trim().includes(outputContent),
         `File should contain "${outputContent}"`,
@@ -166,25 +198,25 @@ describe("Docker Container Utilities", () => {
       await client.remove(containerId.trim(), true);
     });
 
-    it("should handle readonly volume mounts", async () => {
-      const containerName = "hardhat-arb-utils-test-readonly";
+    it('should handle readonly volume mounts', async () => {
+      const containerName = 'hardhat-arb-utils-test-readonly';
       await cleanupContainer(client, containerName);
 
       // Create a test file in temp directory
-      const testFileName = "input.txt";
-      const testContent = "Input data for container";
+      const testFileName = 'input.txt';
+      const testContent = 'Input data for container';
       await fs.writeFile(path.join(tempDir, testFileName), testContent);
 
       // Run alpine container that reads from readonly mounted volume (detached mode for reliable container ID)
       const containerId = await client.run({
-        image: "alpine",
-        tag: "latest",
+        image: 'alpine',
+        tag: 'latest',
         name: containerName,
-        command: ["cat", `/input/${testFileName}`],
+        command: ['cat', `/input/${testFileName}`],
         volumes: [
           {
             host: tempDir,
-            container: "/input",
+            container: '/input',
             readonly: true,
           },
         ],
@@ -192,7 +224,7 @@ describe("Docker Container Utilities", () => {
         autoRemove: false,
       });
 
-      assert.ok(containerId, "Should return container ID");
+      assert.ok(containerId, 'Should return container ID');
 
       // Wait for container to finish
       await new Promise((resolve) => setTimeout(resolve, 1000));

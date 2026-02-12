@@ -10,9 +10,9 @@ Hooks run at specific points in Hardhat's lifecycle. We use three hooks in `hard
 
 **What we do:**
 
-1. **`extendUserConfig`** — Adds a `default` network pointing to a random port. This port is used by hook-started nodes (separate from manually started nodes).
+1. **`extendUserConfig`** - Adds a `default` network pointing to a random port. This port is used by hook-started nodes (separate from manually started nodes).
 
-2. **`resolveUserConfig`** — Takes the user's `arbNode` config and resolves it with defaults.
+2. **`resolveUserConfig`** - Takes the user's `stylus.node` config and resolves it with defaults.
 
 ```typescript
 extendUserConfig: async (config, next) => {
@@ -67,9 +67,9 @@ export default async () => ({
 
 **What we do:**
 
-1. **`newConnection`** — When connecting to the default network, check if a node is running. If not, start a temporary container on the random hook port.
+1. **`newConnection`** - When connecting to the default network, check if a node is running. If not, start a temporary container on the random hook port.
 
-2. **`closeConnection`** — When disconnecting, clean up any temporary container we started.
+2. **`closeConnection`** - When disconnecting, clean up any temporary container we started.
 
 ```typescript
 async newConnection(context, next) {
@@ -108,7 +108,7 @@ The hook also registers process exit handlers (`SIGINT`, `SIGTERM`) to clean up 
 Always use `createPluginError` from utils:
 
 ```typescript
-import { createPluginError } from '@cobuilders/hardhat-arb-utils';
+import { createPluginError } from '@cobuilders/hardhat-arb-utils/errors';
 
 throw createPluginError('Port 8547 is already in use');
 

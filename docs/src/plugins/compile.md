@@ -16,9 +16,9 @@ The plugin supports two ways to compile Stylus contracts:
 | Mode                 | Use Case                         | Requirements                         |
 | -------------------- | -------------------------------- | ------------------------------------ |
 | **Docker** (default) | Zero-setup, isolated builds      | Docker only                          |
-| **Local**            | Faster if Rust already installed | `rustup`, `cargo-stylus`, toolchains |
+| **Host**             | Faster if Rust already installed | `rustup`, `cargo-stylus`, toolchains |
 
-Docker mode runs everything inside containers with cached volumes, so you don't need Rust installed locally. Local mode uses your system's Rust toolchain directly — faster when you already have the tools.
+Docker mode runs everything inside containers with cached volumes, so you don't need Rust installed locally. Host mode uses your system's Rust toolchain directly - faster when you already have the tools.
 
 ---
 
@@ -33,7 +33,7 @@ By default, this compiles **both** Solidity and Stylus contracts.
 | Option         | Description                                   | Default        |
 | -------------- | --------------------------------------------- | -------------- |
 | `--contracts`  | Comma-separated list of Stylus contract names | all discovered |
-| `--local`      | Use local Rust toolchain instead of Docker    | `false`        |
+| `--host`       | Use host Rust toolchain instead of Docker     | `false`        |
 | `--sol`        | Compile only Solidity contracts               | `false`        |
 | `--stylus`     | Compile only Stylus contracts                 | `false`        |
 | `--cleanCache` | Remove cached Docker volumes                  | `false`        |
@@ -46,7 +46,7 @@ npx hardhat arb:compile --stylus                  # Stylus contracts only
 npx hardhat arb:compile --sol                     # Solidity contracts only
 npx hardhat arb:compile --contracts my-counter    # Single Stylus contract
 npx hardhat arb:compile --contracts counter,nft   # Multiple Stylus contracts
-npx hardhat arb:compile --local                   # Use local Rust toolchain
+npx hardhat arb:compile --host                    # Use host Rust toolchain
 npx hardhat arb:compile --cleanCache              # Clear Docker cache, then exit
 npx hardhat arb:compile --cleanCache --stylus     # Clear cache, then compile
 ```
@@ -55,13 +55,13 @@ npx hardhat arb:compile --cleanCache --stylus     # Clear cache, then compile
 
 ## What Happens When You Compile
 
-1. **Discovery** — Scans `contracts/` for directories containing `Cargo.toml` with `stylus-sdk` as a dependency
-2. **Validation** — Checks that each contract has a `rust-toolchain.toml` specifying its toolchain version
-3. **Node** — Starts a temporary Arbitrum node (needed by `cargo stylus check`)
-4. **Check** — Runs `cargo stylus check` against the node to validate the contract
-5. **Build** — Runs `cargo stylus build` to compile to WASM
-6. **Artifacts** — Exports the ABI and generates a Hardhat-compatible artifact
-7. **Cleanup** — Stops the temporary node and removes temporary resources
+1. **Discovery** - Scans `contracts/` for directories containing `Cargo.toml` with `stylus-sdk` as a dependency
+2. **Validation** - Checks that each contract has a `rust-toolchain.toml` specifying its toolchain version
+3. **Node** - Starts a temporary Arbitrum node (needed by `cargo stylus check`)
+4. **Check** - Runs `cargo stylus check` against the node to validate the contract
+5. **Build** - Runs `cargo stylus build` to compile to WASM
+6. **Artifacts** - Exports the ABI and generates a Hardhat-compatible artifact
+7. **Cleanup** - Stops the temporary node and removes temporary resources
 
 !!! info "Temporary Node"
 
@@ -79,7 +79,7 @@ my-hardhat-project/
 │   ├── my-counter/              # Stylus contract
 │   │   ├── Cargo.toml           # Must depend on stylus-sdk
 │   │   ├── Stylus.toml          # Required by cargo-stylus
-│   │   ├── rust-toolchain.toml  # Required — specifies Rust version
+│   │   ├── rust-toolchain.toml  # Required - specifies Rust version
 │   │   └── src/
 │   │       ├── lib.rs           # Contract code
 │   │       └── main.rs          # Entry point (for ABI export)
@@ -113,7 +113,7 @@ my-hardhat-project/
       rm -rf hardhat-arbitrum-stylus
     ```
 
-**`Cargo.toml`** — Must include `stylus-sdk` as a dependency. Non-Stylus Rust projects are automatically ignored.
+**`Cargo.toml`** - Must include `stylus-sdk` as a dependency. Non-Stylus Rust projects are automatically ignored.
 
 ```toml
 [package]
@@ -148,7 +148,7 @@ opt-level = 3
 
 The `export-abi` feature and `[[bin]]` section are needed for ABI export. The `cdylib` crate type is needed for WASM compilation.
 
-**`Stylus.toml`** — Required by `cargo-stylus`. Can be minimal:
+**`Stylus.toml`** - Required by `cargo-stylus`. Can be minimal:
 
 ```toml
 [workspace]
@@ -158,7 +158,7 @@ The `export-abi` feature and `[[bin]]` section are needed for ABI export. The `c
 [contract]
 ```
 
-**`rust-toolchain.toml`** — Required for each contract. Specifies the exact Rust toolchain version to use.
+**`rust-toolchain.toml`** - Required for each contract. Specifies the exact Rust toolchain version to use.
 
 ```toml
 [toolchain]
@@ -167,7 +167,7 @@ channel = "1.93.0"
 
 !!! warning "rust-toolchain.toml is required"
 
-    Every Stylus contract must have a `rust-toolchain.toml` file. Different contracts can use different toolchain versions — the plugin handles this automatically.
+    Every Stylus contract must have a `rust-toolchain.toml` file. Different contracts can use different toolchain versions - the plugin handles this automatically.
 
 ---
 
@@ -218,7 +218,7 @@ The plugin uses two Docker volumes for persistent caching:
 | `stylus-compile-rustup` | Rust toolchains           |
 | `stylus-compile-cargo`  | Cargo registry and crates |
 
-First compilation downloads toolchains and dependencies — subsequent compilations reuse the cache and are much faster.
+First compilation downloads toolchains and dependencies - subsequent compilations reuse the cache and are much faster.
 
 ```bash
 # Remove cache volumes if something goes wrong
@@ -227,12 +227,12 @@ npx hardhat arb:compile --cleanCache
 
 ---
 
-## Local Mode
+## Host Mode
 
-Use `--local` or set `useLocalRust: true` in config to compile with your system's Rust toolchain.
+Use `--host` or set `useHostToolchain: true` in config to compile with your system's Rust toolchain.
 
 ```bash
-npx hardhat arb:compile --local
+npx hardhat arb:compile --host
 ```
 
 The plugin validates all requirements before starting:
@@ -244,9 +244,9 @@ The plugin validates all requirements before starting:
 
 If anything is missing, you'll get clear instructions on what to install.
 
-!!! note "Local Mode Prerequisites"
+!!! note "Host Mode Prerequisites"
 
-    Install the required tools before using local mode:
+    Install the required tools before using host mode:
 
     ```bash
     # Install rustup (if not already installed)
@@ -266,16 +266,18 @@ If anything is missing, you'll get clear instructions on what to install.
 
 ```typescript
 export default {
-  stylusCompile: {
-    useLocalRust: false, // Set to true to always use local Rust
+  stylus: {
+    compile: {
+      useHostToolchain: false, // Set to true to always use host Rust
+    },
   },
 };
 ```
 
-| Option         | Type    | Default | Description                                |
-| -------------- | ------- | ------- | ------------------------------------------ |
-| `useLocalRust` | boolean | `false` | Use local Rust toolchain instead of Docker |
+| Option             | Type    | Default | Description                               |
+| ------------------ | ------- | ------- | ----------------------------------------- |
+| `useHostToolchain` | boolean | `false` | Use host Rust toolchain instead of Docker |
 
-The `--local` CLI flag overrides this setting for a single run.
+The `--host` CLI flag overrides this setting for a single run.
 
 See [Configuration](../configuration.md) for all options.

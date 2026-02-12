@@ -1,24 +1,23 @@
 # @cobuilders/hardhat-arb-utils
 
-Internal shared utilities for the hardhat-arbitrum-stylus plugin suite.
+Shared utilities for the hardhat-arbitrum-stylus plugin suite.
 
-## Features
+> This is an internal package used by [@cobuilders/hardhat-arbitrum-stylus](../hardhat-arbitrum-stylus). You don't need to install it directly.
 
-- **Container Manager**: Generic Docker container lifecycle management
-- **Docker Client**: Low-level Docker CLI wrapper
+## Modules
 
-## Usage
+| Module | Import | Description |
+| --- | --- | --- |
+| **Container** | `@cobuilders/hardhat-arb-utils/container` | Docker container lifecycle and network management |
+| **Errors** | `@cobuilders/hardhat-arb-utils/errors` | `createPluginError` for consistent error handling |
+| **Web3** | `@cobuilders/hardhat-arb-utils/web3` | Viem wrappers, RPC helpers, chain/wallet setup |
+| **Stylus** | `@cobuilders/hardhat-arb-utils/stylus` | Contract discovery, Docker images, toolchain validation |
+| **Testing** | `@cobuilders/hardhat-arb-utils/testing` | `useFixtureProject` for test fixtures |
 
-```ts
-import { ContainerManager } from "@cobuilders/hardhat-arb-utils/container";
+## Documentation
 
-const manager = new ContainerManager();
+📖 **[Read the docs](https://cobuilders-xyz.github.io/hardhat-arbitrum-stylus/)** | [Source](../../docs)
 
-const container = await manager.start({
-  image: "some-image",
-  tag: "v1.0.0",
-  ports: [{ host: 8080, container: 80 }],
-});
+## License
 
-await manager.stop(container.id);
-```
+MIT

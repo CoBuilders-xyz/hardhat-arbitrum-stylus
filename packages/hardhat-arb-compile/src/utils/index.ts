@@ -2,15 +2,26 @@
  * Public utilities for hardhat-arb-compile.
  */
 
-// Discovery
+// Re-export shared utilities from @cobuilders/hardhat-arb-utils/stylus
 export {
   discoverStylusContracts,
   type DiscoveryOptions,
   type StylusContractInfo,
-} from './discovery/index.js';
+  ensureVolumes,
+  cleanCacheVolumes,
+  RUSTUP_VOLUME_NAME,
+  CARGO_VOLUME_NAME,
+  ensureCompileImage,
+  getCompileImageName,
+  execWithProgress,
+  execAsync,
+  type ProgressCallback,
+  type ExecResult,
+  validateAllToolchains,
+} from '@cobuilders/hardhat-arb-utils/stylus';
 
-// Compilation
-export { compileLocal, type CompileOptions } from './compiler/local.js';
+// Compilation (compile-specific)
+export { compileHost, type CompileOptions } from './compiler/host.js';
 export type { CompileResult } from './compiler/types.js';
 
 // ABI export

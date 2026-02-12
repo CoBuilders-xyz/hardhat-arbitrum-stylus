@@ -1,6 +1,6 @@
-import fs from "node:fs/promises";
-import path from "node:path";
-import { after, before } from "node:test";
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { after, before } from 'node:test';
 
 /**
  * This helper adds node:test hooks to run the tests inside one of the projects
@@ -20,8 +20,8 @@ export function useFixtureProject(projectName: string): void {
     prevWorkingDir = process.cwd();
     projectPath = path.join(
       prevWorkingDir,
-      "test",
-      "fixture-projects",
+      'test',
+      'fixture-projects',
       projectName,
     );
 

@@ -1,4 +1,4 @@
 {
-  "name": "compile-local-rust-fixture",
+  "name": "compile-container-rust-fixture",
   "type": "module"
 }

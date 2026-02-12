@@ -21,8 +21,8 @@ const hardhatArbCompilePlugin: HardhatPlugin = {
         description: 'Comma-separated list of Stylus contract names to compile',
       })
       .addFlag({
-        name: 'local',
-        description: 'Use local Rust toolchain instead of Docker',
+        name: 'host',
+        description: 'Use host Rust toolchain instead of Docker',
       })
       .addFlag({
         name: 'sol',

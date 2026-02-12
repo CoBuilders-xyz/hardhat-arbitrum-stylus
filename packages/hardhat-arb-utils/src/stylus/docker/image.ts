@@ -1,4 +1,4 @@
-import { DockerClient } from '@cobuilders/hardhat-arb-utils';
+import { DockerClient } from '../../container/docker-client.js';
 
 /** Image name for Stylus compile containers */
 const COMPILE_IMAGE_NAME = 'stylus-compile';

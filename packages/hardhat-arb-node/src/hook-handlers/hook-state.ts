@@ -12,9 +12,10 @@ let hookHttpPort: number | null = null;
 let hookWsPort: number | null = null;
 
 /**
- * Generate a random port in the safe range
+ * Generate a random port in the safe range.
+ * Exported for reuse by compile/deploy tasks that spin up ephemeral nodes.
  */
-function generateRandomPort(): number {
+export function generateRandomPort(): number {
   return Math.floor(Math.random() * (MAX_PORT - MIN_PORT)) + MIN_PORT;
 }
 

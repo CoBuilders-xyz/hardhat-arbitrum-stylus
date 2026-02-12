@@ -9,10 +9,10 @@ import {
   type Chain,
   type WalletClient,
   type HttpTransport,
-} from "viem";
-import { privateKeyToAccount, type PrivateKeyAccount } from "viem/accounts";
+} from 'viem';
+import { privateKeyToAccount, type PrivateKeyAccount } from 'viem/accounts';
 
-import type { ChainConfig } from "./types.js";
+import type { ChainConfig } from './types.js';
 
 /**
  * Create a custom chain configuration.
@@ -22,8 +22,8 @@ export function createChain(config: ChainConfig): Chain {
     id: config.chainId,
     name: config.name,
     nativeCurrency: {
-      name: "Ether",
-      symbol: "ETH",
+      name: 'Ether',
+      symbol: 'ETH',
       decimals: 18,
     },
     rpcUrls: {

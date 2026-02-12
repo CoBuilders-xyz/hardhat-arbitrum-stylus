@@ -3,9 +3,9 @@ import type { HardhatRuntimeEnvironment } from 'hardhat/types/hre';
 
 const taskTest: NewTaskActionFunction<{}> = async (
   {},
-  hre: HardhatRuntimeEnvironment,
+  _hre: HardhatRuntimeEnvironment,
 ) => {
-  console.log('test', 'hre.version:', hre.versions.hardhat);
+  console.log('arb:test is not yet implemented. Stay tuned!');
 };
 
 export default taskTest;

@@ -1,11 +1,11 @@
-import type { ChildProcess } from "node:child_process";
+import type { ChildProcess } from 'node:child_process';
 
-import { DockerClient, DockerError } from "./docker-client.js";
+import { DockerClient, DockerError } from './docker-client.js';
 import type {
   ContainerConfig,
   ContainerInfo,
   ReadinessCheck,
-} from "./types.js";
+} from './types.js';
 
 /**
  * Error thrown when container operations fail.
@@ -15,7 +15,7 @@ export class ContainerManagerError extends Error {
 
   constructor(message: string, originalCause?: Error) {
     super(message);
-    this.name = "ContainerManagerError";
+    this.name = 'ContainerManagerError';
     this.originalCause = originalCause;
   }
 }
@@ -39,7 +39,7 @@ export class ContainerManager {
     const available = await this.client.isAvailable();
     if (!available) {
       throw new ContainerManagerError(
-        "Docker is not available. Please ensure Docker is installed and running.",
+        'Docker is not available. Please ensure Docker is installed and running.',
       );
     }
   }
@@ -77,7 +77,7 @@ export class ContainerManager {
         if (error instanceof DockerError) {
           throw new ContainerManagerError(
             `Failed to pull image ${config.image}:${config.tag}. ` +
-              "Please check your internet connection and image name.",
+              'Please check your internet connection and image name.',
             error,
           );
         }
@@ -227,11 +227,11 @@ export class ContainerManager {
     check: ReadinessCheck,
   ): Promise<boolean> {
     switch (check.type) {
-      case "http":
+      case 'http':
         return this.httpReadinessCheck(check.target);
-      case "tcp":
+      case 'tcp':
         return this.tcpReadinessCheck(check.target);
-      case "exec":
+      case 'exec':
         return this.execReadinessCheck(info.id, check.target);
     }
   }
@@ -242,11 +242,11 @@ export class ContainerManager {
   private async httpReadinessCheck(url: string): Promise<boolean> {
     try {
       const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          jsonrpc: "2.0",
-          method: "eth_chainId",
+          jsonrpc: '2.0',
+          method: 'eth_chainId',
           params: [],
           id: 1,
         }),
@@ -261,18 +261,18 @@ export class ContainerManager {
    * TCP readiness check - checks if port is open.
    */
   private async tcpReadinessCheck(target: string): Promise<boolean> {
-    const [host, portStr] = target.split(":");
+    const [host, portStr] = target.split(':');
     const port = parseInt(portStr, 10);
 
     return new Promise((resolve) => {
-      import("node:net")
+      import('node:net')
         .then(({ createConnection }) => {
           const socket = createConnection({ host, port }, () => {
             socket.end();
             resolve(true);
           });
 
-          socket.on("error", () => {
+          socket.on('error', () => {
             resolve(false);
           });
 
@@ -297,7 +297,7 @@ export class ContainerManager {
     try {
       const result = await this.client.execInContainer(
         containerId,
-        command.split(" "),
+        command.split(' '),
       );
       return result.exitCode === 0;
     } catch {

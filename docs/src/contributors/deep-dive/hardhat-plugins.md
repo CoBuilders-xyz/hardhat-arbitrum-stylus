@@ -2,9 +2,9 @@
 
 A Hardhat plugin extends Hardhat by adding:
 
-- **Tasks** — CLI commands (`npx hardhat my-task`)
-- **Configuration** — New options in `hardhat.config.ts`
-- **Hooks** — Code that runs at specific lifecycle points
+- **Tasks** - CLI commands (`npx hardhat my-task`)
+- **Configuration** - New options in `hardhat.config.ts`
+- **Hooks** - Code that runs at specific lifecycle points
 
 ## Plugin Definition
 

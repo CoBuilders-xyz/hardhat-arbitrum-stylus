@@ -5,9 +5,9 @@
 
 Hardhat plugin suite for Arbitrum Stylus development.
 
-!!! tip "Beta Status"
+!!! tip "Alpha Status"
 
-    Some features are coming soon. See [Plugins](plugins/index.md) for current status.
+    The test plugin is still under development. See [Plugins](plugins/index.md) for current status.
 
 ## What's Included
 
@@ -17,7 +17,7 @@ Hardhat plugin suite for Arbitrum Stylus development.
 | --------------------------------- | ------------------------ | -------------- |
 | `@cobuilders/hardhat-arb-node`    | Run local Arbitrum node  | ✅ Available   |
 | `@cobuilders/hardhat-arb-compile` | Compile Stylus contracts | ✅ Available   |
-| `@cobuilders/hardhat-arb-deploy`  | Deploy contracts         | 🔜 Coming Soon |
+| `@cobuilders/hardhat-arb-deploy`  | Deploy contracts         | ✅ Available   |
 | `@cobuilders/hardhat-arb-test`    | Test runner              | 🔜 Coming Soon |
 
 ## Prerequisites
@@ -62,12 +62,12 @@ If starting from scratch we first need a hardhat project:
     echo "auto-install-peers=true" >> .npmrc
     pnpm dlx hardhat --init
     ```
-    !!! Warning
+    !!! warning
         We set auto-install-peers to true. If you prefer to install peers manually ignore this line
 
         `echo "auto-install-peers=true" >> .npmrc`
 
-Choose any template (Viem, Ethers, or minimal) — all work with this plugin.
+Choose any template (Viem, Ethers, or minimal) - all work with this plugin.
 
 Now that you have a Hardhat project, you can go to Install the Plugin section.
 
@@ -150,7 +150,7 @@ Account #0: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 (10 ETH)
 
 ## Next Steps
 
-- [Node Plugin](plugins/node.md) — All commands and options
-- [Configuration](configuration.md) — Customize settings
-- [First Stylus Contract](guides/first-stylus-contract.md) — Build and deploy a contract
-- [Troubleshooting](guides/troubleshooting.md) — Common issues and solutions
+- [Node Plugin](plugins/node.md) - All commands and options
+- [Configuration](configuration.md) - Customize settings
+- [First Stylus Contract](guides/first-stylus-contract.md) - Build and deploy a contract
+- [Troubleshooting](guides/troubleshooting.md) - Common issues and solutions

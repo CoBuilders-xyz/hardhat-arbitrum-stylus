@@ -3,6 +3,9 @@
   "references": [
     {
       "path": "../hardhat-arb-node"
+    },
+    {
+      "path": "../hardhat-arb-utils"
     }
   ],
   "exclude": ["dist", "node_modules", "test/fixture-projects"]

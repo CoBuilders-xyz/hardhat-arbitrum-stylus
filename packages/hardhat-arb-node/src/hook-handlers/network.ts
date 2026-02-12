@@ -96,7 +96,6 @@ export default async (): Promise<Partial<NetworkHooks>> => {
                 await hre.tasks.getTask(['arb:node', 'start']).run({
                   quiet: true,
                   detach: true,
-                  stylusReady: false,
                   name: tempContainerName,
                   httpPort: hookHttpPort,
                   wsPort: hookWsPort,

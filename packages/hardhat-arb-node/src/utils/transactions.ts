@@ -6,12 +6,12 @@ import {
   type PrivateKeyAccount,
   encodeFunctionData,
   getAddress,
-  createPluginError,
   createChain,
   createWalletClientFromKey,
   getTransactionReceipt,
   computeCreate2Address,
 } from '@cobuilders/hardhat-arb-utils';
+import { createPluginError } from '@cobuilders/hardhat-arb-utils/errors';
 
 // Re-export web3 utilities for backwards compatibility
 export {

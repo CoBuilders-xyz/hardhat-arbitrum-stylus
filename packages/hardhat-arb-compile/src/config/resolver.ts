@@ -9,7 +9,8 @@ export function resolveStylusCompileConfig(
   userConfig?: StylusCompileUserConfig,
 ): StylusCompileConfig {
   return {
-    useLocalRust:
-      userConfig?.useLocalRust ?? DEFAULT_STYLUS_COMPILE_CONFIG.useLocalRust,
+    useHostToolchain:
+      userConfig?.useHostToolchain ??
+      DEFAULT_STYLUS_COMPILE_CONFIG.useHostToolchain,
   };
 }

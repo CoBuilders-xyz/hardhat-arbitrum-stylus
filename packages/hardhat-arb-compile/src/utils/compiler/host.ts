@@ -2,7 +2,10 @@ import path from 'node:path';
 
 import { createPluginError } from '@cobuilders/hardhat-arb-utils/errors';
 
-import { execWithProgress, type ProgressCallback } from '../exec.js';
+import {
+  execWithProgress,
+  type ProgressCallback,
+} from '@cobuilders/hardhat-arb-utils/stylus';
 import {
   generateStylusArtifact,
   saveStylusArtifact,
@@ -12,17 +15,19 @@ import type { CompileResult } from './types.js';
 export type { CompileResult } from './types.js';
 
 /**
- * Options for local compilation.
+ * Options for host compilation.
  */
 export interface CompileOptions {
   /** Callback for progress updates during compilation */
   onProgress?: ProgressCallback;
   /** Directory to save artifacts to */
   artifactsDir?: string;
+  /** RPC endpoint for cargo stylus check (e.g. http://localhost:12345) */
+  endpoint?: string;
 }
 
 /**
- * Compile a Stylus contract using the local Rust toolchain.
+ * Compile a Stylus contract using the host Rust toolchain.
  *
  * Note: Toolchain validation should be done upfront via validateAllToolchains()
  * before calling this function.
@@ -34,16 +39,19 @@ export interface CompileOptions {
  * @returns Compilation result with path to WASM output
  * @throws HardhatPluginError if compilation fails
  */
-export async function compileLocal(
+export async function compileHost(
   contractPath: string,
   toolchain: string,
   packageName: string,
   options?: CompileOptions,
 ): Promise<CompileResult> {
   // Run cargo stylus check
+  const endpointFlag = options?.endpoint
+    ? ` --endpoint ${options.endpoint}`
+    : '';
   try {
     await execWithProgress(
-      `cargo +${toolchain} stylus check`,
+      `cargo +${toolchain} stylus check${endpointFlag}`,
       { cwd: contractPath },
       options?.onProgress,
     );
@@ -92,25 +100,18 @@ export async function compileLocal(
 
   // Generate and save artifact if artifactsDir is provided
   if (options?.artifactsDir) {
-    try {
-      const artifact = await generateStylusArtifact(
-        contractPath,
-        packageName,
-        wasmPath,
-        toolchain,
-        options?.onProgress,
-      );
-      const artifactPath = await saveStylusArtifact(
-        options.artifactsDir,
-        artifact,
-      );
-      result.artifactPath = artifactPath;
-    } catch (error) {
-      // Don't fail the compilation if artifact generation fails
-      // Just log a warning
-      const message = error instanceof Error ? error.message : String(error);
-      console.warn(`Warning: Failed to generate artifact: ${message}`);
-    }
+    const artifact = await generateStylusArtifact(
+      contractPath,
+      packageName,
+      wasmPath,
+      toolchain,
+      options?.onProgress,
+    );
+    const artifactPath = await saveStylusArtifact(
+      options.artifactsDir,
+      artifact,
+    );
+    result.artifactPath = artifactPath;
   }
 
   return result;

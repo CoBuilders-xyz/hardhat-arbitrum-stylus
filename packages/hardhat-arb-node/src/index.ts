@@ -18,6 +18,12 @@ export {
   ensureExitHandlerRegistered,
 } from './temp-node.js';
 
+// Export port utility for ephemeral nodes in compile/deploy
+export { generateRandomPort } from './hook-handlers/hook-state.js';
+
+// Export default accounts for use in deploy tasks
+export { HARDHAT_ACCOUNTS } from './config/defaults.js';
+
 const hardhatArbNodePlugin: HardhatPlugin = {
   id: 'hardhat-arb-node',
   npmPackage: '@cobuilders/hardhat-arb-node',
@@ -38,11 +44,6 @@ const hardhatArbNodePlugin: HardhatPlugin = {
         name: 'detach',
         shortName: 'd',
         description: 'Run in background without attaching to logs',
-      })
-      .addFlag({
-        name: 'stylusReady',
-        description:
-          'Deploy CREATE2 factory, Cache Manager, and StylusDeployer',
       })
       .addOption({
         name: 'name',
