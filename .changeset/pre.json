@@ -11,6 +11,7 @@
     "@cobuilders/hardhat-arb-utils": "0.0.1-alpha.12"
   },
   "changesets": [
+    "all-worms-burn",
     "bold-rabbits-rescue",
     "cute-trees-film",
     "dark-areas-mate",
@@ -30,6 +31,7 @@
     "shaky-cows-rest",
     "sixty-phones-glow",
     "slick-wings-remain",
+    "slow-dryers-divide",
     "solid-dragons-beg",
     "spicy-loops-show",
     "thick-knives-cheat",

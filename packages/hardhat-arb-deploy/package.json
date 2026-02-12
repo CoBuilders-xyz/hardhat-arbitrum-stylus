@@ -1,6 +1,6 @@
 {
   "name": "@cobuilders/hardhat-arb-deploy",
-  "version": "0.0.1-alpha.13",
+  "version": "0.0.1-alpha.14",
   "description": "Hardhat plugin for deploying Arbitrum Stylus (WASM) contracts",
   "homepage": "https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arb-deploy",
   "keywords": [
