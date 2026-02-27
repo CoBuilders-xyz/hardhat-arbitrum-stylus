@@ -39,29 +39,37 @@ flowchart TD
 
 ```
 src/
-├── index.ts                    # Plugin definition and task registration
-├── type-extensions.ts          # Extends StylusConfig with deploy options
+├── index.ts                    # Stable entrypoint (re-exports plugin)
+├── plugin/
+│   ├── index.ts                # Plugin definition and task registration
+│   ├── type-extensions.ts      # Extends StylusConfig with deploy options
+│   ├── hooks/
+│   │   ├── config.ts           # Config hook - resolves stylus.deploy
+│   │   └── network.ts          # Network hook - stylusViem integration
+│   └── tasks/
+│       └── deploy.ts           # Main task orchestration
 ├── config/
 │   ├── types.ts                # StylusDeployConfig, StylusDeployUserConfig
 │   ├── defaults.ts             # Default values
 │   └── resolver.ts             # Merge user config with defaults
-├── hook-handlers/
-│   └── config.ts               # Config hook - resolves stylus.deploy
-├── tasks/
-│   └── deploy.ts               # Main task orchestration
-└── utils/
-    └── deployer/
-        ├── types.ts            # WasmDeployResult, ProgressCallback
-        ├── solidity.ts         # Solidity artifact lookup + deploy
-        ├── wasm-host.ts        # Host cargo stylus deploy
-        └── wasm-container.ts   # Docker cargo stylus deploy
+├── services/
+│   ├── deployers/
+│   │   ├── types.ts            # WasmDeployResult, ProgressCallback
+│   │   ├── solidity.ts         # Solidity artifact lookup + deploy
+│   │   ├── wasm-host.ts        # Host cargo stylus deploy
+│   │   ├── wasm-container.ts   # Docker cargo stylus deploy
+│   │   └── viem-stylus.ts      # viem bridge for Stylus deploy
+│   └── assertions/
+│       └── stylus-assertions.ts
+└── state/
+    └── deploy-mode.ts          # Test-only host/container override
 ```
 
 ---
 
 ## Task Entry Point
 
-The `arb:deploy` task in `tasks/deploy.ts` orchestrates the full flow. It branches on three dimensions:
+The `arb:deploy` task in `plugin/tasks/deploy.ts` orchestrates the full flow. It branches on three dimensions:
 
 1. **Contract type** - Solidity (`.sol`) vs Stylus (folder name)
 2. **Deployment mode** - Host vs Docker (for Stylus only)
@@ -84,7 +92,7 @@ The task handles all lifecycle management: starting/stopping ephemeral nodes, cr
 
 ## Solidity Deployment
 
-`utils/deployer/solidity.ts` handles Solidity contracts:
+`services/deployers/solidity.ts` handles Solidity contracts:
 
 1. **Find artifact** - `findSolidityArtifact()` recursively scans `artifacts/` for a JSON file matching the contract name. Skips `.dbg.` files and empty bytecodes.
 
@@ -104,7 +112,7 @@ The encoding uses `encodeAbiParameters` from `hardhat-arb-utils`, which wraps vi
 
 ## Stylus Host Deployment
 
-`utils/deployer/wasm-host.ts` handles host-mode Stylus deployment:
+`services/deployers/wasm-host.ts` handles host-mode Stylus deployment:
 
 1. **Build command** - Assembles `cargo +{toolchain} stylus deploy` with endpoint, private key, and `--no-verify`
 2. **Execute** - Runs via `execWithProgress` from `hardhat-arb-utils/stylus`, streaming progress lines
@@ -126,7 +134,7 @@ const patterns = [
 
 ## Stylus Container Deployment
 
-`utils/deployer/wasm-container.ts` handles Docker-mode Stylus deployment:
+`services/deployers/wasm-container.ts` handles Docker-mode Stylus deployment:
 
 1. **Prepare toolchain** - Runs `rustup toolchain install` and `rustup target add wasm32-unknown-unknown` in a container (cached in volumes)
 2. **Deploy** - Runs `cargo stylus deploy` in a temporary container

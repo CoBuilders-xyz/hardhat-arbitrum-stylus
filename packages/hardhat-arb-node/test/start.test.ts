@@ -3,14 +3,17 @@ import path from 'node:path';
 import { describe, it, after } from 'node:test';
 import { pathToFileURL } from 'node:url';
 
-import { DockerClient, useFixtureProject } from '@cobuilders/hardhat-arb-utils';
+import {
+  DockerClient,
+  useFixtureProject,
+  getCode,
+} from '@cobuilders/hardhat-arb-utils';
 import { createHardhatRuntimeEnvironment } from 'hardhat/hre';
 import { CONTAINER_NAME } from '../src/config/defaults.js';
 import {
-  getCode,
   PRECOMPILES,
   CREATE2_FACTORY,
-} from '../src/utils/transactions.js';
+} from '../src/services/transactions/client.js';
 
 /**
  * Clean up the container after tests

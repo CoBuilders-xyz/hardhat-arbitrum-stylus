@@ -109,7 +109,7 @@ export interface ContainerInfo {
 /**
  * Result of executing a command inside a container.
  */
-export interface ExecResult {
+export interface ContainerExecResult {
   /** Exit code of the command */
   exitCode: number;
   /** Standard output */

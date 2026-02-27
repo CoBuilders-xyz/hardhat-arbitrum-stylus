@@ -7,6 +7,37 @@ import type { DiscoveryOptions, StylusContractInfo } from './types.js';
 
 export type { DiscoveryOptions, StylusContractInfo } from './types.js';
 
+const discoveryCache = new Map<string, StylusContractInfo[]>();
+
+function cloneContracts(contracts: StylusContractInfo[]): StylusContractInfo[] {
+  return contracts.map((contract) => ({ ...contract }));
+}
+
+function normalizeContractsFilter(contracts: string[] | undefined): string {
+  if (!contracts || contracts.length === 0) {
+    return '*';
+  }
+
+  return [...new Set(contracts.map((name) => name.trim()).filter(Boolean))]
+    .sort()
+    .join(',');
+}
+
+function getDiscoveryCacheKey(
+  contractsDir: string,
+  options?: DiscoveryOptions,
+): string {
+  const root = path.resolve(contractsDir);
+  return `${root}::${normalizeContractsFilter(options?.contracts)}`;
+}
+
+/**
+ * Clear the in-memory Stylus contract discovery cache.
+ */
+export function clearDiscoveryCache(): void {
+  discoveryCache.clear();
+}
+
 /**
  * Recursively find all directories containing Cargo.toml files.
  */
@@ -54,13 +85,23 @@ export async function discoverStylusContracts(
   contractsDir: string,
   options?: DiscoveryOptions,
 ): Promise<StylusContractInfo[]> {
+  const cacheKey = getDiscoveryCacheKey(contractsDir, options);
+  if (!options?.forceRefresh) {
+    const cached = discoveryCache.get(cacheKey);
+    if (cached) {
+      return cloneContracts(cached);
+    }
+  }
+
   // Ensure directory exists
   try {
     const stats = await stat(contractsDir);
     if (!stats.isDirectory()) {
+      discoveryCache.set(cacheKey, []);
       return [];
     }
   } catch {
+    discoveryCache.set(cacheKey, []);
     return [];
   }
 
@@ -88,5 +129,6 @@ export async function discoverStylusContracts(
     });
   }
 
-  return contracts;
+  discoveryCache.set(cacheKey, cloneContracts(contracts));
+  return cloneContracts(contracts);
 }

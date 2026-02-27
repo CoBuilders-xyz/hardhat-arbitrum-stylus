@@ -1,6 +1,6 @@
 import { createPluginError } from '../../errors/index.js';
 
-import { execAsync } from '../exec.js';
+import { execAsync } from '../../exec/exec.js';
 
 const WASM_TARGET = 'wasm32-unknown-unknown';
 

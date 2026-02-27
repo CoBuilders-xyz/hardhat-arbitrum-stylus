@@ -204,6 +204,127 @@ If anything is missing, you'll get clear instructions on what to install.
 
 ---
 
+## Programmatic Deployment (stylusViem)
+
+In addition to the CLI `arb:deploy` command, the deploy plugin adds `stylusViem` to every network connection. This works alongside the original `viem` from hardhat-viem — the original `viem` is never modified.
+
+When you call `stylusViem.deployContract()`, the plugin automatically detects the contract type:
+
+- **Solidity contracts** are routed to the original viem deploy path
+- **Stylus contracts** are deployed via `cargo stylus deploy` (compiles, deploys, and activates in one step)
+
+Both return the same viem contract instance with `.read`, `.write`, and `.getEvents`. No separate compilation step is needed for Stylus — `cargo stylus deploy` handles it internally.
+
+```typescript
+import { network } from 'hardhat';
+
+const { viem, stylusViem } = await network.connect();
+
+// Deploy Solidity (either viem or stylusViem works)
+const solCounter = await viem.deployContract('SolidityCounter');
+await solCounter.write.increment();
+const count = await solCounter.read.count(); // 1n
+
+// Deploy Stylus (use stylusViem)
+const stylusCounter = await stylusViem.deployContract('stylus-counter');
+await stylusCounter.write.increment();
+const stylusCount = await stylusCounter.read.count(); // 1n
+```
+
+### stylusViem.assertions
+
+When using `@nomicfoundation/hardhat-viem-assertions`, `stylusViem.assertions` inherits `emit`, `emitWithArgs`, and `balancesHaveChanged` from `viem.assertions`, and overrides all revert-related assertions for compatibility with Arbitrum nodes.
+
+The standard `hardhat-viem-assertions` revert helpers require raw revert data (`data: "0x..."`) in the error chain — a format provided by Hardhat's built-in EDR but not preserved when Hardhat connects to an external node via HTTP (like `nitro-devnode`). `stylusViem.assertions` replaces these with implementations that work on any Arbitrum node.
+
+**Solidity example:**
+
+```typescript
+const { stylusViem } = await network.connect();
+
+const counter = await stylusViem.deployContract('SolidityCounter');
+
+await stylusViem.assertions.emit(
+  counter.write.increment(),
+  counter,
+  'CountChanged',
+);
+
+await stylusViem.assertions.revert(counter.write.decrement());
+
+await stylusViem.assertions.revertWith(
+  counter.write.decrement(),
+  'Counter: cannot decrement below zero',
+);
+
+await stylusViem.assertions.revertWithCustomError(
+  counter.write.decrementCustom(),
+  counter,
+  'Underflow',
+);
+
+await stylusViem.assertions.revertWithCustomErrorWithArgs(
+  counter.write.setCountChecked([2000n]),
+  counter,
+  'InvalidCount',
+  [5n, 2000n],
+);
+```
+
+**Stylus (Rust) example:**
+
+Custom errors in Stylus contracts work by defining errors with `alloy_sol_types::sol!` and returning ABI-encoded data via `SolError::abi_encode()`:
+
+```rust
+use alloy_sol_types::{sol, SolError};
+
+sol! {
+    error NotOwner(address caller, address owner);
+}
+
+#[public]
+impl MyContract {
+    pub fn restricted_fn(&mut self) -> Result<(), Vec<u8>> {
+        let caller = self.vm().msg_sender();
+        let owner = self.owner.get();
+        if caller != owner {
+            return Err(NotOwner { caller, owner }.abi_encode());
+        }
+        Ok(())
+    }
+}
+```
+
+```typescript
+await stylusViem.assertions.revert(proxy.write.restrictedFn());
+
+await stylusViem.assertions.revertWithCustomError(
+  proxy.write.restrictedFn(),
+  proxy,
+  'NotOwner',
+);
+```
+
+| Method                          | Source                    | Notes                                                               |
+| ------------------------------- | ------------------------- | ------------------------------------------------------------------- |
+| `emit`                          | `viem.assertions` (proxy) | Works as-is                                                         |
+| `emitWithArgs`                  | `viem.assertions` (proxy) | Works as-is                                                         |
+| `balancesHaveChanged`           | `viem.assertions` (proxy) | Works as-is                                                         |
+| `revert`                        | Custom (stylusViem)       | Checks the call throws (any revert)                                 |
+| `revertWith`                    | Custom (stylusViem)       | Checks the error message contains expected reason                   |
+| `revertWithCustomError`         | Custom (stylusViem)       | ABI decode for Solidity; selector-based check for Stylus            |
+| `revertWithCustomErrorWithArgs` | Custom (stylusViem)       | ABI decode + args for Solidity; selector-based (no args) for Stylus |
+
+!!! note "Stylus Custom Error Limitations"
+
+    `cargo stylus export-abi` does not include `sol!`-defined custom errors in the exported ABI. For Solidity contracts, `revertWithCustomError` fully decodes the error name and args via ABI. For Stylus contracts, the assertion verifies that the call reverted with a custom error signature (not a string revert or panic) but cannot verify the specific error name or arguments. This is a known limitation of the Stylus ABI export.
+
+!!! info "No Compile Step Needed"
+
+    Stylus contracts don't need to be pre-compiled. The deploy hook discovers contracts from source, exports the ABI, and runs `cargo stylus deploy` which handles compilation internally. For the best experience, use `npx hardhat arb:test` which wraps the test runner with Stylus support.
+
+---
+
 ## Configuration
 
 ```typescript

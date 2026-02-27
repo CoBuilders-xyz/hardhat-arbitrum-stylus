@@ -21,11 +21,11 @@ export {
 } from '@cobuilders/hardhat-arb-utils/stylus';
 
 // Compilation (compile-specific)
-export { compileHost, type CompileOptions } from './compiler/host.js';
-export type { CompileResult } from './compiler/types.js';
+export { compileHost, type CompileOptions } from '../services/compiler/host.js';
+export type { CompileResult } from '../services/compiler/types.js';
 
 // ABI export
-export { exportStylusAbi } from './abi/export.js';
+export { exportStylusAbi } from '@cobuilders/hardhat-arb-utils/stylus';
 
 // Artifact generation
 export {
@@ -33,4 +33,4 @@ export {
   generateStylusArtifact,
   saveStylusArtifact,
   type StylusArtifact,
-} from './stylus-artifacts/stylus-artifact.js';
+} from '../services/artifacts/stylus-artifact.js';

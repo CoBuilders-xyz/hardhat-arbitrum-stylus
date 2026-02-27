@@ -43,37 +43,46 @@ flowchart TD
 
 ```
 src/
-├── index.ts                    # Plugin definition, task registration, re-exports
-├── type-extensions.ts          # Extends StylusConfig with node options
-├── temp-node.ts                # Temporary container lifecycle management
+├── index.ts                    # Stable entrypoint (re-exports plugin)
+├── plugin/
+│   ├── index.ts                # Plugin definition, task registration, re-exports
+│   ├── type-extensions.ts      # Extends StylusConfig with node options
+│   ├── hooks/
+│   │   ├── config.ts           # Config hook: default network + config resolution
+│   │   ├── hre.ts              # HRE hook: captures HRE for network hook
+│   │   └── network.ts          # Network hook: auto-start/stop temp nodes
+│   └── tasks/
+│       ├── start.ts            # Start node + setup + Stylus infra
+│       ├── stop.ts             # Stop and remove container
+│       ├── status.ts           # Check if node is running
+│       └── logs.ts             # Stream or show container logs
+├── state/
+│   └── port-state.ts           # Random port generation for hook nodes
 ├── constants/
 │   └── bytecode.ts             # CREATE2 factory, Cache Manager, StylusDeployer bytecodes
 ├── config/
 │   ├── types.ts                # ArbNodeConfig, ArbNodeUserConfig, DevAccount
 │   ├── defaults.ts             # Default config, HARDHAT_ACCOUNTS, CONTAINER_NAME
 │   └── resolver.ts             # Merge user config with defaults
-├── hook-handlers/
-│   ├── config.ts               # Config hook: default network + config resolution
-│   ├── hook-state.ts           # Random port generation for hook nodes
-│   ├── hre.ts                  # HRE hook: captures HRE for network hook
-│   └── network.ts              # Network hook: auto-start/stop temp nodes
-├── tasks/
-│   ├── start.ts                # Start node + setup + Stylus infra
-│   ├── stop.ts                 # Stop and remove container
-│   ├── status.ts               # Check if node is running
-│   └── logs.ts                 # Stream or show container logs
+├── services/
+│   ├── runtime/
+│   │   └── temp-node.ts        # Temporary container lifecycle management
+│   ├── lifecycle/
+│   │   ├── chain-setup.ts      # performEssentialSetup(), prefundAccounts()
+│   │   ├── chain-infra.ts      # deployCreate2Factory(), deployCacheManager(), deployStylusDeployer()
+│   │   └── startup-info.ts     # printStartupInfo()
+│   └── transactions/
+│       ├── client.ts           # Precompile calls, deployment, RPC helpers
+│       └── batch-funder.ts     # Batch funding helper
 └── utils/
-    ├── transactions.ts         # Precompile calls, contract deployment, RPC helpers
-    ├── chain-setup.ts          # performEssentialSetup(), prefundAccounts()
-    ├── chain-infra.ts          # deployCreate2Factory(), deployCacheManager(), deployStylusDeployer()
-    └── startup-info.ts         # printStartupInfo()
+    └── index.ts                # Compatibility barrel for moved utilities
 ```
 
 ---
 
 ## Node Startup Flow
 
-The `arb:node start` task in `tasks/start.ts` performs the full setup:
+The `arb:node start` task in `plugin/tasks/start.ts` performs the full setup:
 
 1. **Port check** - Verifies HTTP and WebSocket ports are available
 2. **Container start** - Uses `ContainerManager` to pull the image, create and start the container, then run a readiness check (HTTP probe with 60s timeout)
@@ -113,7 +122,7 @@ The CREATE2 Factory uses a pre-signed transaction (no private key needed). The C
 
 The node plugin uses three hooks to integrate with Hardhat's lifecycle:
 
-### Config Hook (`hook-handlers/config.ts`)
+### Config Hook (`plugin/hooks/config.ts`)
 
 Two responsibilities:
 
@@ -131,11 +140,11 @@ const arbNodeNetwork: HttpNetworkUserConfig = {
 };
 ```
 
-### HRE Hook (`hook-handlers/hre.ts`)
+### HRE Hook (`plugin/hooks/hre.ts`)
 
 Captures the `HardhatRuntimeEnvironment` on creation. The network hook needs this reference to call `arb:node start` programmatically.
 
-### Network Hook (`hook-handlers/network.ts`)
+### Network Hook (`plugin/hooks/network.ts`)
 
 Three handlers:
 
@@ -147,7 +156,7 @@ Three handlers:
 
 ---
 
-## Temp Node Manager (`temp-node.ts`)
+## Temp Node Manager (`services/runtime/temp-node.ts`)
 
 Manages ephemeral containers with automatic cleanup:
 
@@ -167,7 +176,7 @@ This module is re-exported by the plugin and used by both the compile and deploy
 
 ---
 
-## Hook-State Port Management (`hook-handlers/hook-state.ts`)
+## Port-State Management (`state/port-state.ts`)
 
 Each process gets its own random HTTP port (10000-60000) for hook-managed nodes. This ensures:
 
@@ -190,7 +199,7 @@ The `generateRandomPort()` function is also re-exported for use by compile and d
 
 ---
 
-## Transaction Utilities (`utils/transactions.ts`)
+## Transaction Utilities (`services/transactions/client.ts`)
 
 Low-level RPC helpers for chain setup:
 
@@ -214,13 +223,13 @@ The plugin re-exports utilities for use by sibling plugins (compile, deploy):
 
 ```typescript
 // Temp node management
-export { generateTempContainerName, registerTempContainer, cleanupTempContainer, ... } from './temp-node.js';
+export { generateTempContainerName, registerTempContainer, cleanupTempContainer, ... } from '../services/runtime/temp-node.js';
 
 // Port generation
-export { generateRandomPort } from './hook-handlers/hook-state.js';
+export { generateRandomPort } from '../state/port-state.js';
 
 // Pre-funded accounts
-export { HARDHAT_ACCOUNTS } from './config/defaults.js';
+export { HARDHAT_ACCOUNTS } from '../config/defaults.js';
 ```
 
 This makes `hardhat-arb-node` the central dependency for any plugin that needs to spin up ephemeral nodes.

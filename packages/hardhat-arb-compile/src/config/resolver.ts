@@ -1,5 +1,6 @@
-import type { StylusCompileConfig, StylusCompileUserConfig } from './types.js';
+import { resolveStylusSubConfig } from '@cobuilders/hardhat-arb-utils/config';
 
+import type { StylusCompileConfig, StylusCompileUserConfig } from './types.js';
 import { DEFAULT_STYLUS_COMPILE_CONFIG } from './defaults.js';
 
 /**
@@ -8,9 +9,8 @@ import { DEFAULT_STYLUS_COMPILE_CONFIG } from './defaults.js';
 export function resolveStylusCompileConfig(
   userConfig?: StylusCompileUserConfig,
 ): StylusCompileConfig {
-  return {
-    useHostToolchain:
-      userConfig?.useHostToolchain ??
-      DEFAULT_STYLUS_COMPILE_CONFIG.useHostToolchain,
-  };
+  return resolveStylusSubConfig<StylusCompileConfig, StylusCompileUserConfig>(
+    userConfig,
+    DEFAULT_STYLUS_COMPILE_CONFIG,
+  );
 }

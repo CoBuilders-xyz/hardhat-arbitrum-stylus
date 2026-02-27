@@ -33,21 +33,24 @@ flowchart TD
 
 ```
 src/
-├── index.ts                    # Plugin definition and task registration
-├── type-extensions.ts          # Extends StylusConfig with compile options
+├── index.ts                    # Stable entrypoint (re-exports plugin)
+├── plugin/
+│   ├── index.ts                # Plugin definition and task registration
+│   ├── type-extensions.ts      # Extends StylusConfig with compile options
+│   ├── hooks/
+│   │   └── config.ts           # Config hook
+│   └── tasks/
+│       └── compile.ts          # Main task orchestration
 ├── config/                     # Configuration resolution
-├── hook-handlers/              # Config hook
-├── tasks/
-│   └── compile.ts              # Main task orchestration
+├── services/
+│   ├── compiler/
+│   │   ├── host.ts             # Host compilation
+│   │   ├── container.ts        # Docker compilation
+│   │   └── types.ts            # Compile result types
+│   └── artifacts/
+│       └── stylus-artifact.ts  # Artifact generation and saving
 └── utils/
-    ├── discovery/              # Find Stylus contracts
-    ├── toolchain/              # Validate host Rust tools
-    ├── compiler/
-    │   ├── host.ts             # Host compilation
-    │   ├── container.ts        # Docker compilation
-    │   └── image-builder.ts    # Build the compile Docker image
-    ├── abi/                    # ABI export and parsing
-    └── stylus-artifacts/       # Artifact generation and saving
+    └── index.ts                # Public compile utility exports
 ```
 
 ---
@@ -128,16 +131,16 @@ When using Docker (the default):
 6. **Cleanup** - Stops node, removes Docker network
 
 ```typescript
-// container.ts - runs commands inside Docker containers
-await runInContainer(
+// Shared utility from @cobuilders/hardhat-arb-utils/stylus
+await runInStylusContainer(
   imageName,
   contractPath,
   ['cargo', `+${toolchain}`, 'stylus', 'check', '--endpoint', rpcEndpoint],
-  options,
+  { ...options, containerPrefix: 'stylus-compile-tmp' },
 );
 ```
 
-Each `runInContainer` call starts a temporary container with the contract directory mounted at `/workspace` and the cache volumes mounted.
+Each `runInStylusContainer` call starts a temporary container with the contract directory mounted at `/workspace` and the cache volumes mounted.
 
 ---
 
@@ -146,7 +149,7 @@ Each `runInContainer` call starts a temporary container with the contract direct
 After successful compilation:
 
 1. **ABI export** - Runs `cargo stylus export-abi` to get a Solidity interface
-2. **Parse ABI** - `parseAbiFromSolidity()` converts the Solidity interface to JSON ABI format (functions, events, parameter types)
+2. **Parse ABI** - `parseAbiFromSolidity()` (from `@cobuilders/hardhat-arb-utils/stylus`) converts the Solidity interface to JSON ABI format (functions, events, parameter types)
 3. **Read WASM** - Reads the compiled `.wasm` file and converts to hex
 4. **Save** - Writes `artifacts/contracts/{name}/{name}.json`
 

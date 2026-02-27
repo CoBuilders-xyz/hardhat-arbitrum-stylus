@@ -1,5 +1,6 @@
-import type { StylusDeployConfig, StylusDeployUserConfig } from './types.js';
+import { resolveStylusSubConfig } from '@cobuilders/hardhat-arb-utils/config';
 
+import type { StylusDeployConfig, StylusDeployUserConfig } from './types.js';
 import { DEFAULT_STYLUS_DEPLOY_CONFIG } from './defaults.js';
 
 /**
@@ -8,9 +9,8 @@ import { DEFAULT_STYLUS_DEPLOY_CONFIG } from './defaults.js';
 export function resolveStylusDeployConfig(
   userConfig?: StylusDeployUserConfig,
 ): StylusDeployConfig {
-  return {
-    useHostToolchain:
-      userConfig?.useHostToolchain ??
-      DEFAULT_STYLUS_DEPLOY_CONFIG.useHostToolchain,
-  };
+  return resolveStylusSubConfig<StylusDeployConfig, StylusDeployUserConfig>(
+    userConfig,
+    DEFAULT_STYLUS_DEPLOY_CONFIG,
+  );
 }

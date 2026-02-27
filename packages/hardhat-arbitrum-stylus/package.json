@@ -11,6 +11,9 @@
   "author": "CoBuilders",
   "license": "MIT",
   "type": "module",
+  "bin": {
+    "hardhat-arbitrum-stylus": "./dist/src/cli/index.js"
+  },
   "types": "./dist/src/index.d.ts",
   "exports": {
     ".": {
@@ -45,13 +48,14 @@
     "CHANGELOG.md"
   ],
   "devDependencies": {
-    "@cobuilders/hardhat-arb-node": "workspace:^",
     "@cobuilders/hardhat-arb-compile": "workspace:^",
     "@cobuilders/hardhat-arb-deploy": "workspace:^",
+    "@cobuilders/hardhat-arb-node": "workspace:^",
     "@cobuilders/hardhat-arb-test": "workspace:^",
     "@cobuilders/hardhat-arb-utils": "workspace:^",
     "@nomicfoundation/hardhat-node-test-runner": "^3.0.0",
     "@nomicfoundation/hardhat-viem": "^3.0.0",
+    "@nomicfoundation/hardhat-viem-assertions": "^3.0.5",
     "@types/node": "^22.0.0",
     "eslint": "^9.18.0",
     "hardhat": "^3.0.0",
@@ -61,9 +65,9 @@
     "viem": "^2.30.0"
   },
   "peerDependencies": {
-    "@cobuilders/hardhat-arb-node": "workspace:^",
     "@cobuilders/hardhat-arb-compile": "workspace:^",
     "@cobuilders/hardhat-arb-deploy": "workspace:^",
+    "@cobuilders/hardhat-arb-node": "workspace:^",
     "@cobuilders/hardhat-arb-test": "workspace:^",
     "hardhat": "^3.0.0"
   },
