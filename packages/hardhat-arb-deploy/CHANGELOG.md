@@ -1,5 +1,13 @@
 # @cobuilders/hardhat-arb-deploy
 
+## 0.0.1-alpha.16
+
+### Patch Changes
+
+- 6b61fb5: fix: enhance scaffold stylus contracts
+- Updated dependencies [6b61fb5]
+  - @cobuilders/hardhat-arb-utils@0.0.1-alpha.19
+
 ## 0.0.1-alpha.15
 
 ### Patch Changes

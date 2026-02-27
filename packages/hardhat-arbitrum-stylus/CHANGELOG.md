@@ -1,5 +1,13 @@
 # @cobuilders/hardhat-arbitrum-stylus
 
+## 0.0.1-alpha.20
+
+### Patch Changes
+
+- 6b61fb5: fix: enhance scaffold stylus contracts
+- Updated dependencies [6b61fb5]
+  - @cobuilders/hardhat-arb-deploy@0.0.1-alpha.16
+
 ## 0.0.1-alpha.19
 
 ### Patch Changes
