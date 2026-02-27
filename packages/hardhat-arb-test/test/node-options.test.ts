@@ -9,7 +9,10 @@ import {
 
 describe('node options helper', () => {
   it('appends import when no existing NODE_OPTIONS are set', () => {
-    const actual = appendImportToNodeOptions(undefined, 'file:///tsx-loader.mjs');
+    const actual = appendImportToNodeOptions(
+      undefined,
+      'file:///tsx-loader.mjs',
+    );
     assert.equal(actual, '--import "file:///tsx-loader.mjs"');
   });
 

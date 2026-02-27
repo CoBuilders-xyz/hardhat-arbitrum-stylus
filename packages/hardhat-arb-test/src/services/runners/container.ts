@@ -52,7 +52,9 @@ export async function runContainerMode(
 
   const envUpdates = {
     HH_TEST: 'true',
-    NODE_OPTIONS: await deps.buildNodeOptionsWithTsxImport(process.env.NODE_OPTIONS),
+    NODE_OPTIONS: await deps.buildNodeOptionsWithTsxImport(
+      process.env.NODE_OPTIONS,
+    ),
     ...(process.env.NODE_ENV === undefined ? { NODE_ENV: 'test' } : {}),
   };
 

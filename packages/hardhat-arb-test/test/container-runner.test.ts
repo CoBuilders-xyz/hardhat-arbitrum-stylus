@@ -37,7 +37,11 @@ describe('container runner', () => {
     process.env.NODE_OPTIONS = '--trace-warnings';
 
     let envSeenInSpawn:
-      | { hhTest: string | undefined; nodeEnv: string | undefined; nodeOptions: string | undefined }
+      | {
+          hhTest: string | undefined;
+          nodeEnv: string | undefined;
+          nodeOptions: string | undefined;
+        }
       | undefined;
     let buildRuns = 0;
     let argsPassedToSpawn: string[] | undefined;
