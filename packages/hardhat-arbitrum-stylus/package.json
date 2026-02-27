@@ -33,7 +33,7 @@
     "build": "tsc --build .",
     "clean": "rimraf dist",
     "prepublishOnly": "pnpm build",
-    "test": "node --import tsx/esm --test --test-reporter=spec \"test/*.test.ts\"",
+    "test": "node --import tsx/esm --test --test-concurrency=1 --test-reporter=spec \"test/*.test.ts\"",
     "pretest": "pnpm build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
