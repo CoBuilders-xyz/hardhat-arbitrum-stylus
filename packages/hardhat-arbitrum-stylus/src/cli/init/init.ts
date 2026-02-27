@@ -5,7 +5,11 @@ import { pathToFileURL } from 'node:url';
 
 import { patchHardhatConfig, writeScaffoldFiles } from '../scaffold/files.js';
 import { checkInitPreflightConflicts } from '../scaffold/safety.js';
-import { detectPackageManager, installDeps } from '../scaffold/utils.js';
+import {
+  detectPackageManager,
+  generateCargoLockfiles,
+  installDeps,
+} from '../scaffold/utils.js';
 
 const OUR_DEPS = [
   '@cobuilders/hardhat-arbitrum-stylus',
@@ -169,6 +173,9 @@ export async function init(targetDir: string): Promise<void> {
 
   console.log('\nScaffolding Stylus contracts/tests...\n');
   writeScaffoldFiles(targetDir);
+
+  console.log('\nGenerating Cargo.lock files...\n');
+  generateCargoLockfiles(path.join(targetDir, 'contracts'));
 
   console.log('\nDone! Your Hardhat + Arbitrum Stylus project is ready.');
   console.log('Try running:\n');
