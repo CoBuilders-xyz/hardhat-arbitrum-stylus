@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { parseAbiFromSolidity } from '../src/utils/abi/export.js';
+import { parseAbiFromSolidity } from '@cobuilders/hardhat-arb-utils/stylus';
 
 describe('parseAbiFromSolidity', () => {
   it('returns empty array for empty string', () => {

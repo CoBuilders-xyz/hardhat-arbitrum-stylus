@@ -3,10 +3,16 @@ import type { HardhatUserConfig } from 'hardhat/types/config';
 // eslint-disable-next-line import/no-relative-packages
 import hardhatArbitrumStylusPlugin from '../../../src/index.js';
 import HardhatViem from '@nomicfoundation/hardhat-viem';
+import HardhatViemAssertions from '@nomicfoundation/hardhat-viem-assertions';
 import HardhatNodeTestRunner from '@nomicfoundation/hardhat-node-test-runner';
 
 const config: HardhatUserConfig = {
-  plugins: [hardhatArbitrumStylusPlugin, HardhatViem, HardhatNodeTestRunner],
+  plugins: [
+    hardhatArbitrumStylusPlugin,
+    HardhatViem,
+    HardhatViemAssertions,
+    HardhatNodeTestRunner,
+  ],
   solidity: '0.8.24',
   paths: {
     tests: {

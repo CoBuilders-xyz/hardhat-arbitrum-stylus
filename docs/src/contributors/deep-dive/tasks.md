@@ -32,7 +32,7 @@ The array `['arb:node', 'start']` creates a subtask. In Hardhat 3, subtasks are 
 Each task file exports an action function:
 
 ```typescript
-// tasks/start.ts
+// plugin/tasks/start.ts
 const startTask: NewTaskActionFunction<StartTaskArguments> = async (
   args,
   hre,

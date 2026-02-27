@@ -16,4 +16,6 @@ export interface StylusContractInfo {
 export interface DiscoveryOptions {
   /** Filter to specific contract names */
   contracts?: string[];
+  /** Bypass cached discovery results for this query */
+  forceRefresh?: boolean;
 }

@@ -30,6 +30,22 @@ graph TD
 
 ---
 
+## Source Layout Convention
+
+For plugin packages, we standardize source layout like this:
+
+- `src/index.ts` - stable public entrypoint
+- `src/plugin/` - Hardhat plugin wiring (`index.ts`, `type-extensions.ts`, `hooks/`, `tasks/`)
+- `src/config/` - config types/defaults/resolution
+- `src/state/` - module-scoped runtime state
+- `src/services/` - operational logic (compile/deploy/node services)
+- `src/constants/` - static constants and bytecode
+- `src/utils/` - compatibility/public utility barrels only
+
+This keeps lifecycle wiring separate from domain logic and makes file placement predictable across packages.
+
+---
+
 ## The Toolbox
 
 `hardhat-arbitrum-stylus` just bundles the others:

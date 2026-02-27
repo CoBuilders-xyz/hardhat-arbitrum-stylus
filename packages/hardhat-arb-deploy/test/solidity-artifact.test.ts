@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
-import { findSolidityArtifact } from '../src/utils/deployer/solidity.js';
+import { findSolidityArtifact } from '../src/services/deployers/solidity.js';
 
 const FAKE_ARTIFACT = {
   contractName: 'SolidityCounter',
@@ -71,5 +71,28 @@ describe('findSolidityArtifact', () => {
 
     assert.ok(result, 'Should still find the real artifact');
     assert.strictEqual(result.contractName, 'SolidityCounter');
+  });
+
+  it('refreshes cache when artifacts directory changes', () => {
+    const missingBefore = findSolidityArtifact(tmpDir, 'BrandNewContract');
+    assert.strictEqual(missingBefore, null);
+
+    const newContractDir = path.join(
+      tmpDir,
+      'contracts',
+      'BrandNewContract.sol',
+    );
+    fs.mkdirSync(newContractDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(newContractDir, 'BrandNewContract.json'),
+      JSON.stringify({
+        ...FAKE_ARTIFACT,
+        contractName: 'BrandNewContract',
+      }),
+    );
+
+    const discoveredAfter = findSolidityArtifact(tmpDir, 'BrandNewContract');
+    assert.ok(discoveredAfter, 'Should discover newly added artifact');
+    assert.strictEqual(discoveredAfter.contractName, 'BrandNewContract');
   });
 });

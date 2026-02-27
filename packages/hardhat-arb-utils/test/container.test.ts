@@ -53,7 +53,7 @@ describe('Docker Container Utilities', () => {
         image: 'hello-world',
         tag: 'latest',
         name: containerName,
-        autoRemove: true,
+        autoRemove: false,
       });
 
       assert.ok(info.id, 'Container should have an ID');
@@ -62,11 +62,10 @@ describe('Docker Container Utilities', () => {
       // Wait a moment for the container to finish (hello-world exits immediately)
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      // Clean up - container may have already exited and been removed
       try {
         await manager.remove(info.id);
       } catch {
-        // Container already removed by autoRemove
+        // Ignore if already removed
       }
     });
 

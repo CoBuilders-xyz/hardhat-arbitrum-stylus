@@ -2,18 +2,23 @@
  * Shared Stylus utilities used by compile and deploy plugins.
  */
 
-// Exec utilities
+// ABI parsing
+export { parseAbiFromSolidity } from './abi/parser.js';
+export { exportStylusAbi } from './abi/export-abi.js';
+
+// Exec utilities (re-exported from shared exec module)
 export {
   execAsync,
   execWithProgress,
   type ExecOptions,
   type ExecResult,
   type ProgressCallback,
-} from './exec.js';
+} from '../exec/index.js';
 
 // Discovery
 export {
   discoverStylusContracts,
+  clearDiscoveryCache,
   type DiscoveryOptions,
   type StylusContractInfo,
 } from './discovery/index.js';
@@ -35,3 +40,15 @@ export {
   compileImageExists,
   ensureCompileImage,
 } from './docker/image.js';
+
+// Docker container execution
+export {
+  runInStylusContainer,
+  type RunInStylusContainerOptions,
+} from './docker/run-container.js';
+export {
+  runStylusContainerCommand,
+  ensureContainerToolchain,
+  type StylusContainerCommandOptions,
+  type EnsureContainerToolchainOptions,
+} from './docker/commands.js';

@@ -5,9 +5,9 @@ import { join } from 'node:path';
 
 import type {
   ContainerConfig,
+  ContainerExecResult,
   ContainerInfo,
   ContainerStatus,
-  ExecResult,
 } from './types.js';
 
 /**
@@ -32,6 +32,44 @@ interface CommandResult {
   stdout: string;
   stderr: string;
   exitCode: number;
+}
+
+interface ProgressLineForwarder {
+  push(text: string): void;
+  flush(): void;
+}
+
+function createProgressLineForwarder(
+  onProgress?: (line: string) => void,
+): ProgressLineForwarder {
+  let pending = '';
+
+  return {
+    push(text: string) {
+      if (!onProgress) return;
+
+      pending += text;
+
+      let newlineIndex = pending.indexOf('\n');
+      while (newlineIndex !== -1) {
+        const line = pending.slice(0, newlineIndex).trim();
+        if (line) {
+          onProgress(line);
+        }
+        pending = pending.slice(newlineIndex + 1);
+        newlineIndex = pending.indexOf('\n');
+      }
+    },
+    flush() {
+      if (!onProgress) return;
+
+      const line = pending.trim();
+      if (line) {
+        onProgress(line);
+      }
+      pending = '';
+    },
+  };
 }
 
 /**
@@ -114,30 +152,24 @@ export class DockerClient {
       );
 
       let stderr = '';
+      const stdoutLines = createProgressLineForwarder(onProgress);
+      const stderrLines = createProgressLineForwarder(onProgress);
 
       proc.stdout.on('data', (data: Buffer) => {
-        const lines = data.toString().split('\n');
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (trimmed && onProgress) {
-            onProgress(trimmed);
-          }
-        }
+        stdoutLines.push(data.toString());
       });
 
       proc.stderr.on('data', (data: Buffer) => {
-        stderr += data.toString();
-        // Docker build outputs progress to stderr
-        const lines = data.toString().split('\n');
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (trimmed && onProgress) {
-            onProgress(trimmed);
-          }
-        }
+        const text = data.toString();
+        stderr += text;
+        // Docker build outputs progress to stderr.
+        stderrLines.push(text);
       });
 
       proc.on('close', (code) => {
+        stdoutLines.flush();
+        stderrLines.flush();
+
         // Clean up temp directory
         try {
           rmSync(tempDir, { recursive: true, force: true });
@@ -319,7 +351,7 @@ export class DockerClient {
   async execInContainer(
     containerId: string,
     command: string[],
-  ): Promise<ExecResult> {
+  ): Promise<ContainerExecResult> {
     const args = ['exec', containerId, ...command];
     const result = await this.exec(args);
 
@@ -465,6 +497,68 @@ export class DockerClient {
         result.stderr,
       );
     }
+  }
+
+  /**
+   * Run a Docker CLI command with streaming output.
+   * Rejects on non-zero exit code. Use this for commands that need
+   * real-time progress (e.g., `docker run` foreground, `docker exec`).
+   */
+  async runStreamingCommand(
+    args: string[],
+    onProgress?: (line: string) => void,
+  ): Promise<{ stdout: string; stderr: string }> {
+    return new Promise((resolve, reject) => {
+      const proc = spawn(this.dockerCommand, args, {
+        stdio: ['ignore', 'pipe', 'pipe'],
+      });
+
+      let stdout = '';
+      let stderr = '';
+      const stdoutLines = createProgressLineForwarder(onProgress);
+      const stderrLines = createProgressLineForwarder(onProgress);
+
+      proc.stdout.on('data', (data: Buffer) => {
+        const text = data.toString();
+        stdout += text;
+        stdoutLines.push(text);
+      });
+
+      proc.stderr.on('data', (data: Buffer) => {
+        const text = data.toString();
+        stderr += text;
+        stderrLines.push(text);
+      });
+
+      proc.on('close', (code) => {
+        stdoutLines.flush();
+        stderrLines.flush();
+
+        if (code === 0) {
+          resolve({ stdout, stderr });
+        } else {
+          reject(
+            new DockerError(
+              `Docker command failed with exit code ${code}:\n${stderr || stdout}`,
+              `docker ${args.join(' ')}`,
+              code ?? 1,
+              stderr,
+            ),
+          );
+        }
+      });
+
+      proc.on('error', (err) => {
+        reject(
+          new DockerError(
+            `Failed to run docker command: ${err.message}`,
+            `docker ${args.join(' ')}`,
+            1,
+            err.message,
+          ),
+        );
+      });
+    });
   }
 
   /**

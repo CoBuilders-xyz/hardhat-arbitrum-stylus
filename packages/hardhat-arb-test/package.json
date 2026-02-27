@@ -33,7 +33,9 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --check .",
-    "format:fix": "prettier --write ."
+    "format:fix": "prettier --write .",
+    "test": "node --import tsx/esm --test --test-reporter=spec \"test/*.test.ts\"",
+    "pretest": "pnpm build"
   },
   "files": [
     "dist/src/",
@@ -42,10 +44,16 @@
     "LICENSE",
     "CHANGELOG.md"
   ],
+  "dependencies": {
+    "@cobuilders/hardhat-arb-utils": "workspace:^",
+    "tsx": "^4.19.3"
+  },
   "peerDependencies": {
+    "@cobuilders/hardhat-arb-deploy": "workspace:^",
     "hardhat": "^3.0.0"
   },
   "devDependencies": {
+    "@cobuilders/hardhat-arb-deploy": "workspace:^",
     "@types/node": "^22.0.0",
     "eslint": "^9.18.0",
     "hardhat": "^3.0.0",
