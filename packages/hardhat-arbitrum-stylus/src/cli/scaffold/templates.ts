@@ -125,6 +125,7 @@ license = "MIT OR Apache-2.0"
 alloy-primitives = "=0.8.20"
 alloy-sol-types = "=0.8.20"
 stylus-sdk = "=0.9.0"
+ruint = ">=1.12,<1.17"
 hex = { version = "0.4", default-features = false }
 
 [features]
@@ -160,6 +161,154 @@ export const STYLUS_COUNTER_RUST_TOOLCHAIN_TOML = `\
 channel = "1.93.0"
 `;
 
+export const SOLIDITY_PROXY_SOL = `\
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24;
+
+interface ICounter {
+    function count() external view returns (uint256);
+    function increment() external;
+}
+
+contract SolidityProxy {
+    address public owner;
+    ICounter public target;
+
+    event ProxyCall(address indexed caller, string action);
+
+    constructor(address _target) {
+        owner = msg.sender;
+        target = ICounter(_target);
+    }
+
+    function proxyCount() external view returns (uint256) {
+        return target.count();
+    }
+
+    function proxyIncrement() external {
+        require(msg.sender == owner, 'not owner');
+        target.increment();
+        emit ProxyCall(msg.sender, 'increment');
+    }
+}
+`;
+
+export const STYLUS_PROXY_LIB_RS = `\
+#![cfg_attr(not(any(test, feature = "export-abi")), no_main)]
+#![cfg_attr(not(any(test, feature = "export-abi")), no_std)]
+
+#[macro_use]
+extern crate alloc;
+
+use alloc::vec::Vec;
+use alloy_sol_types::{sol, SolError};
+use stylus_sdk::{
+    alloy_primitives::{Address, U256},
+    prelude::*,
+};
+
+sol! {
+    error NotOwner(address caller, address owner);
+}
+
+sol_interface! {
+    interface ICounter {
+        function count() external view returns (uint256);
+        function increment() external;
+    }
+}
+
+sol_storage! {
+    #[entrypoint]
+    pub struct RustProxy {
+        address owner;
+        address target;
+    }
+}
+
+#[public]
+impl RustProxy {
+    #[constructor]
+    pub fn constructor(&mut self, owner: Address, target: Address) {
+        self.owner.set(owner);
+        self.target.set(target);
+    }
+
+    pub fn owner(&self) -> Address {
+        self.owner.get()
+    }
+
+    pub fn target(&self) -> Address {
+        self.target.get()
+    }
+
+    pub fn proxy_count(&self) -> Result<U256, Vec<u8>> {
+        let target = self.target.get();
+        let counter = ICounter::new(target);
+        Ok(counter.count(self)?)
+    }
+
+    pub fn proxy_increment(&mut self) -> Result<(), Vec<u8>> {
+        let owner = self.owner.get();
+        let caller = self.vm().msg_sender();
+        if caller != owner {
+            return Err(NotOwner { caller, owner }.abi_encode());
+        }
+        let target = self.target.get();
+        let counter = ICounter::new(target);
+        counter.increment(self)?;
+        Ok(())
+    }
+}
+`;
+
+export const STYLUS_PROXY_MAIN_RS = `\
+#![cfg_attr(not(any(test, feature = "export-abi")), no_main)]
+
+#[cfg(not(any(test, feature = "export-abi")))]
+#[no_mangle]
+pub extern "C" fn main() {}
+
+#[cfg(feature = "export-abi")]
+fn main() {
+    stylus_proxy::print_from_args();
+}
+`;
+
+export const STYLUS_PROXY_CARGO_TOML = `\
+[package]
+name = "stylus-proxy"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+alloy-primitives = "=0.8.20"
+alloy-sol-types = "=0.8.20"
+stylus-sdk = "=0.9.0"
+ruint = ">=1.12,<1.17"
+hex = { version = "0.4", default-features = false }
+
+[features]
+default = ["mini-alloc"]
+export-abi = ["stylus-sdk/export-abi"]
+mini-alloc = ["stylus-sdk/mini-alloc"]
+
+[[bin]]
+name = "stylus-proxy"
+path = "src/main.rs"
+
+[lib]
+crate-type = ["lib", "cdylib"]
+
+[profile.release]
+codegen-units = 1
+strip = true
+lto = true
+panic = "abort"
+opt-level = 3
+`;
+
 export const CROSS_VM_TEST_TS = `\
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
@@ -185,6 +334,107 @@ describe('Cross-VM: Solidity + Stylus', async function () {
     assert.equal(await solCounter.read.count(), 100n);
 
     assert.equal(await stylusCounter.read.count(), 1n);
+  });
+});
+`;
+
+export const CROSS_VM_SOL_RUST_TEST_TS = `\
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
+import { network } from 'hardhat';
+
+describe('Cross-VM: EOA > Solidity > Stylus', async function () {
+  const { stylusViem } = await network.connect();
+  const [walletClient] = await stylusViem.getWalletClients();
+  const eoa = walletClient.account.address;
+
+  const stylusCounter = await stylusViem.deployContract('stylus-counter');
+  const solProxy = await stylusViem.deployContract('SolidityProxy', [
+    stylusCounter.address,
+  ]);
+
+  it('Solidity Proxy owner is the EOA', async function () {
+    const owner = await solProxy.read.owner();
+    assert.equal(owner.toLowerCase(), eoa.toLowerCase());
+  });
+
+  it('Solidity Proxy target is the Stylus counter', async function () {
+    const target = await solProxy.read.target();
+    assert.equal(target.toLowerCase(), stylusCounter.address.toLowerCase());
+  });
+
+  it('proxyCount reads Stylus counter (starts at 0)', async function () {
+    assert.equal(await solProxy.read.proxyCount(), 0n);
+  });
+
+  it('proxyIncrement writes through to Stylus counter', async function () {
+    await solProxy.write.proxyIncrement();
+    assert.equal(await solProxy.read.proxyCount(), 1n);
+    assert.equal(await stylusCounter.read.count(), 1n);
+  });
+
+  it('multiple increments through proxy accumulate', async function () {
+    await solProxy.write.proxyIncrement();
+    await solProxy.write.proxyIncrement();
+    assert.equal(await solProxy.read.proxyCount(), 3n);
+    assert.equal(await stylusCounter.read.count(), 3n);
+  });
+
+  it('direct Stylus counter read matches proxy read', async function () {
+    const direct = await stylusCounter.read.count();
+    const proxied = await solProxy.read.proxyCount();
+    assert.equal(direct, proxied);
+  });
+});
+`;
+
+export const CROSS_VM_RUST_SOL_TEST_TS = `\
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
+import { network } from 'hardhat';
+
+describe('Cross-VM: EOA > Stylus > Solidity', async function () {
+  const { stylusViem } = await network.connect();
+  const [walletClient] = await stylusViem.getWalletClients();
+  const eoa = walletClient.account.address;
+
+  const solCounter = await stylusViem.deployContract('SolidityCounter');
+  const stylusProxy = await stylusViem.deployContract('stylus-proxy', [
+    eoa,
+    solCounter.address,
+  ]);
+
+  it('Stylus proxy owner is the EOA', async function () {
+    const owner = await stylusProxy.read.owner();
+    assert.equal(owner.toLowerCase(), eoa.toLowerCase());
+  });
+
+  it('Stylus proxy target is the Solidity counter', async function () {
+    const target = await stylusProxy.read.target();
+    assert.equal(target.toLowerCase(), solCounter.address.toLowerCase());
+  });
+
+  it('proxyCount reads Solidity counter (starts at 0)', async function () {
+    assert.equal(await stylusProxy.read.proxyCount(), 0n);
+  });
+
+  it('proxyIncrement writes through to Solidity counter', async function () {
+    await stylusProxy.write.proxyIncrement();
+    assert.equal(await stylusProxy.read.proxyCount(), 1n);
+    assert.equal(await solCounter.read.count(), 1n);
+  });
+
+  it('multiple increments through Stylus proxy accumulate', async function () {
+    await stylusProxy.write.proxyIncrement();
+    await stylusProxy.write.proxyIncrement();
+    assert.equal(await stylusProxy.read.proxyCount(), 3n);
+    assert.equal(await solCounter.read.count(), 3n);
+  });
+
+  it('direct Solidity counter read matches proxy read', async function () {
+    const direct = await solCounter.read.count();
+    const proxied = await stylusProxy.read.proxyCount();
+    assert.equal(direct, proxied);
   });
 });
 `;

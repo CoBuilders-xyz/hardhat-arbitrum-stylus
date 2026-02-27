@@ -3,12 +3,18 @@ import path from 'node:path';
 
 import {
   SOLIDITY_COUNTER_SOL,
+  SOLIDITY_PROXY_SOL,
   STYLUS_COUNTER_LIB_RS,
   STYLUS_COUNTER_MAIN_RS,
   STYLUS_COUNTER_CARGO_TOML,
   STYLUS_COUNTER_STYLUS_TOML,
   STYLUS_COUNTER_RUST_TOOLCHAIN_TOML,
+  STYLUS_PROXY_LIB_RS,
+  STYLUS_PROXY_MAIN_RS,
+  STYLUS_PROXY_CARGO_TOML,
   CROSS_VM_TEST_TS,
+  CROSS_VM_SOL_RUST_TEST_TS,
+  CROSS_VM_RUST_SOL_TEST_TS,
 } from './templates.js';
 
 interface FileEntry {
@@ -41,7 +47,39 @@ const SCAFFOLD_FILES: FileEntry[] = [
     relativePath: 'contracts/stylus-counter/rust-toolchain.toml',
     content: STYLUS_COUNTER_RUST_TOOLCHAIN_TOML,
   },
+  {
+    relativePath: 'contracts/SolidityProxy.sol',
+    content: SOLIDITY_PROXY_SOL,
+  },
+  {
+    relativePath: 'contracts/stylus-proxy/src/lib.rs',
+    content: STYLUS_PROXY_LIB_RS,
+  },
+  {
+    relativePath: 'contracts/stylus-proxy/src/main.rs',
+    content: STYLUS_PROXY_MAIN_RS,
+  },
+  {
+    relativePath: 'contracts/stylus-proxy/Cargo.toml',
+    content: STYLUS_PROXY_CARGO_TOML,
+  },
+  {
+    relativePath: 'contracts/stylus-proxy/Stylus.toml',
+    content: STYLUS_COUNTER_STYLUS_TOML,
+  },
+  {
+    relativePath: 'contracts/stylus-proxy/rust-toolchain.toml',
+    content: STYLUS_COUNTER_RUST_TOOLCHAIN_TOML,
+  },
   { relativePath: 'test/cross-vm.test.ts', content: CROSS_VM_TEST_TS },
+  {
+    relativePath: 'test/cross-vm-sol-rust.test.ts',
+    content: CROSS_VM_SOL_RUST_TEST_TS,
+  },
+  {
+    relativePath: 'test/cross-vm-rust-sol.test.ts',
+    content: CROSS_VM_RUST_SOL_TEST_TS,
+  },
 ];
 
 export function writeScaffoldFiles(targetDir: string): void {

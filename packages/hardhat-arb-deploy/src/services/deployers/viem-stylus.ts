@@ -56,14 +56,24 @@ const preparedToolchains = new Set<string>();
  * Export ABI from a Stylus contract source using cargo stylus export-abi.
  * This is lightweight — it compiles a native binary to extract the interface,
  * NOT the WASM (that happens inside cargo stylus deploy).
+ *
+ * Returns { abi, error } so the caller can surface the underlying cause
+ * when the export fails (e.g., missing toolchain, compilation error).
  */
 async function exportAbi(
   contractPath: string,
   toolchain: string,
-): Promise<unknown[]> {
-  const solInterface = await exportStylusAbi(contractPath, toolchain);
-  if (!solInterface) return [];
-  return parseAbiFromSolidity(solInterface);
+): Promise<{ abi: unknown[]; error?: Error }> {
+  try {
+    const solInterface = await exportStylusAbi(contractPath, toolchain);
+    if (!solInterface) return { abi: [] };
+    return { abi: parseAbiFromSolidity(solInterface) };
+  } catch (error) {
+    return {
+      abi: [],
+      error: error instanceof Error ? error : new Error(String(error)),
+    };
+  }
 }
 
 /**
@@ -116,11 +126,16 @@ export async function deployStylusViem(
     abi = artifact.abi as unknown[];
   } catch {
     // No artifact — export ABI directly from Rust source (lightweight)
-    abi = await exportAbi(contract.path, contract.toolchain);
+    const result = await exportAbi(contract.path, contract.toolchain);
+    abi = result.abi;
     if (abi.length === 0) {
+      const stderr = (result.error as Error & { stderr?: string })?.stderr;
+      const detail = stderr || result.error?.message || '';
       throw createPluginError(
         `Could not export ABI for "${contractName}". ` +
-          `Ensure the contract has a valid #[public] interface.`,
+          `Ensure the contract has a valid #[public] interface and ` +
+          `that cargo-stylus is installed with the correct toolchain.\n` +
+          (detail ? `cargo stylus export-abi output:\n${detail}` : ''),
       );
     }
   }
