@@ -26,6 +26,9 @@ const config: HardhatUserConfig = {
     deploy: {
       useHostToolchain: false,
     },
+    test: {
+      useHostToolchain: false,
+    },
   },
 };
 
@@ -61,12 +64,7 @@ export default config;
 - `useHostToolchain: false` means Stylus deploy runs in Docker by default.
 - Set `true` to deploy with your local Rust/cargo-stylus toolchain instead.
 
-### Test plugin options (`arb:test`)
+### `stylus.test`
 
-The test plugin does not add `hardhat.config.ts` options. It exposes task-level options instead:
-
-- `npx hardhat arb:test [testFiles...]`
-- `--only`: run tests marked with `.only`.
-- `--grep <pattern>`: run only matching tests.
-- `--no-compile`: skip Solidity compile before tests.
-- `--host`: use host Rust toolchain instead of Docker for Stylus.
+- `useHostToolchain: false` means `arb:test` uses Docker mode for Stylus by default.
+- Set `true` to run `arb:test` in host mode by default (local Rust/cargo-stylus toolchain).
