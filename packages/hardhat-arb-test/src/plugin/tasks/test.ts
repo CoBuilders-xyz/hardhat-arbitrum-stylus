@@ -37,10 +37,12 @@ export async function runArbTestTask(
   hre: HardhatRuntimeEnvironment,
   deps: ArbTestTaskDeps = defaultTaskDeps,
 ): Promise<void> {
-  deps.setTestHostMode(host);
+  const useHostToolchain = host || hre.config.stylus.test.useHostToolchain;
+
+  deps.setTestHostMode(useHostToolchain);
 
   try {
-    if (host) {
+    if (useHostToolchain) {
       await deps.runHostMode(hre, { testFiles, only, grep, noCompile });
     } else {
       await deps.runContainerMode(hre, { testFiles, only, grep, noCompile });
