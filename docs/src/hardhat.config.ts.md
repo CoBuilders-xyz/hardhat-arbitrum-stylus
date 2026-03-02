@@ -1,17 +1,17 @@
-# Configuration
+# hardhat.config.ts
 
-Configure the Hardhat Arbitrum Stylus plugin via your `hardhat.config.ts` file. This configuration is used by both CLI commands and the Hardhat Runtime Environment (HRE).
-
-## Node Configuration
+Use a single `hardhat.config.ts` that includes Hardhat viem tooling plus the Arbitrum Stylus plugin configuration:
 
 ```typescript
 import type { HardhatUserConfig } from 'hardhat/config';
 import hardhatToolboxViemPlugin from '@nomicfoundation/hardhat-toolbox-viem';
-import hardhatArbitrumStylus from '@cobuilders/hardhat-arbitrum-stylus';
+import hardhatArbitrumStylusPlugin from '@cobuilders/hardhat-arbitrum-stylus';
 
 const config: HardhatUserConfig = {
-  plugins: [hardhatToolboxViemPlugin, hardhatArbitrumStylus],
+  plugins: [hardhatToolboxViemPlugin, hardhatArbitrumStylusPlugin],
+  solidity: '0.8.24',
 
+  // Arbitrum Stylus plugin configuration (all values shown are defaults)
   stylus: {
     node: {
       image: 'offchainlabs/nitro-node',
@@ -20,65 +20,9 @@ const config: HardhatUserConfig = {
       wsPort: 8548,
       chainId: 412346,
     },
-  },
-};
-
-export default config;
-```
-
-## Options
-
-| Option     | Type   | Default                   | Description       |
-| ---------- | ------ | ------------------------- | ----------------- |
-| `image`    | string | `offchainlabs/nitro-node` | Docker image name |
-| `tag`      | string | `v3.7.1-926f1ab`          | Image tag/version |
-| `httpPort` | number | `8547`                    | HTTP RPC port     |
-| `wsPort`   | number | `8548`                    | WebSocket port    |
-| `chainId`  | number | `412346`                  | Chain ID          |
-
-All options are optional. Default values are used if not specified.
-
----
-
-## Compile Configuration
-
-```typescript
-import type { HardhatUserConfig } from 'hardhat/config';
-import hardhatToolboxViemPlugin from '@nomicfoundation/hardhat-toolbox-viem';
-import hardhatArbitrumStylus from '@cobuilders/hardhat-arbitrum-stylus';
-
-const config: HardhatUserConfig = {
-  plugins: [hardhatToolboxViemPlugin, hardhatArbitrumStylus],
-
-  stylus: {
     compile: {
       useHostToolchain: false,
     },
-  },
-};
-
-export default config;
-```
-
-| Option             | Type    | Default | Description                               |
-| ------------------ | ------- | ------- | ----------------------------------------- |
-| `useHostToolchain` | boolean | `false` | Use host Rust toolchain instead of Docker |
-
-The `--host` CLI flag overrides this for a single run. See [Compile Plugin](plugins/compile.md) for details.
-
----
-
-## Deploy Configuration
-
-```typescript
-import type { HardhatUserConfig } from 'hardhat/config';
-import hardhatToolboxViemPlugin from '@nomicfoundation/hardhat-toolbox-viem';
-import hardhatArbitrumStylus from '@cobuilders/hardhat-arbitrum-stylus';
-
-const config: HardhatUserConfig = {
-  plugins: [hardhatToolboxViemPlugin, hardhatArbitrumStylus],
-
-  stylus: {
     deploy: {
       useHostToolchain: false,
     },
@@ -88,8 +32,41 @@ const config: HardhatUserConfig = {
 export default config;
 ```
 
-| Option             | Type    | Default | Description                               |
-| ------------------ | ------- | ------- | ----------------------------------------- |
-| `useHostToolchain` | boolean | `false` | Use host Rust toolchain instead of Docker |
+## Section by section
 
-The `--host` CLI flag overrides this for a single run. See [Deploy Plugin](plugins/deploy.md) for details.
+### `plugins`
+
+- `@nomicfoundation/hardhat-toolbox-viem` enables viem-based Hardhat workflows.
+- `@cobuilders/hardhat-arbitrum-stylus` registers `arb:*` tasks and Stylus integrations.
+
+### `solidity`
+
+- `solidity: '0.8.24'` is the Solidity compiler version used for EVM contracts in the same project.
+
+### `stylus.node`
+
+- `image`: Docker image used for the local Arbitrum Nitro devnode.
+- `tag`: Docker image tag.
+- `httpPort`: HTTP RPC port exposed locally.
+- `wsPort`: WebSocket RPC port exposed locally.
+- `chainId`: chain ID used by the local node.
+
+### `stylus.compile`
+
+- `useHostToolchain: false` means Stylus compile runs in Docker by default.
+- Set `true` to use your local Rust/cargo-stylus toolchain instead.
+
+### `stylus.deploy`
+
+- `useHostToolchain: false` means Stylus deploy runs in Docker by default.
+- Set `true` to deploy with your local Rust/cargo-stylus toolchain instead.
+
+### Test plugin options (`arb:test`)
+
+The test plugin does not add `hardhat.config.ts` options. It exposes task-level options instead:
+
+- `npx hardhat arb:test [testFiles...]`
+- `--only`: run tests marked with `.only`.
+- `--grep <pattern>`: run only matching tests.
+- `--no-compile`: skip Solidity compile before tests.
+- `--host`: use host Rust toolchain instead of Docker for Stylus.

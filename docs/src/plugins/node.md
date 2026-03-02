@@ -148,7 +148,7 @@ export default {
 };
 ```
 
-See [Configuration](../configuration.md) for all options.
+See [Configuration](../hardhat.config.ts.md) for all options.
 
 ---
 
