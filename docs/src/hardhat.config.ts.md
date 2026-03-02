@@ -1,6 +1,6 @@
 # hardhat.config.ts
 
-Use a single `hardhat.config.ts` that includes Hardhat viem tooling plus the Arbitrum Stylus plugin configuration:
+Some `@cobuilders/hardhat-arbitrum-stylus` options are configurable directly in `hardhat.config.ts`:
 
 ```typescript
 import type { HardhatUserConfig } from 'hardhat/config';
@@ -9,7 +9,11 @@ import hardhatArbitrumStylusPlugin from '@cobuilders/hardhat-arbitrum-stylus';
 
 const config: HardhatUserConfig = {
   plugins: [hardhatToolboxViemPlugin, hardhatArbitrumStylusPlugin],
-  solidity: '0.8.24',
+
+  // Other Hardhat Options
+  // solidity:
+  // networks:
+  // etc.
 
   // Arbitrum Stylus plugin configuration (all values shown are defaults)
   stylus: {
@@ -41,10 +45,6 @@ export default config;
 
 - `@nomicfoundation/hardhat-toolbox-viem` enables viem-based Hardhat workflows.
 - `@cobuilders/hardhat-arbitrum-stylus` registers `arb:*` tasks and Stylus integrations.
-
-### `solidity`
-
-- `solidity: '0.8.24'` is the Solidity compiler version used for EVM contracts in the same project.
 
 ### `stylus.node`
 
