@@ -6,10 +6,11 @@ Configure the Hardhat Arbitrum Stylus plugin via your `hardhat.config.ts` file. 
 
 ```typescript
 import type { HardhatUserConfig } from 'hardhat/config';
+import hardhatToolboxViemPlugin from '@nomicfoundation/hardhat-toolbox-viem';
 import hardhatArbitrumStylus from '@cobuilders/hardhat-arbitrum-stylus';
 
 const config: HardhatUserConfig = {
-  plugins: [hardhatArbitrumStylus],
+  plugins: [hardhatToolboxViemPlugin, hardhatArbitrumStylus],
 
   stylus: {
     node: {
@@ -43,10 +44,11 @@ All options are optional. Default values are used if not specified.
 
 ```typescript
 import type { HardhatUserConfig } from 'hardhat/config';
+import hardhatToolboxViemPlugin from '@nomicfoundation/hardhat-toolbox-viem';
 import hardhatArbitrumStylus from '@cobuilders/hardhat-arbitrum-stylus';
 
 const config: HardhatUserConfig = {
-  plugins: [hardhatArbitrumStylus],
+  plugins: [hardhatToolboxViemPlugin, hardhatArbitrumStylus],
 
   stylus: {
     compile: {
@@ -70,10 +72,11 @@ The `--host` CLI flag overrides this for a single run. See [Compile Plugin](plug
 
 ```typescript
 import type { HardhatUserConfig } from 'hardhat/config';
+import hardhatToolboxViemPlugin from '@nomicfoundation/hardhat-toolbox-viem';
 import hardhatArbitrumStylus from '@cobuilders/hardhat-arbitrum-stylus';
 
 const config: HardhatUserConfig = {
-  plugins: [hardhatArbitrumStylus],
+  plugins: [hardhatToolboxViemPlugin, hardhatArbitrumStylus],
 
   stylus: {
     deploy: {

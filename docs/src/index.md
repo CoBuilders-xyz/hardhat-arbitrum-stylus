@@ -7,27 +7,23 @@ Hardhat plugin suite for Arbitrum Stylus development.
 
 !!! tip "Alpha Status"
 
-    The test plugin is still under development. See [Plugins](plugins/index.md) for current status.
+    This suite is under active development. APIs and workflows may evolve between releases.
 
 ## What's Included
 
 `@cobuilders/hardhat-arbitrum-stylus` is a **plugin bundler** that includes all the individual plugins:
 
-| Plugin                            | Description              | Status         |
-| --------------------------------- | ------------------------ | -------------- |
-| `@cobuilders/hardhat-arb-node`    | Run local Arbitrum node  | ✅ Available   |
-| `@cobuilders/hardhat-arb-compile` | Compile Stylus contracts | ✅ Available   |
-| `@cobuilders/hardhat-arb-deploy`  | Deploy contracts         | ✅ Available   |
-| `@cobuilders/hardhat-arb-test`    | Test runner              | 🔜 Coming Soon |
+- `@cobuilders/hardhat-arb-node`: Run a local Arbitrum node.
+- `@cobuilders/hardhat-arb-compile`: Compile Stylus contracts.
+- `@cobuilders/hardhat-arb-deploy`: Deploy Solidity and Stylus contracts.
+- `@cobuilders/hardhat-arb-test`: Run tests across Solidity and Stylus.
 
 ## Prerequisites
 
-| Tool          | Version | Installation                                         |
-| ------------- | ------- | ---------------------------------------------------- |
-| **Hardhat**   | **v3**  | Required (v2 not supported)                          |
-| Node.js       | v22+    | [nodejs.org](https://nodejs.org) or `nvm install 22` |
-| Docker        | Latest  | [docker.com](https://docker.com)                     |
-| pnpm/npm/yarn | Latest  | Package manager                                      |
+- **Hardhat v3** (Hardhat v2 is not supported).
+- **Node.js v22+**: [nodejs.org](https://nodejs.org) or `nvm install 22`.
+- **Docker**: latest version from [docker.com](https://docker.com).
+- **npm**: bundled with Node.js.
 
 !!! warning "Hardhat 3 Required"
 
@@ -39,76 +35,22 @@ You can add this plugin to an **existing Hardhat 3 project** or create a new one
 
 ### New Hardhat Project
 
-If starting from scratch we first need a hardhat project:
+If you are starting from scratch, use the Stylus initializer:
 
-=== "npm"
+```bash
+mkdir my-stylus-project && cd my-stylus-project
+npx @cobuilders/hardhat-arbitrum-stylus --init
+```
 
-    ```bash
-    mkdir my-stylus-project && cd my-stylus-project
-    npx hardhat --init
-    ```
-
-=== "yarn"
-
-    ```bash
-    mkdir my-stylus-project && cd my-stylus-project
-    yarn dlx hardhat --init
-    ```
-
-=== "pnpm"
-
-    ```bash
-    mkdir my-stylus-project && cd my-stylus-project
-    echo "auto-install-peers=true" >> .npmrc
-    pnpm dlx hardhat --init
-    ```
-    !!! warning
-        We set auto-install-peers to true. If you prefer to install peers manually ignore this line
-
-        `echo "auto-install-peers=true" >> .npmrc`
-
-Choose any template (Viem, Ethers, or minimal) - all work with this plugin.
-
-Now that you have a Hardhat project, you can go to Install the Plugin section.
+This command scaffolds a Hardhat 3 + viem project and wires the Arbitrum Stylus setup.
 
 ### Add to Existing Hardhat Project
 
-If you already have a Hardhat 3 project, skip to installing the plugin.
+If you already have a Hardhat 3 project, install the plugin and required dependencies:
 
-### Install the Plugin
-
-=== "npm"
-
-    ```bash
-    npm install @cobuilders/hardhat-arbitrum-stylus
-    ```
-
-    npm automatically installs peer dependencies.
-
-=== "yarn"
-
-    ```bash
-    yarn add @cobuilders/hardhat-arbitrum-stylus
-    ```
-
-    yarn automatically installs peer dependencies.
-
-=== "pnpm"
-
-    ```bash
-    pnpm add @cobuilders/hardhat-arbitrum-stylus
-    ```
-    pnpm does not install peer dependencies automatically. You may need to install them manually:
-
-    ```bash
-    pnpm add @cobuilders/hardhat-arb-node @cobuilders/hardhat-arb-compile \
-             @cobuilders/hardhat-arb-deploy @cobuilders/hardhat-arb-test \
-             @cobuilders/hardhat-arb-utils viem
-    ```
-
-!!! info "Init Script (Coming Soon)"
-
-    We're working on `npx hardhat arb --init` to automate project setup and peer dependency installation.
+```bash
+npm install -D "@cobuilders/hardhat-arbitrum-stylus" "@nomicfoundation/hardhat-toolbox-viem@^5.0.2"
+```
 
 ### Configure Hardhat
 
@@ -116,10 +58,11 @@ Add the plugin to your `hardhat.config.ts`:
 
 ```typescript
 import type { HardhatUserConfig } from 'hardhat/config';
+import hardhatToolboxViemPlugin from '@nomicfoundation/hardhat-toolbox-viem';
 import hardhatArbitrumStylus from '@cobuilders/hardhat-arbitrum-stylus';
 
 const config: HardhatUserConfig = {
-  plugins: [hardhatArbitrumStylus],
+  plugins: [hardhatToolboxViemPlugin, hardhatArbitrumStylus],
 };
 
 export default config;
@@ -129,7 +72,7 @@ export default config;
 
 ```bash
 npx hardhat --help
-# Should show arb:node commands
+# Should show arb:* commands
 ```
 
 ## Quick Start
@@ -147,10 +90,3 @@ Started HTTP Server at http://localhost:8547/
 Account #0: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 (10 ETH)
 ...
 ```
-
-## Next Steps
-
-- [Node Plugin](plugins/node.md) - All commands and options
-- [Configuration](configuration.md) - Customize settings
-- [First Stylus Contract](guides/first-stylus-contract.md) - Build and deploy a contract
-- [Troubleshooting](guides/troubleshooting.md) - Common issues and solutions

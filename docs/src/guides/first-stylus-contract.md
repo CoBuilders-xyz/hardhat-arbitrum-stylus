@@ -17,23 +17,10 @@ A **Counter** contract with `get()`, `increment()`, and `set()` functions.
 
 ```bash
 mkdir my-first-stylus && cd my-first-stylus
-pnpm init
-pnpm add hardhat @cobuilders/hardhat-arbitrum-stylus
-pnpm add -D typescript @types/node
+npx hardhat-arbitrum-stylus --init
 ```
 
-Create `hardhat.config.ts`:
-
-```typescript
-import type { HardhatUserConfig } from 'hardhat/config';
-import hardhatArbitrumStylus from '@cobuilders/hardhat-arbitrum-stylus';
-
-const config: HardhatUserConfig = {
-  plugins: [hardhatArbitrumStylus],
-};
-
-export default config;
-```
+The initializer creates and configures `hardhat.config.ts` for you.
 
 ## Step 2: Create Stylus Contract
 
