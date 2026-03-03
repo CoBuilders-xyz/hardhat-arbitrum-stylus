@@ -12,6 +12,16 @@ npx hardhat arb:test
 
 Runs tests against the Arbitrum node.
 
+You can set the default host mode in `hardhat.config.ts`:
+
+```ts
+stylus: {
+  test: {
+    useHostToolchain: true,
+  },
+}
+```
+
 ## Documentation
 
 📖 **[Read the docs](https://cobuilders-xyz.github.io/hardhat-arbitrum-stylus/plugins/test/)** | [Source](../../docs)

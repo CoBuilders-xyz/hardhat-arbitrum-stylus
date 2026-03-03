@@ -2,10 +2,15 @@ import type { HardhatPlugin } from 'hardhat/types/plugins';
 import { task } from 'hardhat/config';
 import { ArgumentType } from 'hardhat/types/arguments';
 
+import './type-extensions.js';
+
 const hardhatArbTestPlugin: HardhatPlugin = {
   id: 'hardhat-arb-test',
   npmPackage: '@cobuilders/hardhat-arb-test',
   dependencies: () => [import('@cobuilders/hardhat-arb-deploy')],
+  hookHandlers: {
+    config: () => import('./hooks/config.js'),
+  },
   tasks: [
     task('arb:test', 'Run tests against Arbitrum node')
       .addVariadicArgument({

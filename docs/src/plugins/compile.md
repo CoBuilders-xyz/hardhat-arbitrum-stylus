@@ -280,4 +280,4 @@ export default {
 
 The `--host` CLI flag overrides this setting for a single run.
 
-See [Configuration](../configuration.md) for all options.
+See [Configuration](../hardhat.config.ts.md) for all options.

@@ -104,20 +104,6 @@ This is the same pattern as Hardhat's built-in node: when you run `npx hardhat t
 
     Temporary nodes use random ports and unique container names, so they don't conflict with nodes started via `arb:node start`.
 
-### Example: Running Tests
-
-```bash
-# No need to start a node first - it happens automatically
-npx hardhat test
-```
-
-### Example: Running Scripts
-
-```bash
-# The default network auto-starts a temporary node
-npx hardhat run scripts/deploy.ts
-```
-
 ---
 
 ## Stylus Infrastructure
@@ -148,7 +134,7 @@ export default {
 };
 ```
 
-See [Configuration](../configuration.md) for all options.
+See [hardhat.config.ts](../hardhat.config.ts.md) for all options.
 
 ---
 

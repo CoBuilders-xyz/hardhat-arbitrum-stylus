@@ -36,10 +36,11 @@ npm install @cobuilders/hardhat-arbitrum-stylus
 
 ```typescript
 import type { HardhatUserConfig } from 'hardhat/config';
+import hardhatToolboxViemPlugin from '@nomicfoundation/hardhat-toolbox-viem';
 import hardhatArbitrumStylus from '@cobuilders/hardhat-arbitrum-stylus';
 
 const config: HardhatUserConfig = {
-  plugins: [hardhatArbitrumStylus],
+  plugins: [hardhatToolboxViemPlugin, hardhatArbitrumStylus],
 };
 
 export default config;
@@ -64,7 +65,7 @@ npm install @cobuilders/hardhat-arb-node
 | [Node](node.md)       | `@cobuilders/hardhat-arb-node`    | ✅ Available   | [:fontawesome-brands-github:](https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arb-node) [:fontawesome-brands-npm:](https://www.npmjs.com/package/@cobuilders/hardhat-arb-node)       |
 | [Compile](compile.md) | `@cobuilders/hardhat-arb-compile` | ✅ Available   | [:fontawesome-brands-github:](https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arb-compile) [:fontawesome-brands-npm:](https://www.npmjs.com/package/@cobuilders/hardhat-arb-compile) |
 | [Deploy](deploy.md)   | `@cobuilders/hardhat-arb-deploy`  | ✅ Available   | [:fontawesome-brands-github:](https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arb-deploy) [:fontawesome-brands-npm:](https://www.npmjs.com/package/@cobuilders/hardhat-arb-deploy)   |
-| [Test](test.md)       | `@cobuilders/hardhat-arb-test`    | 🔜 Coming Soon | [:fontawesome-brands-github:](https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arb-test) [:fontawesome-brands-npm:](https://www.npmjs.com/package/@cobuilders/hardhat-arb-test)       |
+| [Test](test.md)       | `@cobuilders/hardhat-arb-test`    | ✅ Available   | [:fontawesome-brands-github:](https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arb-test) [:fontawesome-brands-npm:](https://www.npmjs.com/package/@cobuilders/hardhat-arb-test)       |
 
 ## All Tasks
 
@@ -75,5 +76,5 @@ npx hardhat arb:node status   # Check node status
 npx hardhat arb:node logs     # View node logs
 npx hardhat arb:compile       # Compile Stylus contracts
 npx hardhat arb:deploy        # Deploy Solidity or Stylus contracts
-npx hardhat arb:test          # Run tests (coming soon)
+npx hardhat arb:test          # Run tests
 ```

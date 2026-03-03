@@ -5,8 +5,16 @@ import type { HardhatRuntimeEnvironment } from 'hardhat/types/hre';
 
 import { runArbTestTask } from '../src/plugin/tasks/test.js';
 
-function createHre(): HardhatRuntimeEnvironment {
-  return {} as HardhatRuntimeEnvironment;
+function createHre(useHostToolchain = false): HardhatRuntimeEnvironment {
+  return {
+    config: {
+      stylus: {
+        test: {
+          useHostToolchain,
+        },
+      },
+    },
+  } as unknown as HardhatRuntimeEnvironment;
 }
 
 describe('arb:test task orchestration', () => {
@@ -23,7 +31,7 @@ describe('arb:test task orchestration', () => {
         noCompile: true,
         host: false,
       },
-      createHre(),
+      createHre(false),
       {
         setTestHostMode: (value) => {
           hostModeCalls.push(value);
@@ -55,7 +63,39 @@ describe('arb:test task orchestration', () => {
         noCompile: false,
         host: true,
       },
-      createHre(),
+      createHre(false),
+      {
+        setTestHostMode: (value) => {
+          hostModeCalls.push(value);
+        },
+        runHostMode: async () => {
+          hostCalls += 1;
+        },
+        runContainerMode: async () => {
+          containerCalls += 1;
+        },
+      },
+    );
+
+    assert.equal(hostCalls, 1);
+    assert.equal(containerCalls, 0);
+    assert.deepEqual(hostModeCalls, [true, null]);
+  });
+
+  it('uses config host mode when --host flag is not set', async () => {
+    const hostModeCalls: Array<boolean | null> = [];
+    let containerCalls = 0;
+    let hostCalls = 0;
+
+    await runArbTestTask(
+      {
+        testFiles: [],
+        only: false,
+        grep: undefined,
+        noCompile: false,
+        host: false,
+      },
+      createHre(true),
       {
         setTestHostMode: (value) => {
           hostModeCalls.push(value);
@@ -86,7 +126,7 @@ describe('arb:test task orchestration', () => {
           noCompile: true,
           host: false,
         },
-        createHre(),
+        createHre(false),
         {
           setTestHostMode: (value) => {
             hostModeCalls.push(value);

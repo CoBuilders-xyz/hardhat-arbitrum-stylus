@@ -180,5 +180,4 @@ export async function init(targetDir: string): Promise<void> {
   console.log('\nDone! Your Hardhat + Arbitrum Stylus project is ready.');
   console.log('Try running:\n');
   console.log('  npx hardhat arb:node start');
-  console.log('  npx hardhat test\n');
 }
