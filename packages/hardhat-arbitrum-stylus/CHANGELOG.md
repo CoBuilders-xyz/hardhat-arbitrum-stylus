@@ -1,5 +1,13 @@
 # @cobuilders/hardhat-arbitrum-stylus
 
+## 0.0.1-alpha.21
+
+### Patch Changes
+
+- 105f6e3: Added host option to test plugin
+- Updated dependencies [105f6e3]
+  - @cobuilders/hardhat-arb-test@0.0.1-alpha.16
+
 ## 0.0.1-alpha.20
 
 ### Patch Changes

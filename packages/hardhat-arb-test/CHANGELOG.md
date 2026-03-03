@@ -1,5 +1,11 @@
 # @cobuilders/hardhat-arb-test
 
+## 0.0.1-alpha.16
+
+### Patch Changes
+
+- 105f6e3: Added host option to test plugin
+
 ## 0.0.1-alpha.15
 
 ### Patch Changes
