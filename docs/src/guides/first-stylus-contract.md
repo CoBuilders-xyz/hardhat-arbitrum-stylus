@@ -1,122 +1,166 @@
-# Tutorial: Your First Stylus Contract
+# Your First Stylus Contract
 
-<!--
-CONTENT DESCRIPTION:
-End-to-end tutorial building a Counter contract. Complete walkthrough from setup to deployment.
--->
+Build, deploy, and test a Stylus counter contract using only the plugin's `arb:*` tasks.
 
-Build and deploy your first Stylus contract.
+**Time:** ~30 minutes (first Docker compile may take longer)
 
 ## What You'll Build
 
-A **Counter** contract with `get()`, `increment()`, and `set()` functions.
+A **Counter** contract with `count()`, `increment()`, and a Hardhat test that deploys it via `stylusViem`.
 
-**Time:** 30 minutes
-
-## Step 1: Project Setup
+## Step 1: Create the Project
 
 ```bash
 mkdir my-first-stylus && cd my-first-stylus
-npx hardhat-arbitrum-stylus --init
+npx @cobuilders/hardhat-arbitrum-stylus --init
 ```
 
-The initializer creates and configures `hardhat.config.ts` for you.
+The initializer creates:
 
-## Step 2: Create Stylus Contract
+- `hardhat.config.ts` with the plugin configured
+- `contracts/stylus-counter/` a ready-to-use Stylus counter
+- `contracts/SolidityCounter.sol` a Solidity counter for cross-VM tests
+- `test/cross-vm.test.ts` example tests
 
-```bash
-mkdir -p contracts/stylus && cd contracts/stylus
-cargo stylus new counter && cd counter
-```
+!!! tip "Docker file sharing on Linux"
 
-Replace `src/lib.rs`:
+    If `arb:compile` fails with "path is not shared from the host", create your project outside `/tmp`. Use your home directory or workspace Docker Desktop must have that path in **Settings → Resources → File Sharing**.
+
+## Step 2: Understand the Contract
+
+The scaffolded counter lives at `contracts/stylus-counter/src/lib.rs`:
 
 ```rust
-#![cfg_attr(not(feature = "std"), no_std)]
+#![cfg_attr(not(any(test, feature = "export-abi")), no_main)]
+#![cfg_attr(not(any(test, feature = "export-abi")), no_std)]
 
-use stylus_sdk::prelude::*;
+#[macro_use]
+extern crate alloc;
+
+use alloc::vec::Vec;
+use stylus_sdk::{alloy_primitives::U256, prelude::*};
 
 sol_storage! {
     #[entrypoint]
     pub struct Counter {
-        uint256 value;
+        uint256 count;
     }
 }
 
 #[public]
 impl Counter {
-    pub fn get(&self) -> u256 {
-        self.value.get()
+    pub fn count(&self) -> U256 {
+        self.count.get()
     }
 
     pub fn increment(&mut self) {
-        let current = self.value.get();
-        self.value.set(current + U256::from(1));
-    }
-
-    pub fn set(&mut self, new_value: u256) {
-        self.value.set(new_value);
+        let count = self.count.get();
+        self.count.set(count + U256::from(1));
     }
 }
 ```
 
-## Step 3: Start Local Node
+Each Stylus contract is a directory under `contracts/` with:
 
-Open a new terminal at project root:
+| File                  | Purpose                         |
+| --------------------- | ------------------------------- |
+| `Cargo.toml`          | Must depend on `stylus-sdk`     |
+| `rust-toolchain.toml` | Pins the Rust toolchain version |
+| `Stylus.toml`         | Stylus SDK configuration        |
+| `src/lib.rs`          | Contract logic                  |
 
-```bash
-npx hardhat arb:node start
-```
-
-Wait for "Listening for transactions..."
-
-## Step 4: Deploy Contract
-
-In the contract directory (`contracts/stylus/counter`):
+## Step 3: Compile
 
 ```bash
-cargo stylus check --endpoint http://localhost:8547
+npx hardhat arb:compile
 ```
 
-Deploy:
+This compiles Solidity and all Stylus contracts. Artifacts are written to `artifacts/contracts/<name>/<name>.json`.
+
+To compile only Stylus contracts:
 
 ```bash
-cargo stylus deploy \
-  --endpoint http://localhost:8547 \
-  --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+npx hardhat arb:compile --stylus
 ```
 
-Save the deployed address from output: `deployed code at address: 0x...`
+## Step 4: Start a Local Node (optional)
 
-## Step 5: Interact
-
-Replace `CONTRACT_ADDRESS` with your address:
+For manual deploys against a persistent node:
 
 ```bash
-# Read counter (returns 0)
-cast call CONTRACT_ADDRESS "get()(uint256)" --rpc-url http://localhost:8547
-
-# Increment
-cast send CONTRACT_ADDRESS "increment()" \
-  --rpc-url http://localhost:8547 \
-  --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-
-# Read again (returns 1)
-cast call CONTRACT_ADDRESS "get()(uint256)" --rpc-url http://localhost:8547
+npx hardhat arb:node start --detach
 ```
 
-## Step 6: Clean Up
+Tests and deploys without `--network` start their own temporary node automatically you can skip this step if you only plan to test.
 
-Stop the node: `npx hardhat arb:node stop`
+## Step 5: Deploy
+
+```bash
+npx hardhat arb:deploy stylus-counter
+```
+
+Expected output:
+
+```
+✓ stylus-counter deployed
+  Address: 0x...
+```
+
+The plugin discovers the contract by folder name (`stylus-counter`), compiles if needed, and runs `cargo stylus deploy` inside Docker (or on the host with `--host`).
+
+## Step 6: Write a Test
+
+Create `test/counter.test.ts`:
+
+```typescript
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
+import { network } from 'hardhat';
+
+describe('Counter', async function () {
+  const { stylusViem } = await network.create();
+
+  it('starts at 0 and increments', async function () {
+    const counter = await stylusViem.deployContract('stylus-counter');
+
+    assert.equal(await counter.read.count(), 0n);
+    await counter.write.increment();
+    assert.equal(await counter.read.count(), 1n);
+  });
+});
+```
+
+## Step 7: Run Tests
+
+```bash
+npx hardhat arb:test
+```
+
+Or run a single file:
+
+```bash
+npx hardhat arb:test test/counter.test.ts
+```
+
+`arb:test` compiles Solidity, starts a temporary Nitro node, compiles Stylus contracts, deploys them in each test, and runs the Node.js test runner.
+
+## Step 8: Clean Up
+
+```bash
+npx hardhat arb:node stop
+```
 
 ## What You Learned
 
-- Setting up a Hardhat project with Stylus plugins
-- Writing Stylus contracts in Rust
-- Running a local Arbitrum node
-- Deploying and interacting with contracts
+- Project layout for Stylus contracts (`contracts/<name>/`)
+- `arb:compile` for Rust/WASM compilation
+- `arb:deploy` for on-chain deployment
+- `arb:test` with `stylusViem.deployContract()`
+- Cross-VM interaction (Solidity + Stylus on the same chain)
 
 ## Next Steps
 
-- [Node Plugin Reference](../plugins/node.md)
-- [Local Development Guide](local-development.md)
+- [Deploy Plugin](../plugins/deploy.md) constructor args, networks, `stylusViem` API
+- [Test Plugin](../plugins/test.md) host mode, assertions, concurrency
+- [Real-World Examples](../examples/index.md) production contract test suites
+- [Troubleshooting](troubleshooting.md) Docker, ports, toolchain issues

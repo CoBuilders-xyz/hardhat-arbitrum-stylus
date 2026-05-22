@@ -25,4 +25,4 @@ Hardhat loads this at startup and registers everything.
 
 ## Learn More
 
-For the complete guide, see the [official Hardhat plugin docs](https://hardhat.org/hardhat-runner/docs/advanced/building-plugins).
+For the complete guide, see the [official Hardhat 3 plugin docs](https://hardhat.org/hardhat3-docs/plugins).

@@ -10,8 +10,11 @@ graph TD
     Toolbox --> Deploy[hardhat-arb-deploy]
     Toolbox --> Test[hardhat-arb-test]
     Node --> Utils[hardhat-arb-utils]
+    Compile --> Node
     Compile --> Utils
+    Deploy --> Node
     Deploy --> Utils
+    Test --> Deploy
     Test --> Utils
 ```
 
