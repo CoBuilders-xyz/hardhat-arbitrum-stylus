@@ -14,7 +14,7 @@ describe('Arb-node default network', () => {
       pathToFileURL(path.join(process.cwd(), 'hardhat.config.js')).href
     );
     const hre = await createHardhatRuntimeEnvironment(hardhatConfig.default);
-    const connection = await hre.network.connect();
+    const connection = await hre.network.create();
 
     // Verify we're connected to the right chain (Arbitrum nitro-devnode chainId: 412346)
     const chainId = await connection.provider.request({
@@ -28,7 +28,7 @@ describe('Arb-node default network', () => {
       pathToFileURL(path.join(process.cwd(), 'hardhat.config.js')).href
     );
     const hre = await createHardhatRuntimeEnvironment(hardhatConfig.default);
-    const connection = await hre.network.connect();
+    const connection = await hre.network.create();
 
     // Get accounts
     const accounts = await connection.provider.request({
@@ -50,7 +50,7 @@ describe('Arb-node default network', () => {
       pathToFileURL(path.join(process.cwd(), 'hardhat.config.js')).href
     );
     const hre = await createHardhatRuntimeEnvironment(hardhatConfig.default);
-    const connection = await hre.network.connect();
+    const connection = await hre.network.create();
 
     // Get balance of first account
     const balance = await connection.provider.request({
@@ -68,7 +68,7 @@ describe('Arb-node default network', () => {
       pathToFileURL(path.join(process.cwd(), 'hardhat.config.js')).href
     );
     const hre = await createHardhatRuntimeEnvironment(hardhatConfig.default);
-    const connection = await hre.network.connect();
+    const connection = await hre.network.create();
 
     // The onRequest hook intercepts hardhat_getAutomine and returns true.
     // This makes tools like Ignition treat the devnode as automined

@@ -3,7 +3,7 @@ import { describe, it } from 'node:test';
 import { network } from 'hardhat';
 
 describe('Solidity Assertions', async function () {
-  const { stylusViem } = await network.connect();
+  const { stylusViem } = await network.create();
   const counter = await stylusViem.deployContract('SolidityCounter');
   const greeter = await stylusViem.deployContract('GreeterSol', [
     'Hello Stylus!',

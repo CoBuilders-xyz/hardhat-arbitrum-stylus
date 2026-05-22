@@ -53,7 +53,7 @@ describe('Viem Deploy Integration', () => {
       await hre.tasks.getTask('compile').run({ quiet: true });
 
       // Connect to the default network (auto-starts nitro-devnode)
-      const connection = await hre.network.connect();
+      const connection = await hre.network.create();
 
       try {
         // Access the viem helpers (attached by hardhat-viem, wrapped by arb-deploy)

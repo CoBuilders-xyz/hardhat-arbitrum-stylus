@@ -81,7 +81,7 @@
   "devDependencies": {
     "@types/node": "^22.0.0",
     "eslint": "^9.18.0",
-    "hardhat": "^3.0.0",
+    "hardhat": "^3.4.0",
     "prettier": "^3.4.0",
     "rimraf": "^6.0.0",
     "tsx": "^4.19.3",
@@ -89,7 +89,7 @@
     "viem": "^2.30.0"
   },
   "peerDependencies": {
-    "hardhat": "^3.0.0",
+    "hardhat": "^3.4.0",
     "viem": "^2.30.0"
   },
   "publishConfig": {
