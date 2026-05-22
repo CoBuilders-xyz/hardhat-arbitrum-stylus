@@ -9,7 +9,10 @@ import { clearValidatedToolchainSetCache } from '../src/state/preflight-cache.js
 function createHreForHost(root = '/tmp/project'): HardhatRuntimeEnvironment {
   return {
     config: {
-      paths: { root },
+      paths: {
+        root,
+        sources: { solidity: [root + '/contracts'] },
+      },
     },
     tasks: {
       getTask: () => ({
@@ -33,7 +36,7 @@ describe('host runner', () => {
     const hre = createHreForHost('/tmp/project-cache');
 
     const deps = {
-      discoverStylusContracts: async () => [
+      discoverStylusContractsFromSources: async () => [
         { name: 'a', path: '/tmp/a', toolchain: '1.82.0' },
         { name: 'b', path: '/tmp/b', toolchain: '1.82.0' },
         { name: 'c', path: '/tmp/c', toolchain: '1.83.0' },
@@ -55,7 +58,10 @@ describe('host runner', () => {
 
     const hre = {
       config: {
-        paths: { root: '/tmp/project-host-run' },
+        paths: {
+          root: '/tmp/project-host-run',
+          sources: { solidity: ['/tmp/project-host-run/contracts'] },
+        },
       },
       tasks: {
         getTask: (id: unknown) => {
@@ -70,7 +76,7 @@ describe('host runner', () => {
     } as unknown as HardhatRuntimeEnvironment;
 
     const deps = {
-      discoverStylusContracts: async () => [],
+      discoverStylusContractsFromSources: async () => [],
       validateAllToolchains: async (_versions: string[]) => {
         throw new Error('should not be called');
       },

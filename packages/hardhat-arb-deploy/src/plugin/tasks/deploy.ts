@@ -18,7 +18,7 @@ import {
   type EphemeralNodeContext,
 } from '@cobuilders/hardhat-arb-utils/task-helpers';
 import {
-  discoverStylusContracts,
+  discoverStylusContractsFromSources,
   ensureVolumes,
   ensureCompileImage,
   validateAllToolchains,
@@ -172,14 +172,14 @@ async function deployStylusHost(
   contractName: string,
   constructorArgs: string[],
 ): Promise<void> {
-  const contractsDir = path.join(hre.config.paths.root, 'contracts');
-  const discovered = await discoverStylusContracts(contractsDir, {
+  const sourcesDirs = hre.config.paths.sources.solidity;
+  const discovered = await discoverStylusContractsFromSources(sourcesDirs, {
     contracts: [contractName],
   });
 
   if (discovered.length === 0) {
     throw createPluginError(
-      `Stylus contract "${contractName}" not found in contracts/ directory.`,
+      `Stylus contract "${contractName}" not found in ${sourcesDirs.join(', ')}.`,
     );
   }
 
@@ -224,14 +224,14 @@ async function deployStylusContainer(
     useHostGateway?: boolean;
   },
 ): Promise<void> {
-  const contractsDir = path.join(hre.config.paths.root, 'contracts');
-  const discovered = await discoverStylusContracts(contractsDir, {
+  const sourcesDirs = hre.config.paths.sources.solidity;
+  const discovered = await discoverStylusContractsFromSources(sourcesDirs, {
     contracts: [contractName],
   });
 
   if (discovered.length === 0) {
     throw createPluginError(
-      `Stylus contract "${contractName}" not found in contracts/ directory.`,
+      `Stylus contract "${contractName}" not found in ${sourcesDirs.join(', ')}.`,
     );
   }
 

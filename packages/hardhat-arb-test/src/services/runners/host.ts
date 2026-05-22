@@ -1,9 +1,7 @@
-import path from 'node:path';
-
 import type { HardhatRuntimeEnvironment } from 'hardhat/types/hre';
 
 import {
-  discoverStylusContracts,
+  discoverStylusContractsFromSources,
   validateAllToolchains,
 } from '@cobuilders/hardhat-arb-utils/stylus';
 
@@ -21,12 +19,12 @@ export interface HostRunnerOpts {
 }
 
 interface HostPreflightDeps {
-  discoverStylusContracts: typeof discoverStylusContracts;
+  discoverStylusContractsFromSources: typeof discoverStylusContractsFromSources;
   validateAllToolchains: typeof validateAllToolchains;
 }
 
 const defaultHostPreflightDeps: HostPreflightDeps = {
-  discoverStylusContracts,
+  discoverStylusContractsFromSources,
   validateAllToolchains,
 };
 
@@ -38,8 +36,8 @@ export async function validateHostDeps(
   hre: HardhatRuntimeEnvironment,
   deps: HostPreflightDeps = defaultHostPreflightDeps,
 ): Promise<void> {
-  const contractsDir = path.join(hre.config.paths.root, 'contracts');
-  const contracts = await deps.discoverStylusContracts(contractsDir);
+  const sourcesDirs = hre.config.paths.sources.solidity;
+  const contracts = await deps.discoverStylusContractsFromSources(sourcesDirs);
 
   if (contracts.length === 0) return;
 

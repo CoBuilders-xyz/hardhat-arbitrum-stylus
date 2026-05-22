@@ -132,3 +132,25 @@ export async function discoverStylusContracts(
   discoveryCache.set(cacheKey, cloneContracts(contracts));
   return cloneContracts(contracts);
 }
+
+/**
+ * Discover Stylus contracts across all configured Hardhat source paths.
+ */
+export async function discoverStylusContractsFromSources(
+  sourcesDirs: string[],
+  options?: DiscoveryOptions,
+): Promise<StylusContractInfo[]> {
+  const contracts: StylusContractInfo[] = [];
+  const seen = new Set<string>();
+
+  for (const dir of sourcesDirs) {
+    const found = await discoverStylusContracts(dir, options);
+    for (const contract of found) {
+      if (seen.has(contract.name)) continue;
+      seen.add(contract.name);
+      contracts.push(contract);
+    }
+  }
+
+  return contracts;
+}

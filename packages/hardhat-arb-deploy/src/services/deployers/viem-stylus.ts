@@ -1,5 +1,3 @@
-import path from 'node:path';
-
 import {
   type Hex,
   DockerClient,
@@ -7,7 +5,7 @@ import {
 } from '@cobuilders/hardhat-arb-utils';
 import { createPluginError } from '@cobuilders/hardhat-arb-utils/errors';
 import {
-  discoverStylusContracts,
+  discoverStylusContractsFromSources,
   ensureVolumes,
   ensureCompileImage,
   exportStylusAbi,
@@ -41,7 +39,7 @@ export interface ViemHelpers {
  * Extends the user-facing StylusDeployConfig with runtime-resolved fields.
  */
 export interface StylusDeployRuntimeConfig {
-  projectRoot: string;
+  sourcesDirs: string[];
   useHostToolchain: boolean;
 }
 
@@ -104,16 +102,16 @@ export async function deployStylusViem(
   config: StylusDeployRuntimeConfig,
   constructorArgs?: readonly unknown[],
 ): Promise<unknown> {
-  const contractsDir = path.join(config.projectRoot, 'contracts');
+  const { sourcesDirs } = config;
 
   // Discover the Stylus contract (path, toolchain, package name)
-  const discovered = await discoverStylusContracts(contractsDir, {
+  const discovered = await discoverStylusContractsFromSources(sourcesDirs, {
     contracts: [contractName],
   });
 
   if (discovered.length === 0) {
     throw createPluginError(
-      `Stylus contract "${contractName}" not found in contracts/ directory.`,
+      `Stylus contract "${contractName}" not found in ${sourcesDirs.join(', ')}.`,
     );
   }
 

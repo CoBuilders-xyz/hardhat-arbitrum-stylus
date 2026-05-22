@@ -17,7 +17,7 @@ import {
 } from '@cobuilders/hardhat-arb-utils/task-helpers';
 
 import {
-  discoverStylusContracts,
+  discoverStylusContractsFromSources,
   ensureVolumes,
   cleanCacheVolumes,
   ensureCompileImage,
@@ -226,12 +226,15 @@ async function compileStylusContracts(
 ): Promise<{ successful: number; failed: number }> {
   console.log('\n--- Stylus Compilation ---\n');
 
-  const contractsDir = path.join(hre.config.paths.root, 'contracts');
-  console.log(`Discovering Stylus contracts in ${contractsDir}...`);
+  const sourcesDirs = hre.config.paths.sources.solidity;
+  console.log(`Discovering Stylus contracts in ${sourcesDirs.join(', ')}...`);
 
-  const discoveredContracts = await discoverStylusContracts(contractsDir, {
-    contracts: contractFilter,
-  });
+  const discoveredContracts = await discoverStylusContractsFromSources(
+    sourcesDirs,
+    {
+      contracts: contractFilter,
+    },
+  );
 
   if (discoveredContracts.length === 0) {
     console.log('No Stylus contracts found.');

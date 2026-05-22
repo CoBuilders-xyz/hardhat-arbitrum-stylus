@@ -18,6 +18,7 @@ export {
 // Discovery
 export {
   discoverStylusContracts,
+  discoverStylusContractsFromSources,
   clearDiscoveryCache,
   type DiscoveryOptions,
   type StylusContractInfo,
