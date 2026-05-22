@@ -1,5 +1,3 @@
-import path from 'node:path';
-
 import type { NewTaskActionFunction } from 'hardhat/types/tasks';
 import type { HardhatRuntimeEnvironment } from 'hardhat/types/hre';
 import {
