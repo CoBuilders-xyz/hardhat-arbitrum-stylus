@@ -151,7 +151,11 @@ export async function init(targetDir: string): Promise<void> {
     await hardhat.validatePackageJson(workspace, template.packageJson, true);
     await hardhat.copyProjectFiles(workspace, template, false);
     await Promise.all([
-      hardhat.installProjectDependencies({ workspace, template, install: true }),
+      hardhat.installProjectDependencies({
+        workspace,
+        template,
+        install: true,
+      }),
       analyticsPromise,
     ]);
   } catch (error) {

@@ -65,10 +65,6 @@
     "viem": "^2.30.0"
   },
   "peerDependencies": {
-    "@cobuilders/hardhat-arb-compile": "workspace:^",
-    "@cobuilders/hardhat-arb-deploy": "workspace:^",
-    "@cobuilders/hardhat-arb-node": "workspace:^",
-    "@cobuilders/hardhat-arb-test": "workspace:^",
     "hardhat": "^3.4.0"
   },
   "publishConfig": {
