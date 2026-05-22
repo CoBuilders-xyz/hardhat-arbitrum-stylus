@@ -50,12 +50,12 @@ interface HardhatInitHelpers {
     template: HardhatTemplate,
     force?: boolean,
   ) => Promise<void>;
-  installProjectDependencies: (
-    workspace: string,
-    template: HardhatTemplate,
-    install?: boolean,
-    update?: boolean,
-  ) => Promise<void>;
+  installProjectDependencies: (options: {
+    workspace: string;
+    template: HardhatTemplate;
+    install?: boolean;
+    update?: boolean;
+  }) => Promise<void>;
 }
 
 async function loadHardhatInitHelpers(): Promise<HardhatInitHelpers> {
@@ -151,7 +151,7 @@ export async function init(targetDir: string): Promise<void> {
     await hardhat.validatePackageJson(workspace, template.packageJson, true);
     await hardhat.copyProjectFiles(workspace, template, false);
     await Promise.all([
-      hardhat.installProjectDependencies(workspace, template, true),
+      hardhat.installProjectDependencies({ workspace, template, install: true }),
       analyticsPromise,
     ]);
   } catch (error) {
