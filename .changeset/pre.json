@@ -12,6 +12,7 @@
   },
   "changesets": [
     "bump-to-beta",
+    "fix-npx-init",
     "thick-states-clean"
   ]
 }
