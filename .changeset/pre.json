@@ -1,45 +1,14 @@
 {
   "mode": "pre",
-  "tag": "alpha",
+  "tag": "beta",
   "initialVersions": {
     "@cobuilders/config": "0.0.0",
-    "@cobuilders/hardhat-arb-compile": "0.0.0",
-    "@cobuilders/hardhat-arb-deploy": "0.0.0",
-    "@cobuilders/hardhat-arb-node": "0.0.0",
-    "@cobuilders/hardhat-arb-test": "0.0.0",
-    "@cobuilders/hardhat-arbitrum-stylus": "0.0.0",
-    "@cobuilders/hardhat-arb-utils": "0.0.1-alpha.12"
+    "@cobuilders/hardhat-arb-compile": "1.0.0-beta.0",
+    "@cobuilders/hardhat-arb-deploy": "1.0.0-beta.0",
+    "@cobuilders/hardhat-arb-node": "1.0.0-beta.0",
+    "@cobuilders/hardhat-arb-test": "1.0.0-beta.0",
+    "@cobuilders/hardhat-arb-utils": "1.0.0-beta.0",
+    "@cobuilders/hardhat-arbitrum-stylus": "1.0.0-beta.0"
   },
-  "changesets": [
-    "all-worms-burn",
-    "bold-rabbits-rescue",
-    "cute-trees-film",
-    "dark-areas-mate",
-    "dirty-cloths-live",
-    "dry-kiwis-do",
-    "dull-garlics-grow",
-    "every-banks-jump",
-    "fair-lines-boil",
-    "fresh-geese-exist",
-    "full-lizards-smell",
-    "fuzzy-mails-occur",
-    "good-pugs-poke",
-    "humble-peaches-wear",
-    "kind-papers-wave",
-    "modern-doodles-listen",
-    "nice-stamps-grab",
-    "rare-banks-film",
-    "rare-cows-leave",
-    "shaggy-candles-deny",
-    "shaky-cows-rest",
-    "sixty-phones-glow",
-    "slick-wings-remain",
-    "slow-dryers-divide",
-    "soft-tools-report",
-    "solid-dragons-beg",
-    "spicy-loops-show",
-    "thick-knives-cheat",
-    "thin-goats-live",
-    "thin-poets-deny"
-  ]
+  "changesets": []
 }

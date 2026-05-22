@@ -1,5 +1,11 @@
 # @cobuilders/hardhat-arb-utils
 
+## 1.0.0-beta.0
+
+### Major Changes
+
+- Release 1.0.0-beta: first public beta of the Hardhat Arbitrum Stylus plugin suite.
+
 ## 0.0.1-alpha.19
 
 ### Patch Changes

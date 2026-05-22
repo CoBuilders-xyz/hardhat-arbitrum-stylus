@@ -1,5 +1,17 @@
 # @cobuilders/hardhat-arb-deploy
 
+## 1.0.0-beta.0
+
+### Major Changes
+
+- Release 1.0.0-beta: first public beta of the Hardhat Arbitrum Stylus plugin suite.
+
+### Patch Changes
+
+- Updated dependencies
+  - @cobuilders/hardhat-arb-node@1.0.0-beta.0
+  - @cobuilders/hardhat-arb-utils@1.0.0-beta.0
+
 ## 0.0.1-alpha.16
 
 ### Patch Changes
