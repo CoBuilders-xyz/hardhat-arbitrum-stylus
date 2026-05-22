@@ -16,7 +16,7 @@ There are two ways to run an Arbitrum node with this plugin:
 | Method                        | Use Case                                | Lifecycle                |
 | ----------------------------- | --------------------------------------- | ------------------------ |
 | **CLI** (`arb:node start`)    | Manual testing, interactive development | Persistent until stopped |
-| **HRE** (`network.connect()`) | Scripts, tests, automated workflows     | Temporary, auto-cleanup  |
+| **HRE** (`network.create()`)  | Scripts, tests, automated workflows     | Temporary, auto-cleanup  |
 
 This is similar to how Hardhat works: you can run `npx hardhat node` for a persistent node, or just run `npx hardhat test` and Hardhat automatically spins up a temporary node for the tests.
 
@@ -82,11 +82,11 @@ npx hardhat arb:node logs [options]
 
 ## HRE Usage (Automatic Temporary Node)
 
-When you use `network.connect()` in scripts or tests without specifying a network, the plugin automatically spins up a **temporary node** that lives only for the duration of your script execution.
+When you use `network.create()` in scripts or tests without specifying a network, the plugin automatically spins up a **temporary node** that lives only for the duration of your script execution.
 
 ```typescript
 // In a script or test
-const connection = await hre.network.connect();
+const connection = await hre.network.create();
 
 // A temporary Arbitrum node is now running
 // It will be cleaned up when the script exits

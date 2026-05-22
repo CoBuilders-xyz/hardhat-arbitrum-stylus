@@ -40,7 +40,7 @@ import { describe, it } from 'node:test';
 import { network } from 'hardhat';
 
 describe('Counter', async function () {
-  const { stylusViem } = await network.connect();
+  const { stylusViem } = await network.create();
 
   it('deploys and interacts with a Solidity counter', async function () {
     const counter = await stylusViem.deployContract('SolidityCounter');
@@ -116,14 +116,14 @@ npx hardhat arb:test --no-compile
 
 The deploy plugin adds `stylusViem` to the network connection alongside the original `viem` from hardhat-viem. The original `viem` is left completely untouched.
 
-- **`stylusViem`** — Stylus-aware helpers. Handles both Solidity and Stylus contracts. **Use this for all contract interactions.**
+- **`stylusViem`** Stylus-aware helpers. Handles both Solidity and Stylus contracts. **Use this for all contract interactions.**
 
 When you call `stylusViem.deployContract()`:
 
 - **Solidity contracts** are routed to the original viem deploy path
 - **Stylus contracts** are deployed via `cargo stylus deploy` (compiles, deploys, and activates in one step)
 
-Both paths return the same viem contract instance with `.read`, `.write`, and `.getEvents` methods. No separate compile step is needed for Stylus — `cargo stylus deploy` handles compilation internally.
+Both paths return the same viem contract instance with `.read`, `.write`, and `.getEvents` methods. No separate compile step is needed for Stylus `cargo stylus deploy` handles compilation internally.
 
 ### Container vs Host Toolchain
 
@@ -133,7 +133,7 @@ Use `--host` to deploy Stylus contracts using your **local Rust toolchain** inst
 
 ### Automatic Node Management
 
-When a test calls `network.connect()`, the node plugin automatically starts a local Arbitrum nitro-devnode if one isn't already running. It stops the node when the connection closes.
+When a test calls `network.create()`, the node plugin automatically starts a local Arbitrum nitro-devnode if one isn't already running. It stops the node when the connection closes.
 
 ### Assertions
 
@@ -144,7 +144,7 @@ import { describe, it } from 'node:test';
 import { network } from 'hardhat';
 
 describe('Assertions example', async function () {
-  const { stylusViem } = await network.connect();
+  const { stylusViem } = await network.create();
   const counter = await stylusViem.deployContract('SolidityCounter');
 
   it('emits CountChanged', async function () {

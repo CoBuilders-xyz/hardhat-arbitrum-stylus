@@ -78,17 +78,21 @@ plugins:
 
 nav:
   - Getting Started: index.md
-  - hardhat.config.ts: hardhat.config.ts.md
+  - Guides:
+      - Your First Contract: guides/first-stylus-contract.md
+      - Troubleshooting: guides/troubleshooting.md
+  - Configuration: hardhat.config.ts.md
   - Plugins:
       - plugins/index.md
       - Node: plugins/node.md
       - Compile: plugins/compile.md
       - Deploy: plugins/deploy.md
       - Test: plugins/test.md
-  # - Guides:
-  #     - Local Development: guides/local-development.md
-  #     - First Stylus Contract: guides/first-stylus-contract.md
-  #     - Troubleshooting: guides/troubleshooting.md
+  - Real-World Examples:
+      - examples/index.md
+      - zkVM Verifiers (Gnosis): examples/zkvm-verifiers.md
+      - OpenZeppelin Contracts: examples/openzeppelin.md
+      - ThirdWeb Contracts: examples/thirdweb.md
   - Contributors:
       - Contributing: contributors/contributing.md
       - Deep Dive:
@@ -101,3 +105,4 @@ nav:
           - Node Plugin: contributors/deep-dive/node.md
           - Compile Plugin: contributors/deep-dive/compile.md
           - Deploy Plugin: contributors/deep-dive/deploy.md
+          - Test Plugin: contributors/deep-dive/test.md

@@ -62,7 +62,7 @@ npx hardhat arb:deploy MyContract.sol --network arbitrum   # Deploy to external 
 
 ### Stylus Contracts
 
-1. **Discovery** - Finds the contract in `contracts/` by folder name
+1. **Discovery** - Finds the contract in the configured source directories by folder name
 2. **Prepare** - Sets up Docker image and volumes (Docker mode) or validates toolchains (host mode)
 3. **Node** - Starts a temporary Arbitrum node if no `--network` is specified
 4. **Deploy** - Runs `cargo stylus deploy` against the target network
@@ -206,19 +206,19 @@ If anything is missing, you'll get clear instructions on what to install.
 
 ## Programmatic Deployment (stylusViem)
 
-In addition to the CLI `arb:deploy` command, the deploy plugin adds `stylusViem` to every network connection. This works alongside the original `viem` from hardhat-viem — the original `viem` is never modified.
+In addition to the CLI `arb:deploy` command, the deploy plugin adds `stylusViem` to every network connection. This works alongside the original `viem` from hardhat-viem the original `viem` is never modified.
 
 When you call `stylusViem.deployContract()`, the plugin automatically detects the contract type:
 
 - **Solidity contracts** are routed to the original viem deploy path
 - **Stylus contracts** are deployed via `cargo stylus deploy` (compiles, deploys, and activates in one step)
 
-Both return the same viem contract instance with `.read`, `.write`, and `.getEvents`. No separate compilation step is needed for Stylus — `cargo stylus deploy` handles it internally.
+Both return the same viem contract instance with `.read`, `.write`, and `.getEvents`. No separate compilation step is needed for Stylus `cargo stylus deploy` handles it internally.
 
 ```typescript
 import { network } from 'hardhat';
 
-const { viem, stylusViem } = await network.connect();
+const { viem, stylusViem } = await network.create();
 
 // Deploy Solidity (either viem or stylusViem works)
 const solCounter = await viem.deployContract('SolidityCounter');
@@ -235,12 +235,12 @@ const stylusCount = await stylusCounter.read.count(); // 1n
 
 When using `@nomicfoundation/hardhat-viem-assertions`, `stylusViem.assertions` inherits `emit`, `emitWithArgs`, and `balancesHaveChanged` from `viem.assertions`, and overrides all revert-related assertions for compatibility with Arbitrum nodes.
 
-The standard `hardhat-viem-assertions` revert helpers require raw revert data (`data: "0x..."`) in the error chain — a format provided by Hardhat's built-in EDR but not preserved when Hardhat connects to an external node via HTTP (like `nitro-devnode`). `stylusViem.assertions` replaces these with implementations that work on any Arbitrum node.
+The standard `hardhat-viem-assertions` revert helpers require raw revert data (`data: "0x..."`) in the error chain a format provided by Hardhat's built-in EDR but not preserved when Hardhat connects to an external node via HTTP (like `nitro-devnode`). `stylusViem.assertions` replaces these with implementations that work on any Arbitrum node.
 
 **Solidity example:**
 
 ```typescript
-const { stylusViem } = await network.connect();
+const { stylusViem } = await network.create();
 
 const counter = await stylusViem.deployContract('SolidityCounter');
 

@@ -7,7 +7,7 @@
 [:fontawesome-brands-github: Source](https://github.com/CoBuilders-xyz/hardhat-arbitrum-stylus/tree/main/packages/hardhat-arb-compile){ .md-button }
 [:fontawesome-brands-npm: npm](https://www.npmjs.com/package/@cobuilders/hardhat-arb-compile){ .md-button }
 
-Compiles Solidity and Stylus (Rust) contracts. Auto-discovers Stylus projects in your `contracts/` directory, compiles them via `cargo-stylus`, and generates Hardhat-compatible artifacts.
+Compiles Solidity and Stylus (Rust) contracts. Auto-discovers Stylus projects in your configured source directories, compiles them via `cargo-stylus`, and generates Hardhat-compatible artifacts.
 
 ## Two Compilation Modes
 
@@ -55,7 +55,7 @@ npx hardhat arb:compile --cleanCache --stylus     # Clear cache, then compile
 
 ## What Happens When You Compile
 
-1. **Discovery** - Scans `contracts/` for directories containing `Cargo.toml` with `stylus-sdk` as a dependency
+1. **Discovery** - Scans all configured source directories for directories containing `Cargo.toml` with `stylus-sdk` as a dependency
 2. **Validation** - Checks that each contract has a `rust-toolchain.toml` specifying its toolchain version
 3. **Node** - Starts a temporary Arbitrum node (needed by `cargo stylus check`)
 4. **Check** - Runs `cargo stylus check` against the node to validate the contract
@@ -71,7 +71,7 @@ npx hardhat arb:compile --cleanCache --stylus     # Clear cache, then compile
 
 ## Contract Project Structure
 
-Each Stylus contract must be a Rust project inside `contracts/` with the following structure:
+Each Stylus contract must be a Rust project inside one of your configured source directories (by default `contracts/`):
 
 ```
 my-hardhat-project/
