@@ -3,7 +3,7 @@ import { describe, it } from 'node:test';
 import { network } from 'hardhat';
 
 describe('Cross-VM: EOA > Stylus > Solidity', async function () {
-  const { stylusViem } = await network.connect();
+  const { stylusViem } = await network.create();
   const [walletClient] = await stylusViem.getWalletClients();
   const eoa = walletClient.account.address;
 

@@ -56,7 +56,7 @@ describe('E2E: Solidity-only deploy', () => {
 
       const hre = await loadHre();
       await hre.tasks.getTask('compile').run({ quiet: true });
-      const connection = await hre.network.connect();
+      const connection = await hre.network.create();
 
       try {
         const viem = (connection as any).viem;
@@ -110,7 +110,7 @@ describe('E2E: Stylus-only deploy', () => {
 
       try {
         const hre = await loadHre();
-        const connection = await hre.network.connect();
+        const connection = await hre.network.create();
 
         try {
           const { stylusViem } = connection;
@@ -155,7 +155,7 @@ describe('E2E: Cross-VM deploy (Solidity + Stylus)', () => {
       try {
         const hre = await loadHre();
         await hre.tasks.getTask('compile').run({ quiet: true });
-        const connection = await hre.network.connect();
+        const connection = await hre.network.create();
 
         try {
           // stylusViem handles both Solidity and Stylus — unified API

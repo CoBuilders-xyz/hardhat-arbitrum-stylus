@@ -46,14 +46,14 @@
   ],
   "peerDependencies": {
     "@cobuilders/hardhat-arb-utils": "workspace:^",
-    "hardhat": "^3.0.0",
+    "hardhat": "^3.4.0",
     "viem": "^2.30.0"
   },
   "devDependencies": {
     "@cobuilders/hardhat-arb-utils": "workspace:^",
     "@types/node": "^22.0.0",
     "eslint": "^9.18.0",
-    "hardhat": "^3.0.0",
+    "hardhat": "^3.4.0",
     "viem": "^2.30.0",
     "prettier": "^3.4.0",
     "rimraf": "^6.0.0",

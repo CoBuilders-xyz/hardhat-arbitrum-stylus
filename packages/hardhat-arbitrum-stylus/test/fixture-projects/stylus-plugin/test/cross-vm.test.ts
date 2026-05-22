@@ -3,7 +3,7 @@ import { describe, it } from 'node:test';
 import { network } from 'hardhat';
 
 describe('Cross-VM: Solidity + Stylus', async function () {
-  const { stylusViem } = await network.connect();
+  const { stylusViem } = await network.create();
 
   it('deploys both VMs and interacts on the same chain', async function () {
     // Deploy Solidity counter (stylusViem handles both)

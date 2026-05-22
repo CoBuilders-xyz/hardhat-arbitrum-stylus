@@ -4,7 +4,7 @@ import { network } from 'hardhat';
 import type { Address } from 'viem';
 
 describe('Stylus Assertions', async function () {
-  const { stylusViem } = await network.connect();
+  const { stylusViem } = await network.create();
 
   describe('stylus-counter', async function () {
     const counter = await stylusViem.deployContract('stylus-counter');

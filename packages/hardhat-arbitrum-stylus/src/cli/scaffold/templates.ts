@@ -315,7 +315,7 @@ import { describe, it } from 'node:test';
 import { network } from 'hardhat';
 
 describe('Cross-VM: Solidity + Stylus', async function () {
-  const { stylusViem } = await network.connect();
+  const { stylusViem } = await network.create();
 
   it('deploys both VMs and interacts on the same chain', async function () {
     const solCounter = await stylusViem.deployContract('SolidityCounter');
@@ -344,7 +344,7 @@ import { describe, it } from 'node:test';
 import { network } from 'hardhat';
 
 describe('Cross-VM: EOA > Solidity > Stylus', async function () {
-  const { stylusViem } = await network.connect();
+  const { stylusViem } = await network.create();
   const [walletClient] = await stylusViem.getWalletClients();
   const eoa = walletClient.account.address;
 
@@ -394,7 +394,7 @@ import { describe, it } from 'node:test';
 import { network } from 'hardhat';
 
 describe('Cross-VM: EOA > Stylus > Solidity', async function () {
-  const { stylusViem } = await network.connect();
+  const { stylusViem } = await network.create();
   const [walletClient] = await stylusViem.getWalletClients();
   const eoa = walletClient.account.address;
 
