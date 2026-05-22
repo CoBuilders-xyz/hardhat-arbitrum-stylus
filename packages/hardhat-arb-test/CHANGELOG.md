@@ -1,5 +1,14 @@
 # @cobuilders/hardhat-arb-test
 
+## 1.0.0-beta.18
+
+### Patch Changes
+
+- c0a6dd7: fix init script - hh new signature
+- Updated dependencies [c0a6dd7]
+  - @cobuilders/hardhat-arb-deploy@1.0.0-beta.18
+  - @cobuilders/hardhat-arb-utils@1.0.0-beta.21
+
 ## 1.0.0-beta.17
 
 ### Major Changes
