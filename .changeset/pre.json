@@ -10,36 +10,5 @@
     "@cobuilders/hardhat-arb-utils": "0.0.1-alpha.19",
     "@cobuilders/hardhat-arbitrum-stylus": "0.0.1-alpha.21"
   },
-  "changesets": [
-    "all-worms-burn",
-    "bold-rabbits-rescue",
-    "cute-trees-film",
-    "dark-areas-mate",
-    "dirty-cloths-live",
-    "dry-kiwis-do",
-    "dull-garlics-grow",
-    "every-banks-jump",
-    "fair-lines-boil",
-    "fresh-geese-exist",
-    "full-lizards-smell",
-    "fuzzy-mails-occur",
-    "good-pugs-poke",
-    "humble-peaches-wear",
-    "kind-papers-wave",
-    "modern-doodles-listen",
-    "nice-stamps-grab",
-    "rare-banks-film",
-    "rare-cows-leave",
-    "shaggy-candles-deny",
-    "shaky-cows-rest",
-    "sixty-phones-glow",
-    "slick-wings-remain",
-    "slow-dryers-divide",
-    "soft-tools-report",
-    "solid-dragons-beg",
-    "spicy-loops-show",
-    "thick-knives-cheat",
-    "thin-goats-live",
-    "thin-poets-deny"
-  ]
+  "changesets": []
 }
