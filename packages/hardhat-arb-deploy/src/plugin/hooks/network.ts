@@ -43,7 +43,7 @@ const networkHook = async (): Promise<Partial<NetworkHooks>> => {
       ).stylus;
 
       const deployConfig: StylusDeployRuntimeConfig = {
-        projectRoot: context.config.paths.root,
+        sourcesDirs: context.config.paths.sources.solidity,
         useHostToolchain: stylusConfig?.deploy?.useHostToolchain ?? false,
       };
 
@@ -110,7 +110,8 @@ const networkHook = async (): Promise<Partial<NetworkHooks>> => {
         } catch (error) {
           if (
             error instanceof Error &&
-            error.message.includes('not found in contracts/')
+            error.message.includes('Stylus contract') &&
+            error.message.includes(' not found in ')
           ) {
             return viem.deployContract(
               contractName,
