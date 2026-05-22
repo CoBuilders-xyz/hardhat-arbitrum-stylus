@@ -1,5 +1,11 @@
 # @cobuilders/hardhat-arb-utils
 
+## 1.0.0-beta.21
+
+### Patch Changes
+
+- c0a6dd7: fix init script - hh new signature
+
 ## 1.0.0-beta.20
 
 ### Major Changes

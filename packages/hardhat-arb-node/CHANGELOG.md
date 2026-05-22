@@ -1,5 +1,13 @@
 # @cobuilders/hardhat-arb-node
 
+## 1.0.0-beta.22
+
+### Patch Changes
+
+- c0a6dd7: fix init script - hh new signature
+- Updated dependencies [c0a6dd7]
+  - @cobuilders/hardhat-arb-utils@1.0.0-beta.21
+
 ## 1.0.0-beta.21
 
 ### Major Changes

@@ -1,5 +1,16 @@
 # @cobuilders/hardhat-arbitrum-stylus
 
+## 1.0.0-beta.23
+
+### Patch Changes
+
+- c0a6dd7: fix init script - hh new signature
+- Updated dependencies [c0a6dd7]
+  - @cobuilders/hardhat-arb-compile@1.0.0-beta.18
+  - @cobuilders/hardhat-arb-deploy@1.0.0-beta.18
+  - @cobuilders/hardhat-arb-node@1.0.0-beta.22
+  - @cobuilders/hardhat-arb-test@1.0.0-beta.18
+
 ## 1.0.0-beta.22
 
 ### Major Changes
