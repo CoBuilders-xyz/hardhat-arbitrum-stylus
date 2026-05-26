@@ -4,7 +4,7 @@
 [![npm](https://img.shields.io/npm/v/@cobuilders/hardhat-arbitrum-stylus?logo=npm)](https://www.npmjs.com/package/@cobuilders/hardhat-arbitrum-stylus)
 
 Hardhat plugin suite for Arbitrum Stylus development. Compile, deploy, and test Rust (WASM) and Solidity contracts with hardhat framework.
-!!! tip "Alpha Status"
+!!! tip "Beta Status"
 
     This suite is under active development. APIs and workflows may evolve between releases.
 
